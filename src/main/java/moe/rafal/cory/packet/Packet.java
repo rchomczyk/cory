@@ -14,6 +14,8 @@ public abstract class Packet {
     this(UUID.randomUUID());
   }
 
+  public abstract void write(PacketPacker packer);
+
   public abstract void read(PacketUnpacker unpacker);
 
   public UUID getUniqueId() {
