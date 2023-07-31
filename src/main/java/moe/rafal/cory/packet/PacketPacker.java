@@ -4,27 +4,27 @@ import java.util.Map;
 
 public interface PacketPacker {
 
-  <T> void packArray(T[] value);
+  <T> PacketPacker packArray(T[] value);
 
-  void packBinaryArray(byte[] value);
+  PacketPacker packBinaryArray(byte[] value);
 
-  void packString(String value);
+  PacketPacker packString(String value);
 
-  void packBoolean(boolean value);
+  PacketPacker packBoolean(boolean value);
 
-  void packInt(int value);
+  PacketPacker packInt(int value);
 
-  void packByte(byte value);
+  PacketPacker packByte(byte value);
 
-  void packLong(long value);
+  PacketPacker packLong(long value);
 
-  void packShort(short value);
+  PacketPacker packShort(short value);
 
-  void packFloat(float value);
+  PacketPacker packFloat(float value);
 
-  void packDouble(double value);
+  PacketPacker packDouble(double value);
 
-  <K, V> void packMap(Map<K, V> value);
+  <K, V> PacketPacker packMap(Map<K, V> value);
 
   byte[] toBinaryArray();
 }
