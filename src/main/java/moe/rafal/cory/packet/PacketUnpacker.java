@@ -1,30 +1,31 @@
 package moe.rafal.cory.packet;
 
-import java.util.Map;
+import java.io.Closeable;
+import java.io.IOException;
 
-public interface PacketUnpacker {
+public interface PacketUnpacker extends Closeable {
 
-  void skipValue();
+  void skipValue() throws IOException;
 
-  <T> T[] unpackArray(Class<T> arrayType);
+  int unpackArrayHeader() throws IOException;
 
-  byte[] unpackBinaryArray();
+  int unpackBinaryHeader() throws IOException;
 
-  String unpackString();
+  String unpackString() throws IOException;
 
-  boolean unpackBoolean();
+  boolean unpackBoolean() throws IOException;
 
-  int unpackInt();
+  int unpackInt() throws IOException;
 
-  byte unpackByte();
+  byte unpackByte() throws IOException;
 
-  long unpackLong();
+  long unpackLong() throws IOException;
 
-  short unpackShort();
+  short unpackShort() throws IOException;
 
-  float unpackFloat();
+  float unpackFloat() throws IOException;
 
-  double unpackDouble();
+  double unpackDouble() throws IOException;
 
-  <K, V> Map<K, V> unpackMap(Class<K> keyType, Class<V> valueType);
+  int unpackMapHeader() throws IOException;
 }
