@@ -25,4 +25,6 @@ public interface PacketPacker {
   void packDouble(double value);
 
   <K, V> void packMap(Map<K, V> value);
+
+  byte[] toBinaryArray();
 }
