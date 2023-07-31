@@ -2,7 +2,7 @@ package moe.rafal.cory.packet;
 
 import java.util.UUID;
 
-public class Packet {
+public abstract class Packet {
 
   private final UUID uniqueId;
 
@@ -13,6 +13,8 @@ public class Packet {
   protected Packet() {
     this(UUID.randomUUID());
   }
+
+  public abstract void read(PacketUnpacker unpacker);
 
   public UUID getUniqueId() {
     return uniqueId;
