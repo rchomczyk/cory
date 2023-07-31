@@ -1,30 +1,33 @@
 package moe.rafal.cory.packet;
 
-import java.util.Map;
+import java.io.Closeable;
+import java.io.IOException;
 
-public interface PacketPacker {
+public interface PacketPacker extends Closeable {
 
-  <T> PacketPacker packArray(T[] value);
+  PacketPacker packArrayHeader(int value) throws IOException;
 
-  PacketPacker packBinaryArray(byte[] value);
+  PacketPacker packBinaryHeader(int value) throws IOException;
 
-  PacketPacker packString(String value);
+  PacketPacker packString(String value) throws IOException;
 
-  PacketPacker packBoolean(boolean value);
+  PacketPacker packBoolean(boolean value) throws IOException;
 
-  PacketPacker packInt(int value);
+  PacketPacker packInt(int value) throws IOException;
 
-  PacketPacker packByte(byte value);
+  PacketPacker packByte(byte value) throws IOException;
 
-  PacketPacker packLong(long value);
+  PacketPacker packLong(long value) throws IOException;
 
-  PacketPacker packShort(short value);
+  PacketPacker packShort(short value) throws IOException;
 
-  PacketPacker packFloat(float value);
+  PacketPacker packFloat(float value) throws IOException;
 
-  PacketPacker packDouble(double value);
+  PacketPacker packDouble(double value) throws IOException;
 
-  <K, V> PacketPacker packMap(Map<K, V> value);
+  PacketPacker packMapHeader(int value) throws IOException;
+
+  PacketPacker flush() throws IOException;
 
   byte[] toBinaryArray();
 }
