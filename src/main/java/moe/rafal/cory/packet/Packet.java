@@ -16,6 +16,8 @@ public abstract class Packet {
 
   public abstract void write(PacketPacker packer);
 
+  public abstract void read(PacketUnpacker unpacker);
+
   public UUID getUniqueId() {
     return uniqueId;
   }
