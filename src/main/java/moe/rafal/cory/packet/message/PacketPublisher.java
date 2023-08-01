@@ -3,7 +3,7 @@ package moe.rafal.cory.packet.message;
 import moe.rafal.cory.packet.Packet;
 
 @FunctionalInterface
-public interface PacketListener<T extends Packet> {
+public interface PacketPublisher {
 
-  void receive(byte[] channelName, T packet);
+  <T extends Packet> void publish(byte[] channelName, T packet);
 }
