@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketUnpackerTests {
 
+  private static final int DEFAULT_VALUE = 0;
+
   @AfterEach
   void closePacketUnpacker() {
     assertThatCode(() -> producePacketUnpacker(new byte[0]).close())
@@ -22,11 +24,12 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void skipValueTest() throws IOException {
-    try (PacketUnpacker unpacker = producePacketUnpacker(getBinaryArrayOf((packer, ignored) -> {
+    byte[] content = getBinaryArrayOf((packer, expectedValue) -> {
       packer.packString("test_string_1");
       packer.packString("test_string_2");
       packer.packString("test_string_3");
-    }, 0))) {
+    }, DEFAULT_VALUE);
+    try (PacketUnpacker unpacker = producePacketUnpacker(content)) {
       assertThat(unpacker.unpackString())
           .isEqualTo("test_string_1");
       unpacker.skipValue();

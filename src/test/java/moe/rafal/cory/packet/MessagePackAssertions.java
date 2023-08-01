@@ -18,9 +18,16 @@ final class MessagePackAssertions {
       T expectedValue)
       throws IOException {
     try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
-      assertThat(valueResolver.apply(unpacker))
-          .isEqualTo(expectedValue);
+      assertThatUnpackerContains(unpacker, valueResolver, expectedValue);
     }
+  }
+
+  static <T> void assertThatUnpackerContains(PacketUnpacker unpacker,
+      ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
+      T expectedValue)
+      throws IOException {
+    assertThat(valueResolver.apply(unpacker))
+        .isEqualTo(expectedValue);
   }
 
   static <T> void packValueAndAssertThatContains(
