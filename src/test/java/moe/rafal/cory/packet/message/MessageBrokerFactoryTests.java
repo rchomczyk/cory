@@ -16,7 +16,7 @@ class MessageBrokerFactoryTests {
       INVALID_PASSWORD);
 
   @Test
-  void produceMessageBrokerThrowsWithoutServer() {
+  void produceMessageBrokerThrowsWithoutServerTest() {
     // noinspection all
     assertThatCode(() -> produceMessageBroker(specification))
         .isInstanceOf(MessageBrokerInstantiationException.class);
