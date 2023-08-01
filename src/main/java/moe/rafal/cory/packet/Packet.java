@@ -2,6 +2,8 @@ package moe.rafal.cory.packet;
 
 import java.io.IOException;
 import java.util.UUID;
+import moe.rafal.cory.packet.serdes.PacketPacker;
+import moe.rafal.cory.packet.serdes.PacketUnpacker;
 
 public abstract class Packet {
 
