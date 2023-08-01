@@ -1,4 +1,4 @@
-package moe.rafal.cory.packet;
+package moe.rafal.cory.packet.serdes;
 
 import org.msgpack.core.MessagePack;
 

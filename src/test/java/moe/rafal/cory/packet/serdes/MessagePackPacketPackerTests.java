@@ -1,7 +1,7 @@
-package moe.rafal.cory.packet;
+package moe.rafal.cory.packet.serdes;
 
 import static moe.rafal.cory.packet.MessagePackAssertions.packValueAndAssertThatContains;
-import static moe.rafal.cory.packet.PacketPackerFactory.producePacketPacker;
+import static moe.rafal.cory.packet.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;

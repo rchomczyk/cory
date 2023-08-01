@@ -1,4 +1,4 @@
-package moe.rafal.cory.packet;
+package moe.rafal.cory.packet.serdes;
 
 import java.io.IOException;
 import org.msgpack.core.MessageUnpacker;
