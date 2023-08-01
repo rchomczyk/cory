@@ -1,8 +1,8 @@
-package moe.rafal.cory.packet;
+package moe.rafal.cory.packet.serdes;
 
 import static moe.rafal.cory.packet.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.packet.MessagePackAssertions.unpackValueAndAssertThatEqualTo;
-import static moe.rafal.cory.packet.PacketUnpackerFactory.producePacketUnpacker;
+import static moe.rafal.cory.packet.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
