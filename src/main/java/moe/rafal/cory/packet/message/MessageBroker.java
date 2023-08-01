@@ -4,5 +4,5 @@ public interface MessageBroker {
 
   void publish(String channelName, byte[] payload);
 
-  void observe(String channelName, byte[] payload);
+  void observe(String channelName);
 }
