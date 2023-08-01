@@ -2,11 +2,13 @@ package moe.rafal.cory.packet;
 
 import static moe.rafal.cory.packet.MessagePackAssertions.assertThatUnpackerContains;
 import static moe.rafal.cory.packet.MessagePackAssertions.getBinaryArrayOf;
-import static moe.rafal.cory.packet.PacketPackerFactory.producePacketPacker;
-import static moe.rafal.cory.packet.PacketUnpackerFactory.producePacketUnpacker;
+import static moe.rafal.cory.packet.serdes.PacketPackerFactory.producePacketPacker;
+import static moe.rafal.cory.packet.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import moe.rafal.cory.packet.serdes.PacketPacker;
+import moe.rafal.cory.packet.serdes.PacketUnpacker;
 import org.junit.jupiter.api.Test;
 
 class MessagePackPacketTests {
