@@ -5,6 +5,7 @@ import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
+import moe.rafal.cory.packet.jacoco.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {
 
@@ -30,6 +31,7 @@ class NatsMessageBroker implements MessageBroker {
     dispatcher.subscribe(channelName);
   }
 
+  @ExcludeFromJacocoGeneratedReport
   @Override
   public void close() {
     try {

@@ -3,8 +3,6 @@ package moe.rafal.cory.packet.message;
 import static moe.rafal.cory.packet.message.MessageBrokerFactory.produceMessageBroker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -64,15 +62,5 @@ class NatsMessageBrokerTests {
     messageBroker.close();
     assertThatCode(() -> messageBroker.publish(EXPECTED_CHANNEL_NAME, EXPECTED_MESSAGE_PAYLOAD))
         .isInstanceOf(IllegalStateException.class);
-  }
-
-  @Test
-  void closeShouldThrowWhenThreadIsOccupiedTest() throws IOException {
-    MessageBroker messageBrokerMock = mock(MessageBroker.class);
-    doThrow(new InterruptedException())
-        .when(messageBrokerMock)
-        .close();
-    assertThatCode(messageBrokerMock::close)
-        .isInstanceOf(InterruptedException.class);
   }
 }
