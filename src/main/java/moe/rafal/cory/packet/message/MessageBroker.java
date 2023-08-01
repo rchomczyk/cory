@@ -6,5 +6,5 @@ public interface MessageBroker extends Closeable {
 
   void publish(String channelName, byte[] payload);
 
-  void observe(String channelName);
+  void observe(String channelName, MessageListener listener);
 }
