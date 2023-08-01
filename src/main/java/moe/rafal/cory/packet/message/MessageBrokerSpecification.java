@@ -1,6 +1,6 @@
 package moe.rafal.cory.packet.message;
 
-class MessageBrokerSpecification {
+public class MessageBrokerSpecification {
 
   private final String connectionUri;
   private final String username;
