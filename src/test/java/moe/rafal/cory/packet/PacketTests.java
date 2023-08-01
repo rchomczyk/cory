@@ -9,24 +9,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-class MessagePackPacketTests {
+class PacketTests {
 
-  private static final String VALID_USERNAME = "jdoe";
-  private static final String VALID_PASSWORD = "jdoe123";
+  private static final String INITIAL_USERNAME = "jdoe";
+  private static final String INITIAL_PASSWORD = "jdoe123";
   private static final String NEW_USERNAME = "jsmith";
   private static final String NEW_PASSWORD = "jsmith123";
   private static final String DEFAULT_VALUE = "";
-  private final MessagePackPacket packet = new MessagePackPacket(
-      VALID_USERNAME,
-      VALID_PASSWORD);
+  private final LoginPacket packet = new LoginPacket(
+      INITIAL_USERNAME,
+      INITIAL_PASSWORD);
 
   @Test
   void writeTest() throws IOException {
     try (PacketPacker packer = producePacketPacker()) {
       packet.write(packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
-        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, VALID_USERNAME);
-        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, VALID_PASSWORD);
+        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_USERNAME);
+        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_PASSWORD);
       }
     }
   }

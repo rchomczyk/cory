@@ -2,12 +2,12 @@ package moe.rafal.cory.packet;
 
 import java.io.IOException;
 
-class MessagePackPacket extends Packet {
+class LoginPacket extends Packet {
 
   private String username;
   private String password;
 
-  MessagePackPacket(String username, String password) {
+  LoginPacket(String username, String password) {
     super();
     this.username = username;
     this.password = password;
