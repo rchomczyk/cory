@@ -1,8 +1,8 @@
 package moe.rafal.cory.packet.message;
 
-public interface MessageBroker<T, R> {
+public interface MessageBroker {
 
-  void publish(T channelName, R payload);
+  void publish(byte[] channelName, byte[] payload);
 
-  void observe(T channelName, R payload);
+  void observe(byte[] channelName, byte[] payload);
 }
