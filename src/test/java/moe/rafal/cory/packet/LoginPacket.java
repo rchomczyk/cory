@@ -15,6 +15,10 @@ class LoginPacket extends Packet {
     this.password = password;
   }
 
+  LoginPacket() {
+    super();
+  }
+
   @Override
   public void write(PacketPacker packer) throws IOException {
     packer.packString(username);
