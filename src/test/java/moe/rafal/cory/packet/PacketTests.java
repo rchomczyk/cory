@@ -108,28 +108,34 @@ class PacketTests {
 
   @Test
   void verifyEqualityWithSameReferenceTest() {
-    assertThat(packet.equals(packet)).isTrue();
+    assertThat(packet.equals(packet))
+        .isTrue();
   }
 
   @Test
   void verifyEqualityWithNullReferenceTest() {
-    assertThat(packet.equals(null)).isFalse();
+    assertThat(packet.equals(null))
+        .isFalse();
   }
 
   @Test
   void verifyEqualityWithDifferentUniqueIdsTest() {
     Packet packet1 = new LoginPacket();
     Packet packet2 = new LoginPacket();
-    assertThat(packet1.equals(packet2)).isFalse();
-    assertThat(packet2.equals(packet1)).isFalse();
+    assertThat(packet1.equals(packet2))
+        .isFalse();
+    assertThat(packet2.equals(packet1))
+        .isFalse();
   }
 
   @Test
   void verifyEqualityWithSameUniqueIdsButDifferentPacketTypeTest() {
     Packet packet1 = new LoginPacket();
     Packet packet2 = new MalformedPacket(INITIAL_USERNAME);
-    assertThat(packet1.equals(packet2)).isFalse();
-    assertThat(packet2.equals(packet1)).isFalse();
+    assertThat(packet1.equals(packet2))
+        .isFalse();
+    assertThat(packet2.equals(packet1))
+        .isFalse();
   }
 
   @Test
@@ -138,7 +144,19 @@ class PacketTests {
     Packet packet2 = new LoginPacket();
     packet1.setUniqueId(NIL_UNIQUE_ID);
     packet2.setUniqueId(NIL_UNIQUE_ID);
-    assertThat(packet1.equals(packet2)).isTrue();
-    assertThat(packet2.equals(packet1)).isTrue();
+    assertThat(packet1.equals(packet2))
+        .isTrue();
+    assertThat(packet2.equals(packet1))
+        .isTrue();
+  }
+
+  @Test
+  void verifyHashCodeEqualityWithSameUniqueIdsButDifferentReferences() {
+    Packet packet1 = new LoginPacket();
+    Packet packet2 = new LoginPacket();
+    packet1.setUniqueId(NIL_UNIQUE_ID);
+    packet2.setUniqueId(NIL_UNIQUE_ID);
+    assertThat(packet1.hashCode())
+        .isEqualTo(packet2.hashCode());
   }
 }
