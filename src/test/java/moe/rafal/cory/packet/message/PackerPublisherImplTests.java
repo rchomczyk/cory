@@ -13,7 +13,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
-import moe.rafal.cory.packet.LoginPacket;
+import moe.rafal.cory.packet.subject.LoginPacket;
 import moe.rafal.cory.packet.Packet;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;

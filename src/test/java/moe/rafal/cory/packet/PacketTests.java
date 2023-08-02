@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
 import java.util.UUID;
+import moe.rafal.cory.packet.subject.LoginPacket;
 import moe.rafal.cory.packet.serdes.PacketPacker;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
 import org.junit.jupiter.api.Test;
