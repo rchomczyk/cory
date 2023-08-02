@@ -94,4 +94,14 @@ class PacketTests {
     assertThat(packet.getUniqueId())
         .isNotNull();
   }
+
+  @Test
+  void setUniqueIdTest() {
+    LoginPacket loginPacket = new LoginPacket();
+    assertThat(loginPacket)
+        .isNotNull();
+    loginPacket.setUniqueId(NIL_UNIQUE_ID);
+    assertThat(loginPacket.getUniqueId())
+        .isEqualTo(NIL_UNIQUE_ID);
+  }
 }
