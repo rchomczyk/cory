@@ -71,6 +71,8 @@ class PackerPublisherImplTests {
           try (PacketUnpacker unpacker = producePacketUnpacker(receivedPayload.get())) {
             assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
                 packet.getClass().getName());
+            assertThatUnpackerContains(unpacker, PacketUnpacker::unpackUUID,
+                packet.getUniqueId());
             assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, EXPECTED_USERNAME);
             assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, EXPECTED_PASSWORD);
           }

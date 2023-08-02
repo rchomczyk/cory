@@ -20,8 +20,7 @@ class PacketPublisherImpl implements PacketPublisher {
   @Override
   public <T extends Packet> void publish(String channelName, T packet) {
     try (PacketPacker packer = producePacketPacker()) {
-      packetGateway.writeDefinition(packet.getClass(), packer);
-      packet.write(packer);
+      packetGateway.writePacket(packet, packer);
       messageBroker.publish(channelName, packer.toBinaryArray());
     } catch (IOException exception) {
       throw new PacketPublicationException(

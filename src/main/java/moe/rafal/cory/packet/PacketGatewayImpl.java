@@ -1,32 +1,68 @@
 package moe.rafal.cory.packet;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
 import moe.rafal.cory.packet.serdes.PacketPacker;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
 
 class PacketGatewayImpl implements PacketGateway {
 
   @Override
-  public <T extends Packet> T mutate(Class<T> packetType, Packet packet) {
-    return packetType.cast(packet);
+  public <T extends Packet> T readPacket(PacketUnpacker unpacker)
+      throws IOException, MalformedPacketException {
+    T packet = newPacketOf(readPacketType(unpacker));
+    packet.setUniqueId(readPacketUniqueId(unpacker));
+    packet.read(unpacker);
+    return packet;
+  }
+
+  private <T extends Packet> T newPacketOf(Class<T> packetType) throws MalformedPacketException {
+    try {
+      return packetType.getDeclaredConstructor().newInstance();
+    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
+             InvocationTargetException exception) {
+      throw new MalformedPacketException(
+          "Packet could not be produced, because of missing public constructor without any parameters.",
+          exception);
+    }
   }
 
   @Override
-  public <T extends Packet> void writeDefinition(Class<T> packetType, PacketPacker packer)
-      throws IOException {
-    packer.packString(packetType.getName());
-  }
-
-  @Override
-  public <T extends Packet> Class<T> readDefinition(PacketUnpacker unpacker)
-      throws IOException, PacketMalformedDefinitionException {
+  public <T extends Packet> Class<T> readPacketType(PacketUnpacker unpacker)
+      throws IOException, MalformedPacketException {
     try {
       // noinspection unchecked
       return (Class<T>) Class.forName(unpacker.unpackString());
     } catch (ClassNotFoundException exception) {
-      throw new PacketMalformedDefinitionException(
-          "Packet definition seems to be malformed, as written class could not be found in classpath.",
+      throw new MalformedPacketException(
+          "Packet definition seems to be malformed, as packet type could not be found in classpath.",
           exception);
     }
+  }
+
+  @Override
+  public UUID readPacketUniqueId(PacketUnpacker unpacker) throws IOException {
+    return unpacker.unpackUUID();
+  }
+
+  @Override
+  public <T extends Packet> void writePacket(T packet, PacketPacker packer)
+      throws IOException {
+    writePacketType(packet, packer);
+    writePacketUniqueId(packet, packer);
+    packet.write(packer);
+  }
+
+  @Override
+  public <T extends Packet> void writePacketType(T packet, PacketPacker packer)
+      throws IOException {
+    packer.packString(packet.getClass().getName());
+  }
+
+  @Override
+  public <T extends Packet> void writePacketUniqueId(T packet, PacketPacker packer)
+      throws IOException {
+    packer.packUUID(packet.getUniqueId());
   }
 }
