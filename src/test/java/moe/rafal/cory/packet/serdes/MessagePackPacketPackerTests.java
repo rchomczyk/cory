@@ -5,6 +5,7 @@ import static moe.rafal.cory.packet.serdes.PacketPackerFactory.producePacketPack
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketPackerTests {
 
+  private static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   private final PacketPacker packetPacker = producePacketPacker();
 
   @AfterEach
@@ -85,6 +87,13 @@ class MessagePackPacketPackerTests {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packLong,
         PacketUnpacker::unpackLong, value);
+  }
+
+  @Test
+  void packUUIDTest() throws IOException {
+    packValueAndAssertThatContains(packetPacker,
+        PacketPacker::packUUID,
+        PacketUnpacker::unpackUUID, NIL_UNIQUE_ID);
   }
 
   @ValueSource(shorts = {10, 30, 4})

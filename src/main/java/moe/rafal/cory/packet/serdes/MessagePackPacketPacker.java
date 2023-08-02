@@ -1,6 +1,7 @@
 package moe.rafal.cory.packet.serdes;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.msgpack.core.MessageBufferPacker;
 
 class MessagePackPacketPacker implements PacketPacker {
@@ -50,6 +51,12 @@ class MessagePackPacketPacker implements PacketPacker {
   @Override
   public PacketPacker packLong(long value) throws IOException {
     underlyingPacker.packLong(value);
+    return this;
+  }
+
+  @Override
+  public PacketPacker packUUID(UUID value) throws IOException {
+    underlyingPacker.packString(value.toString());
     return this;
   }
 
