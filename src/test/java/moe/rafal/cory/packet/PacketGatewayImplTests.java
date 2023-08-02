@@ -1,7 +1,6 @@
 package moe.rafal.cory.packet;
 
 import static moe.rafal.cory.packet.MessagePackAssertions.assertThatPackerContains;
-import static moe.rafal.cory.packet.PacketGatewayFactory.producePacketGateway;
 import static moe.rafal.cory.packet.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.packet.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +15,7 @@ class PacketGatewayImplTests {
 
   private static final String INITIAL_USERNAME = "shitzuu";
   private static final String INITIAL_PASSWORD = "my-secret-password-123";
-  private final PacketGateway packetGateway = producePacketGateway();
+  private final PacketGateway packetGateway = PacketGateway.INSTANCE;
   private final Packet packet = new LoginPacket(
       INITIAL_USERNAME,
       INITIAL_PASSWORD);

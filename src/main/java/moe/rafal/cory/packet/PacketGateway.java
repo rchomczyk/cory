@@ -6,6 +6,8 @@ import moe.rafal.cory.packet.serdes.PacketUnpacker;
 
 public interface PacketGateway {
 
+  PacketGateway INSTANCE = new PacketGatewayImpl();
+
   <T extends Packet> T mutate(Class<T> packetType, Packet packet);
 
   <T extends Packet> void writeDefinition(Class<T> packetType, PacketPacker packer)
