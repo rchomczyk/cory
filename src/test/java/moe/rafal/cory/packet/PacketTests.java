@@ -12,6 +12,7 @@ import java.util.UUID;
 import moe.rafal.cory.packet.subject.LoginPacket;
 import moe.rafal.cory.packet.serdes.PacketPacker;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
+import moe.rafal.cory.packet.subject.MalformedPacket;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -103,5 +104,41 @@ class PacketTests {
     loginPacket.setUniqueId(NIL_UNIQUE_ID);
     assertThat(loginPacket.getUniqueId())
         .isEqualTo(NIL_UNIQUE_ID);
+  }
+
+  @Test
+  void verifyEqualityWithSameReferenceTest() {
+    assertThat(packet.equals(packet)).isTrue();
+  }
+
+  @Test
+  void verifyEqualityWithNullReferenceTest() {
+    assertThat(packet.equals(null)).isFalse();
+  }
+
+  @Test
+  void verifyEqualityWithDifferentUniqueIdsTest() {
+    Packet packet1 = new LoginPacket();
+    Packet packet2 = new LoginPacket();
+    assertThat(packet1.equals(packet2)).isFalse();
+    assertThat(packet2.equals(packet1)).isFalse();
+  }
+
+  @Test
+  void verifyEqualityWithSameUniqueIdsButDifferentPacketTypeTest() {
+    Packet packet1 = new LoginPacket();
+    Packet packet2 = new MalformedPacket(INITIAL_USERNAME);
+    assertThat(packet1.equals(packet2)).isFalse();
+    assertThat(packet2.equals(packet1)).isFalse();
+  }
+
+  @Test
+  void verifyEqualityWithSameUniqueIdsButDifferentReferencesTest() {
+    Packet packet1 = new LoginPacket();
+    Packet packet2 = new LoginPacket();
+    packet1.setUniqueId(NIL_UNIQUE_ID);
+    packet2.setUniqueId(NIL_UNIQUE_ID);
+    assertThat(packet1.equals(packet2)).isTrue();
+    assertThat(packet2.equals(packet1)).isTrue();
   }
 }
