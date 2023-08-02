@@ -1,6 +1,7 @@
 package moe.rafal.cory.packet.serdes;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.msgpack.core.MessageUnpacker;
 
 class MessagePackPacketUnpacker implements PacketUnpacker {
@@ -49,6 +50,11 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   @Override
   public long unpackLong() throws IOException {
     return underlyingUnpacker.unpackLong();
+  }
+
+  @Override
+  public UUID unpackUUID() throws IOException {
+    return UUID.fromString(underlyingUnpacker.unpackString());
   }
 
   @Override

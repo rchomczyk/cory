@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import moe.rafal.cory.packet.subject.LoginPacket;
 import moe.rafal.cory.packet.serdes.PacketPacker;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
 import org.junit.jupiter.api.Test;

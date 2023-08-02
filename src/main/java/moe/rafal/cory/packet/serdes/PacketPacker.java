@@ -2,6 +2,7 @@ package moe.rafal.cory.packet.serdes;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.UUID;
 
 public interface PacketPacker extends Closeable {
 
@@ -18,6 +19,8 @@ public interface PacketPacker extends Closeable {
   PacketPacker packByte(byte value) throws IOException;
 
   PacketPacker packLong(long value) throws IOException;
+
+  PacketPacker packUUID(UUID value) throws IOException;
 
   PacketPacker packShort(short value) throws IOException;
 

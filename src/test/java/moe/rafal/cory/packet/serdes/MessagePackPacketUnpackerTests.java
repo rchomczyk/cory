@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketUnpackerTests {
 
+  private static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   private static final int DEFAULT_VALUE = 0;
 
   @AfterEach
@@ -92,6 +94,13 @@ class MessagePackPacketUnpackerTests {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packLong,
         PacketUnpacker::unpackLong, value);
+  }
+
+  @Test
+  void unpackUUIDTest() throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packUUID,
+        PacketUnpacker::unpackUUID, NIL_UNIQUE_ID);
   }
 
   @ValueSource(shorts = {10, 30, 4})
