@@ -4,18 +4,18 @@ import java.io.IOException;
 import moe.rafal.cory.packet.serdes.PacketPacker;
 import moe.rafal.cory.packet.serdes.PacketUnpacker;
 
-class LoginPacket extends Packet {
+public class LoginPacket extends Packet {
 
   private String username;
   private String password;
 
-  LoginPacket(String username, String password) {
+  public LoginPacket(String username, String password) {
     super();
     this.username = username;
     this.password = password;
   }
 
-  LoginPacket() {
+  public LoginPacket() {
     super();
   }
 
