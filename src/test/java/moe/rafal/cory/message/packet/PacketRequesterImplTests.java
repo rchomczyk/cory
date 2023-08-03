@@ -65,7 +65,8 @@ public class PacketRequesterImplTests {
         .write(any());
     assertThatCode(() -> packetRequester.request(BROADCAST_CHANNEL_NAME, packetMock))
         .isInstanceOf(PacketPublicationException.class)
-        .hasMessage("Could not request packet over the message broker, because of unexpected exception.");
+        .hasMessage(
+            "Could not request packet over the message broker, because of unexpected exception.");
   }
 
   @Test
@@ -76,7 +77,8 @@ public class PacketRequesterImplTests {
       byte[] content = packer.toBinaryArray();
       assertThatCode(() -> packetRequester.processIncomingPacket(content, EMPTY_FUTURE))
           .isInstanceOf(PacketProcessingException.class)
-          .hasMessage("Could not process incoming request packet, because of unexpected exception.");
+          .hasMessage(
+              "Could not process incoming request packet, because of unexpected exception.");
     }
   }
 }

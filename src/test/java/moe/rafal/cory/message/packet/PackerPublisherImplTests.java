@@ -96,6 +96,7 @@ class PackerPublisherImplTests {
         .write(any());
     assertThatCode(() -> packetPublisher.publish(BROADCAST_CHANNEL_NAME, packetMock))
         .isInstanceOf(PacketPublicationException.class)
-        .hasMessage("Could not publish packet over the message broker, because of unexpected exception.");
+        .hasMessage(
+            "Could not publish packet over the message broker, because of unexpected exception.");
   }
 }
