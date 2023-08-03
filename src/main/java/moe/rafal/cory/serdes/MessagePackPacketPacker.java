@@ -76,7 +76,7 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packUUID(UUID value) throws IOException {
-    packMappedValueOrNil(value, UUID::toString);
+    packMappingValue(value, UUID::toString);
     return this;
   }
 
@@ -106,17 +106,17 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packInstant(Instant value) throws IOException {
-    packMappedValueOrNil(value, Instant::toString);
+    packMappingValue(value, Instant::toString);
     return this;
   }
 
   @Override
   public PacketPacker packDuration(Duration value) throws IOException {
-    packMappedValueOrNil(value, Duration::toString);
+    packMappingValue(value, Duration::toString);
     return this;
   }
 
-  private <T> void packMappedValueOrNil(T value, Function<T, String> valueMapper)
+  private <T> void packMappingValue(T value, Function<T, String> valueMapper)
       throws IOException {
     if (value == null) {
       underlyingPacker.packNil();
