@@ -30,5 +30,4 @@ public final class PacketRequesterFactory {
       PacketGateway packetGateway) {
     return new PacketRequesterImpl(messageBroker, packetGateway);
   }
-
 }

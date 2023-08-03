@@ -68,7 +68,7 @@ class CoryImplTests {
     AtomicReference<Packet> receivedPacket = new AtomicReference<>();
     cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
       @Override
-      public void receive(String channelName, String repylChannel, LoginPacket packet) {
+      public void receive(String channelName, String replyChannelName, LoginPacket packet) {
         receivedPacket.set(packet);
       }
     });
