@@ -17,6 +17,8 @@
 
 package moe.rafal.cory;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.UUID;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginPacketListener;
@@ -25,6 +27,10 @@ import moe.rafal.cory.subject.MalformedPacket;
 
 public final class PacketTestsUtils {
 
+  public static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
+  public static final String BROADCAST_CHANNEL_NAME = "test-channel";
+  public static final byte[] BROADCAST_TEST_PAYLOAD = "Hello world".getBytes(
+      StandardCharsets.UTF_8);
   public static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   public static final String INITIAL_USERNAME = "jdoe";
   public static final String INITIAL_PASSWORD = "my-secret-password";

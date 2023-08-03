@@ -15,53 +15,70 @@
  *
  */
 
-package moe.rafal.cory.message;
+package moe.rafal.cory;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
-import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
+import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import moe.rafal.cory.integration.InjectNatsServer;
+import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
+import moe.rafal.cory.integration.InjectNatsServer;
+import moe.rafal.cory.message.MessageBrokerSpecification;
+import moe.rafal.cory.message.packet.PacketListenerDelegate;
+import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(EmbeddedNatsServerExtension.class)
-class NatsMessageBrokerTests {
+class CoryImplTests {
 
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;
-  private MessageBroker messageBroker;
+  private Cory cory;
 
   @BeforeEach
-  void createMessageBroker() {
-    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
-        getNatsConnectionUri(natsServer), "", ""));
+  void setupCory() {
+    cory = CoryBuilder.newBuilder()
+        .withMessageBroker(produceMessageBroker(
+            new MessageBrokerSpecification(getNatsConnectionUri(natsServer), "", "")))
+        .build();
+  }
+
+  @AfterEach
+  void ditchCory() throws IOException {
+    cory.close();
   }
 
   @Test
   void publishAndObserveTest() {
-    AtomicBoolean receivedPayload = new AtomicBoolean();
-    messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, payload) -> receivedPayload.set(true));
-    messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
+    LoginPacket packet = getLoginPacket();
+    AtomicReference<Packet> receivedPacket = new AtomicReference<>();
+    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
+      @Override
+      public void receive(String channelName, LoginPacket packet) {
+        receivedPacket.set(packet);
+      }
+    });
+    cory.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilTrue(receivedPayload);
+        .untilAsserted(() -> assertThat(receivedPacket.get())
+            .isEqualTo(packet));
   }
 
   @Test
-  void closeTest() throws IOException {
-    messageBroker.close();
-    assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))
-        .isInstanceOf(IllegalStateException.class);
+  void closeTest() {
+    assertThatCode(() -> cory.close())
+        .doesNotThrowAnyException();
   }
 }

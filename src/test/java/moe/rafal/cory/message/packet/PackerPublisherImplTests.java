@@ -17,8 +17,10 @@
 
 package moe.rafal.cory.message.packet;
 
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.INITIAL_PASSWORD;
 import static moe.rafal.cory.PacketTestsUtils.INITIAL_USERNAME;
+import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.MessagePackAssertions;
 import moe.rafal.cory.Packet;
@@ -49,9 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class PackerPublisherImplTests {
-
-  private static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
-  private static final String BROADCAST_CHANNEL_NAME = "test-channel";
 
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;

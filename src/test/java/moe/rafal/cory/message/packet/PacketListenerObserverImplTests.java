@@ -17,6 +17,8 @@
 
 package moe.rafal.cory.message.packet;
 
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
+import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLogoutPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
@@ -29,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
@@ -47,8 +48,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class PacketListenerObserverImplTests {
 
-  private static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
-  private static final String BROADCAST_CHANNEL_NAME = "test-channel";
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;
   private PacketGateway packetGateway;
