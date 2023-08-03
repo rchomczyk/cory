@@ -67,7 +67,8 @@ class NatsMessageBrokerTests {
     messageBroker.observe(BROADCAST_CHANNEL_NAME, (channelName, replyChannel, payload) -> {
       messageBroker.publish(replyChannel, BROADCAST_REQUEST_TEST_PAYLOAD);
     });
-    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD, receivedPayload::set);
+    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).thenAccept(
+        receivedPayload::set);
     await().atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(
             () -> assertThat(receivedPayload.get()).isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));

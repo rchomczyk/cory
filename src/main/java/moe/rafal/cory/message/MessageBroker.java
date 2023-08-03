@@ -18,13 +18,14 @@
 package moe.rafal.cory.message;
 
 import java.io.Closeable;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public interface MessageBroker extends Closeable {
 
   void publish(String channelName, byte[] payload);
 
-  void request(String channelName, byte[] payload, Consumer<byte[]> callback);
+  CompletableFuture<byte[]> request(String channelName, byte[] payload);
 
   void observe(String channelName, MessageListener listener);
 }

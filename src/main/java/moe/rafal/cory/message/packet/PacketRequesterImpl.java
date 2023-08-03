@@ -18,6 +18,7 @@
 package moe.rafal.cory.message.packet;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
@@ -38,26 +39,28 @@ class PacketRequesterImpl implements PacketRequester {
   }
 
   @Override
-  public <T extends Packet, R extends Packet> void request(String channelName, T packet,
-      Consumer<R> callback) {
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet) {
     try (PacketPacker packer = PacketPackerFactory.producePacketPacker()) {
       packetGateway.writePacket(packet, packer);
-      messageBroker.request(channelName, packer.toBinaryArray(), bytes -> handle(bytes, callback));
+      CompletableFuture<R> future = new CompletableFuture<>();
+      messageBroker.request(channelName, packer.toBinaryArray())
+          .thenAccept(payload -> handle(payload, future));
+      return future;
     } catch (IOException exception) {
       throw new PacketPublicationException(
-          "Could not publish packet over the message broker, because of unexpected exception",
+          "Could not request packet over the message broker, because of unexpected exception",
           exception);
     }
   }
 
   @Override
-  public <R extends Packet> void handle(byte[] message, Consumer<R> callback) {
+  public <R extends Packet> void handle(byte[] message, CompletableFuture<R> future) {
     try (PacketUnpacker packetUnpacker = PacketUnpackerFactory.producePacketUnpacker(message)) {
       R response = packetGateway.readPacket(packetUnpacker);
-      callback.accept(response);
+      future.complete(response);
     } catch (Exception exception) {
       throw new PacketProcessingException(
-          "Could not process incoming packet, because of unexpected exception.",
+          "Could not process incoming request packet, because of unexpected exception.",
           exception);
     }
   }

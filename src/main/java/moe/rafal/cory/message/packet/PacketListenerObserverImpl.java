@@ -38,14 +38,14 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   public <T extends Packet> void observe(String channelName,
       PacketListenerDelegate<T> packetListener) {
     messageBroker.observe(channelName,
-        (ignored, replyChannel, payload) -> {
+        (ignored, replyChannelName, payload) -> {
           Packet packet = processIncomingPacket(payload);
 
           boolean whetherListensForPacket = packetListener.getPacketType()
               .equals(packet.getClass());
           if (whetherListensForPacket) {
             // noinspection unchecked
-            packetListener.receive(channelName, replyChannel, (T) packet);
+            packetListener.receive(channelName, replyChannelName, (T) packet);
           }
         });
   }

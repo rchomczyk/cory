@@ -18,6 +18,7 @@
 package moe.rafal.cory;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 
@@ -25,7 +26,7 @@ public interface Cory {
 
   <T extends Packet> void publish(String channelName, T packet);
 
-  <T extends Packet, R extends Packet> void request(String channelName, T packet, Consumer<R> callback);
+  <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
