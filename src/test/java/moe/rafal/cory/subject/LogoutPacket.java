@@ -15,40 +15,37 @@
  *
  */
 
-package moe.rafal.cory;
+package moe.rafal.cory.subject;
 
 import java.io.IOException;
+import moe.rafal.cory.Packet;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
-class MessagePackPacket extends Packet {
+public class LogoutPacket extends Packet {
 
   private String username;
-  private String password;
 
-  MessagePackPacket(String username, String password) {
+  public LogoutPacket(String username) {
     super();
     this.username = username;
-    this.password = password;
+  }
+
+  public LogoutPacket() {
+    super();
   }
 
   @Override
   public void write(PacketPacker packer) throws IOException {
     packer.packString(username);
-    packer.packString(password);
   }
 
   @Override
   public void read(PacketUnpacker unpacker) throws IOException {
     username = unpacker.unpackString();
-    password = unpacker.unpackString();
   }
 
   public String getUsername() {
     return username;
-  }
-
-  public String getPassword() {
-    return password;
   }
 }

@@ -17,6 +17,12 @@
 
 package moe.rafal.cory;
 
+import static moe.rafal.cory.PacketTestsUtils.DEFAULT_VALUE;
+import static moe.rafal.cory.PacketTestsUtils.INCOMING_PASSWORD;
+import static moe.rafal.cory.PacketTestsUtils.INCOMING_USERNAME;
+import static moe.rafal.cory.PacketTestsUtils.INITIAL_PASSWORD;
+import static moe.rafal.cory.PacketTestsUtils.INITIAL_USERNAME;
+import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,43 +35,39 @@ import org.junit.jupiter.api.Test;
 
 class MessagePackPacketTests {
 
-  private static final String INITIAL_USERNAME = "jdoe";
-  private static final String INITIAL_PASSWORD = "jdoe123";
-  private static final String NEW_USERNAME = "jsmith";
-  private static final String NEW_PASSWORD = "jsmith123";
-  private static final String DEFAULT_VALUE = "";
-  private final MessagePackPacket packet = new MessagePackPacket(
-      INITIAL_USERNAME,
-      INITIAL_PASSWORD);
-
   @Test
   void writeTest() throws IOException {
+    LoginPacket packet = PacketTestsUtils.getLoginPacket();
     try (PacketPacker packer = PacketPackerFactory.producePacketPacker()) {
       packet.write(packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
-        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_USERNAME);
-        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_PASSWORD);
+        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
+            INITIAL_USERNAME);
+        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
+            INITIAL_PASSWORD);
       }
     }
   }
 
   @Test
   void readTest() throws IOException {
+    LoginPacket packet = getLoginPacket();
     byte[] content = MessagePackAssertions.getBinaryArrayOf((packer, expectedValue) -> {
-      packer.packString(NEW_USERNAME);
-      packer.packString(NEW_PASSWORD);
+      packer.packString(INCOMING_USERNAME);
+      packer.packString(INCOMING_PASSWORD);
     }, DEFAULT_VALUE);
     try (PacketUnpacker unpacker = producePacketUnpacker(content)) {
       packet.read(unpacker);
       assertThat(packet.getUsername())
-          .isEqualTo(NEW_USERNAME);
+          .isEqualTo(INCOMING_USERNAME);
       assertThat(packet.getPassword())
-          .isEqualTo(NEW_PASSWORD);
+          .isEqualTo(INCOMING_PASSWORD);
     }
   }
 
   @Test
   void writeAndReadTest() throws IOException {
+    LoginPacket packet = getLoginPacket();
     try (PacketPacker packer = PacketPackerFactory.producePacketPacker()) {
       packet.write(packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
@@ -81,6 +83,7 @@ class MessagePackPacketTests {
 
   @Test
   void getUniqueIdTest() {
+    LoginPacket packet = getLoginPacket();
     assertThat(packet.getUniqueId())
         .isNotNull();
   }

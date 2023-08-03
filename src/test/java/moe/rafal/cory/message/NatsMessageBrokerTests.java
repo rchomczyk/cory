@@ -17,6 +17,8 @@
 
 package moe.rafal.cory.message;
 
+import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
+import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
@@ -24,50 +26,36 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
-import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
+import moe.rafal.cory.integration.InjectNatsServer;
+import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(EmbeddedNatsServerExtension.class)
 class NatsMessageBrokerTests {
 
   private static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
-  private static final String EXPECTED_USERNAME = "shitzuu";
-  private static final String EXPECTED_PASSWORD = "my-secret-password-123";
-  private static final String EXPECTED_CHANNEL_NAME = "test-channel";
-  private static final byte[] EXPECTED_MESSAGE_PAYLOAD = "Hello world".getBytes(
+  private static final String BROADCAST_CHANNEL_NAME = "test-channel";
+  private static final byte[] BROADCAST_TEST_PAYLOAD = "Hello world".getBytes(
       StandardCharsets.UTF_8);
-  private final EmbeddedNatsServer embeddedServer = new EmbeddedNatsServer(
-      EmbeddedNatsConfig.defaultNatsServerConfig());
+  @InjectNatsServer
+  private EmbeddedNatsServer natsServer;
   private MessageBroker messageBroker;
 
   @BeforeEach
-  void startEmbeddedServerAndCreateMessageBroker() throws Exception {
-    embeddedServer.startServer();
-    messageBroker = MessageBrokerFactory.produceMessageBroker(new MessageBrokerSpecification(
-        getEmbeddedServerConnectionUri(),
-        EXPECTED_USERNAME,
-        EXPECTED_PASSWORD));
-  }
-
-  @AfterEach
-  void ditchEmbeddedServer() {
-    embeddedServer.stopServer();
-  }
-
-  private String getEmbeddedServerConnectionUri() {
-    return String.format("nats://%s:%d",
-        embeddedServer.getRunningHost(),
-        embeddedServer.getRunningPort());
+  void createMessageBroker() {
+    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
+        getNatsConnectionUri(natsServer), "", ""));
   }
 
   @Test
   void publishAndObserveTest() {
     AtomicBoolean receivedPayload = new AtomicBoolean();
-    messageBroker.observe(EXPECTED_CHANNEL_NAME,
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
         (channelName, payload) -> receivedPayload.set(true));
-    messageBroker.publish(EXPECTED_CHANNEL_NAME, EXPECTED_MESSAGE_PAYLOAD);
+    messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilTrue(receivedPayload);
@@ -76,7 +64,7 @@ class NatsMessageBrokerTests {
   @Test
   void closeTest() throws IOException {
     messageBroker.close();
-    assertThatCode(() -> messageBroker.publish(EXPECTED_CHANNEL_NAME, EXPECTED_MESSAGE_PAYLOAD))
+    assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))
         .isInstanceOf(IllegalStateException.class);
   }
 }

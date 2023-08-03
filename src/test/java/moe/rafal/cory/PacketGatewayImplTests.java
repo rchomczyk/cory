@@ -31,16 +31,11 @@ import org.junit.jupiter.api.Test;
 
 class PacketGatewayImplTests {
 
-  private static final String INITIAL_USERNAME = "shitzuu";
-  private static final String INITIAL_PASSWORD = "my-secret-password-123";
-  private static final Packet MALFORMED_PACKET = new MalformedPacket(INITIAL_USERNAME);
   private final PacketGateway packetGateway = PacketGateway.INSTANCE;
-  private final Packet packet = new LoginPacket(
-      INITIAL_USERNAME,
-      INITIAL_PASSWORD);
 
   @Test
   void writeAndReadPacketTest() throws IOException {
+    LoginPacket packet = PacketTestsUtils.getLoginPacket();
     try (PacketPacker packer = producePacketPacker()) {
       packetGateway.writePacket(packet, packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
@@ -52,8 +47,9 @@ class PacketGatewayImplTests {
 
   @Test
   void writeAndReadPacketShouldThrowWithMissingConstructorTest() throws IOException {
+    MalformedPacket packet = PacketTestsUtils.getMalformedPacket();
     try (PacketPacker packer = producePacketPacker()) {
-      packetGateway.writePacket(MALFORMED_PACKET, packer);
+      packetGateway.writePacket(packet, packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
         assertThatCode(() -> packetGateway.readPacket(unpacker))
             .isInstanceOf(MalformedPacketException.class)
@@ -65,6 +61,7 @@ class PacketGatewayImplTests {
 
   @Test
   void writeAndReadPacketTypeTest() throws IOException {
+    LoginPacket packet = PacketTestsUtils.getLoginPacket();
     try (PacketPacker packer = producePacketPacker()) {
       packetGateway.writePacketType(packet, packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
@@ -89,6 +86,7 @@ class PacketGatewayImplTests {
 
   @Test
   void writeAndReadPacketUniqueIdTest() throws IOException {
+    LoginPacket packet = PacketTestsUtils.getLoginPacket();
     try (PacketPacker packer = producePacketPacker()) {
       packetGateway.writePacketUniqueId(packet, packer);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {

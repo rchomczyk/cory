@@ -22,6 +22,7 @@ import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import java.io.IOException;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
@@ -51,6 +52,7 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         });
   }
 
+  @ExcludeFromJacocoGeneratedReport
   private <T extends Packet> T processIncomingPacket(byte[] payload)
       throws PacketProcessingException {
     try (PacketUnpacker unpacker = producePacketUnpacker(payload)) {

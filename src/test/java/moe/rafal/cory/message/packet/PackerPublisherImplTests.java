@@ -17,6 +17,10 @@
 
 package moe.rafal.cory.message.packet;
 
+import static moe.rafal.cory.PacketTestsUtils.INITIAL_PASSWORD;
+import static moe.rafal.cory.PacketTestsUtils.INITIAL_USERNAME;
+import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
+import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -30,58 +34,43 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.MessagePackAssertions;
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketTestsUtils;
+import moe.rafal.cory.integration.InjectNatsServer;
+import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.message.MessageBrokerFactory;
 import moe.rafal.cory.message.MessageBrokerSpecification;
-import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.serdes.PacketUnpacker;
-import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
+import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(EmbeddedNatsServerExtension.class)
 class PackerPublisherImplTests {
 
   private static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
-  private static final String EXPECTED_USERNAME = "shitzuu";
-  private static final String EXPECTED_PASSWORD = "my-secret-password-123";
-  private static final String EXPECTED_CHANNEL_NAME = "test-channel";
-  private static final EmbeddedNatsServer EMBEDDED_SERVER = new EmbeddedNatsServer(
-      EmbeddedNatsConfig.defaultNatsServerConfig());
-  private static MessageBroker MESSAGE_BROKER;
-  private static PacketPublisher PACKET_PUBLISHER;
-  private final Packet packet = new LoginPacket(
-      EXPECTED_USERNAME,
-      EXPECTED_PASSWORD);
+  private static final String BROADCAST_CHANNEL_NAME = "test-channel";
 
-  @BeforeAll
-  static void startEmbeddedServerAndCreateMessageBroker() throws Exception {
-    EMBEDDED_SERVER.startServer();
-    MESSAGE_BROKER = MessageBrokerFactory.produceMessageBroker(new MessageBrokerSpecification(
-        getEmbeddedServerConnectionUri(),
-        EXPECTED_USERNAME,
-        EXPECTED_PASSWORD));
-    PACKET_PUBLISHER = new PacketPublisherImpl(MESSAGE_BROKER);
-  }
+  @InjectNatsServer
+  private EmbeddedNatsServer natsServer;
+  private MessageBroker messageBroker;
+  private PacketPublisher packetPublisher;
 
-  @AfterAll
-  static void ditchEmbeddedServer() {
-    EMBEDDED_SERVER.stopServer();
-  }
-
-  private static String getEmbeddedServerConnectionUri() {
-    return String.format("nats://%s:%d",
-        EMBEDDED_SERVER.getRunningHost(),
-        EMBEDDED_SERVER.getRunningPort());
+  @BeforeEach
+  void createMessageBrokerAndPacketPublisher() {
+    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
+        getNatsConnectionUri(natsServer), "", ""));
+    packetPublisher = new PacketPublisherImpl(messageBroker);
   }
 
   @Test
   void publishAndObserveTest() {
+    LoginPacket packet = PacketTestsUtils.getLoginPacket();
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
-    MESSAGE_BROKER.observe(EXPECTED_CHANNEL_NAME,
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
         (channelName, payload) -> receivedPayload.set(payload));
-    PACKET_PUBLISHER.publish(EXPECTED_CHANNEL_NAME, packet);
+    packetPublisher.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> {
@@ -92,8 +81,10 @@ class PackerPublisherImplTests {
                 packet.getClass().getName());
             MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackUUID,
                 packet.getUniqueId());
-            MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, EXPECTED_USERNAME);
-            MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, EXPECTED_PASSWORD);
+            MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
+                INITIAL_USERNAME);
+            MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
+                INITIAL_PASSWORD);
           }
         });
   }
@@ -104,7 +95,7 @@ class PackerPublisherImplTests {
     doThrow(new IOException())
         .when(packetMock)
         .write(any());
-    assertThatCode(() -> PACKET_PUBLISHER.publish(EXPECTED_CHANNEL_NAME, packetMock))
+    assertThatCode(() -> packetPublisher.publish(BROADCAST_CHANNEL_NAME, packetMock))
         .isInstanceOf(PacketPublicationException.class);
   }
 }
