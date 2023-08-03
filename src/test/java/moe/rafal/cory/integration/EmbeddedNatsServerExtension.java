@@ -1,0 +1,89 @@
+/*
+ *    Copyright 2023 cory
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ */
+
+package moe.rafal.cory.integration;
+
+import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
+
+import java.lang.reflect.Field;
+import java.util.function.Predicate;
+import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
+import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.junit.platform.commons.support.ModifierSupport;
+
+public class EmbeddedNatsServerExtension implements BeforeEachCallback, AfterEachCallback,
+    TestInstancePostProcessor, ParameterResolver {
+
+  private final EmbeddedNatsServer underlyingServer;
+
+  public EmbeddedNatsServerExtension() {
+    this.underlyingServer = new EmbeddedNatsServer(EmbeddedNatsConfig.defaultNatsServerConfig());
+  }
+
+  @Override
+  public void beforeEach(ExtensionContext extensionContext) throws Exception {
+    underlyingServer.startServer();
+  }
+
+  @Override
+  public void afterEach(ExtensionContext extensionContext) {
+    underlyingServer.stopServer();
+  }
+
+  public static String getNatsConnectionUri(EmbeddedNatsServer embeddedNatsServer) {
+    return String.format("nats://%s:%d",
+        embeddedNatsServer.getRunningHost(),
+        embeddedNatsServer.getRunningPort());
+  }
+
+  @Override
+  public boolean supportsParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext) throws ParameterResolutionException {
+    return parameterContext.isAnnotated(InjectNatsServer.class);
+  }
+
+  @Override
+  public Object resolveParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext) throws ParameterResolutionException {
+    return underlyingServer;
+  }
+
+  @Override
+  public void postProcessTestInstance(Object testInstance, ExtensionContext extensionContext) {
+    injectFields(extensionContext.getRequiredTestClass(), testInstance,
+        ModifierSupport::isNotStatic);
+  }
+
+  private void injectFields(Class<?> testClass, Object testInstance, Predicate<Field> predicate) {
+    findAnnotatedFields(testClass, InjectNatsServer.class, predicate)
+        .forEach(field -> {
+          try {
+            field.setAccessible(true);
+            field.set(testInstance, underlyingServer);
+          } catch (Exception ex) {
+            throw new RuntimeException(ex);
+          }
+        });
+  }
+}
