@@ -18,7 +18,10 @@
 package moe.rafal.cory.serdes;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
+import java.util.function.Function;
 import org.msgpack.core.MessageBufferPacker;
 
 class MessagePackPacketPacker implements PacketPacker {
@@ -73,12 +76,7 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packUUID(UUID value) throws IOException {
-    if (value == null) {
-      underlyingPacker.packNil();
-      return this;
-    }
-
-    underlyingPacker.packString(value.toString());
+    packMappedValueOrNil(value, UUID::toString);
     return this;
   }
 
@@ -104,6 +102,28 @@ class MessagePackPacketPacker implements PacketPacker {
   public PacketPacker packMapHeader(int value) throws IOException {
     underlyingPacker.packMapHeader(value);
     return this;
+  }
+
+  @Override
+  public PacketPacker packInstant(Instant value) throws IOException {
+    packMappedValueOrNil(value, Instant::toString);
+    return this;
+  }
+
+  @Override
+  public PacketPacker packDuration(Duration value) throws IOException {
+    packMappedValueOrNil(value, Duration::toString);
+    return this;
+  }
+
+  private <T> void packMappedValueOrNil(T value, Function<T, String> valueMapper)
+      throws IOException {
+    if (value == null) {
+      underlyingPacker.packNil();
+      return;
+    }
+
+    underlyingPacker.packString(valueMapper.apply(value));
   }
 
   @Override
