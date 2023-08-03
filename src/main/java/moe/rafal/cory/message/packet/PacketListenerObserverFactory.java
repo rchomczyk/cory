@@ -17,12 +17,17 @@
 
 package moe.rafal.cory.message.packet;
 
-import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.message.MessageBroker;
 
-public interface PacketListenerObserver {
+public final class PacketListenerObserverFactory {
 
-  <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
+  private PacketListenerObserverFactory() {
 
-  <T extends Packet> T processIncomingPacket(byte[] payload)
-      throws PacketProcessingException;
+  }
+
+  public static PacketListenerObserver producePacketListenerObserver(MessageBroker messageBroker,
+      PacketGateway packetGateway) {
+    return new PacketListenerObserverImpl(messageBroker, packetGateway);
+  }
 }

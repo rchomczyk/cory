@@ -50,7 +50,8 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         });
   }
 
-  <T extends Packet> T processIncomingPacket(byte[] payload)
+  @Override
+  public <T extends Packet> T processIncomingPacket(byte[] payload)
       throws PacketProcessingException {
     try (PacketUnpacker unpacker = producePacketUnpacker(payload)) {
       return packetGateway.readPacket(unpacker);

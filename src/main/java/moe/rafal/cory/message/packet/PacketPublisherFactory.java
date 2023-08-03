@@ -17,12 +17,15 @@
 
 package moe.rafal.cory.message.packet;
 
-import moe.rafal.cory.Packet;
+import moe.rafal.cory.message.MessageBroker;
 
-public interface PacketListenerObserver {
+public final class PacketPublisherFactory {
 
-  <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
+  private PacketPublisherFactory() {
 
-  <T extends Packet> T processIncomingPacket(byte[] payload)
-      throws PacketProcessingException;
+  }
+
+  public static PacketPublisher producePacketPublisher(MessageBroker messageBroker) {
+    return new PacketPublisherImpl(messageBroker);
+  }
 }
