@@ -40,7 +40,12 @@ public final class CoryBuilder {
     return this;
   }
 
-  public Cory build() {
+  public Cory build() throws CoryBuildException {
+    if (messageBroker == null) {
+      throw new CoryBuildException(
+          "Cory could not be built, because of missing message broker, which is required for proper functioning.");
+    }
+
     PacketGateway packetGateway = PacketGateway.INSTANCE;
     return new CoryImpl(
         messageBroker,
