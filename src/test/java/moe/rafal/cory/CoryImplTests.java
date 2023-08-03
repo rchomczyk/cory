@@ -20,6 +20,7 @@ package moe.rafal.cory;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
+import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +36,7 @@ import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 import moe.rafal.cory.subject.LoginPacket;
+import moe.rafal.cory.subject.LoginRequestPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,18 +82,18 @@ class CoryImplTests {
 
   @Test
   void requestTest() {
-    LoginPacket packet = getLoginPacket();
-    AtomicReference<LoginPacket> receivedPacket = new AtomicReference<>();
-    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
+    LoginRequestPacket packet = getLoginRequestPacket();
+    AtomicReference<LoginRequestPacket> receivedPacket = new AtomicReference<>();
+    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginRequestPacket.class) {
       @Override
-      public void receive(String channelName, String replyChannel, LoginPacket packet) {
+      public void receive(String channelName, String replyChannel, LoginRequestPacket packet) {
         packet.setAccess(true);
         cory.publish(replyChannel, packet);
       }
     });
 
     cory.request(BROADCAST_CHANNEL_NAME, packet, response -> {
-      LoginPacket responseLogin = (LoginPacket) response;
+      LoginRequestPacket responseLogin = (LoginRequestPacket) response;
       receivedPacket.set(responseLogin);
     });
 

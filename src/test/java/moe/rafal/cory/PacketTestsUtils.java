@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.UUID;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginPacketListener;
+import moe.rafal.cory.subject.LoginRequestPacket;
 import moe.rafal.cory.subject.LogoutPacket;
 import moe.rafal.cory.subject.MalformedPacket;
 
@@ -51,6 +52,10 @@ public final class PacketTestsUtils {
 
   public static LoginPacket getLoginPacket() {
     return new LoginPacket(INITIAL_USERNAME, INITIAL_PASSWORD);
+  }
+
+  public static LoginRequestPacket getLoginRequestPacket() {
+    return new LoginRequestPacket(INITIAL_USERNAME, INITIAL_PASSWORD);
   }
 
   public static LoginPacketListener getLoginPacketListener() {
