@@ -46,16 +46,15 @@ class CoryImpl implements Cory {
   }
 
   @Override
-  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
-      T packet) {
-    return packetRequester.request(channelName, packet);
-  }
-
-
-  @Override
   public <T extends Packet> void observe(String channelName,
       PacketListenerDelegate<T> packetListener) {
     packetListenerObserver.observe(channelName, packetListener);
+  }
+
+  @Override
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
+      T packet) {
+    return packetRequester.request(channelName, packet);
   }
 
   @Override

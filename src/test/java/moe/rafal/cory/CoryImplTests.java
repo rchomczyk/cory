@@ -90,9 +90,10 @@ class CoryImplTests {
         cory.publish(replyChannelName, packet);
       }
     });
-    cory.request(BROADCAST_CHANNEL_NAME, packet).thenAccept(response -> receivedPacket.set(
-        (LoginRequestPacket) response));
-    await().atMost(MAXIMUM_RESPONSE_PERIOD)
+    cory.request(BROADCAST_CHANNEL_NAME, packet)
+        .thenAccept(response -> receivedPacket.set((LoginRequestPacket) response));
+    await()
+        .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> assertTrue(receivedPacket.get().hasAccess()));
   }
 

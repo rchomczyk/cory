@@ -41,10 +41,11 @@ public final class CoryBuilder {
   }
 
   public Cory build() {
+    PacketGateway packetGateway = PacketGateway.INSTANCE;
     return new CoryImpl(
         messageBroker,
-        producePacketPublisher(messageBroker),
-        producePacketRequester(messageBroker, PacketGateway.INSTANCE),
-        producePacketListenerObserver(messageBroker, PacketGateway.INSTANCE));
+        producePacketPublisher(messageBroker, packetGateway),
+        producePacketRequester(messageBroker, packetGateway),
+        producePacketListenerObserver(messageBroker, packetGateway));
   }
 }

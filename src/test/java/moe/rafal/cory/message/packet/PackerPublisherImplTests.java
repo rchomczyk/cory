@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.MessagePackAssertions;
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.PacketTestsUtils;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.InjectNatsServer;
@@ -60,7 +61,7 @@ class PackerPublisherImplTests {
   void createMessageBrokerAndPacketPublisher() {
     messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = producePacketPublisher(messageBroker);
+    packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
   }
 
   @Test

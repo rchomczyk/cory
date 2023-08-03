@@ -59,7 +59,7 @@ class PacketListenerObserverImplTests {
     packetGateway = PacketGateway.INSTANCE;
     MessageBroker messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = producePacketPublisher(messageBroker);
+    packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
     packetListenerObserver = producePacketListenerObserver(messageBroker, packetGateway);
   }
 

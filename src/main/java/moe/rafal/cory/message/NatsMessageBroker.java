@@ -43,18 +43,18 @@ class NatsMessageBroker implements MessageBroker {
   }
 
   @Override
-  public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-    return connection
-        .request(channelName, payload)
-        .thenApply(Message::getData);
-  }
-
-  @Override
   public void observe(String channelName, MessageListener listener) {
     connection
         .createDispatcher(
             message -> listener.receive(channelName, message.getReplyTo(), message.getData()))
         .subscribe(channelName);
+  }
+
+  @Override
+  public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
+    return connection
+        .request(channelName, payload)
+        .thenApply(Message::getData);
   }
 
   @ExcludeFromJacocoGeneratedReport

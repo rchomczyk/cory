@@ -24,5 +24,6 @@ public interface PacketRequester {
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
 
-  <R extends Packet> void processIncomingPacket(byte[] message, CompletableFuture<R> future);
+  <T extends Packet> CompletableFuture<T> processIncomingPacket(byte[] message)
+      throws PacketProcessingException;
 }

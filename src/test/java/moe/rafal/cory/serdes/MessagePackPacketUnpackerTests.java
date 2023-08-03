@@ -153,17 +153,19 @@ class MessagePackPacketUnpackerTests {
   }
 
   @Test
-  void hasNextEmptyTest() throws IOException {
+  void hasNextOnEmptyUnpackerTest() throws IOException {
     try (PacketUnpacker unpacker = producePacketUnpacker(new byte[0])) {
-      assertThat(unpacker.hasNext()).isFalse();
+      assertThat(unpacker.hasNext())
+          .isFalse();
     }
   }
 
   @Test
-  void hasNextNonEmptyTest() throws IOException {
+  void hasNextOnExhaustedUnpackerTest() throws IOException {
     try (PacketUnpacker unpacker = producePacketUnpacker(
         getBinaryArrayOf(PacketPacker::packInt, 1))) {
-      assertThat(unpacker.hasNext()).isTrue();
+      assertThat(unpacker.hasNext())
+          .isTrue();
     }
   }
 }

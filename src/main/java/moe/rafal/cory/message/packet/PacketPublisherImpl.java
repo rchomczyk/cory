@@ -26,12 +26,12 @@ import moe.rafal.cory.serdes.PacketPackerFactory;
 
 class PacketPublisherImpl implements PacketPublisher {
 
-  private final PacketGateway packetGateway;
   private final MessageBroker messageBroker;
+  private final PacketGateway packetGateway;
 
-  PacketPublisherImpl(MessageBroker messageBroker) {
-    this.packetGateway = PacketGateway.INSTANCE;
+  PacketPublisherImpl(MessageBroker messageBroker, PacketGateway packetGateway) {
     this.messageBroker = messageBroker;
+    this.packetGateway = packetGateway;
   }
 
   @Override

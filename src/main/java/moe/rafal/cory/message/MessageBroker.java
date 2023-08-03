@@ -24,7 +24,7 @@ public interface MessageBroker extends Closeable {
 
   void publish(String channelName, byte[] payload);
 
-  CompletableFuture<byte[]> request(String channelName, byte[] payload);
-
   void observe(String channelName, MessageListener listener);
+
+  CompletableFuture<byte[]> request(String channelName, byte[] payload);
 }

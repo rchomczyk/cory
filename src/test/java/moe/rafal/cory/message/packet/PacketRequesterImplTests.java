@@ -18,7 +18,6 @@
 package moe.rafal.cory.message.packet;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
-import static moe.rafal.cory.PacketTestsUtils.EMPTY_FUTURE;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
@@ -29,6 +28,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.util.concurrent.CompletionException;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
@@ -42,7 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(EmbeddedNatsServerExtension.class)
-public class PacketRequesterImplTests {
+class PacketRequesterImplTests {
 
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;
@@ -55,7 +55,6 @@ public class PacketRequesterImplTests {
         getNatsConnectionUri(natsServer), "", ""));
     packetRequester = producePacketRequester(messageBroker, PacketGateway.INSTANCE);
   }
-
 
   @Test
   void requestShouldThrowWhenWriteFails() throws IOException {
@@ -71,14 +70,21 @@ public class PacketRequesterImplTests {
 
   @Test
   void requestShouldThrowWhenReadFails() throws IOException {
+    PacketGateway packetGatewayMock = mock(PacketGateway.class);
+    doThrow(new IOException())
+        .when(packetGatewayMock)
+        .readPacket(any());
+    packetRequester = producePacketRequester(messageBroker, packetGatewayMock);
     try (PacketPacker packer = producePacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();
-      assertThatCode(() -> packetRequester.processIncomingPacket(content, EMPTY_FUTURE))
-          .isInstanceOf(PacketProcessingException.class)
-          .hasMessage(
-              "Could not process incoming request packet, because of unexpected exception.");
+      assertThatCode(() -> packetRequester.processIncomingPacket(content).join())
+          .isInstanceOf(CompletionException.class)
+          .hasCauseInstanceOf(PacketProcessingException.class)
+          .hasMessage(String.format("%s: %s",
+              PacketProcessingException.class.getName(),
+              "Could not complete processing of incoming request packet, because of unexpected exception."));
     }
   }
 }
