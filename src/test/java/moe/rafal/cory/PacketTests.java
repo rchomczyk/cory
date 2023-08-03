@@ -32,8 +32,6 @@ import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
 import java.util.UUID;
-import moe.rafal.cory.message.MessageBrokerFactory;
-import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
 import moe.rafal.cory.serdes.PacketUnpacker;
@@ -131,14 +129,6 @@ class PacketTests {
     LoginPacket packet = getLoginPacket();
     assertThat(packet.equals(packet))
         .isTrue();
-  }
-
-  void chuj() {
-    Cory cory = CoryBuilder.newBuilder()
-        .withMessageBroker(
-            MessageBrokerFactory.produceMessageBroker(new MessageBrokerSpecification("", "", "")))
-        .build();
-    cory.publish("asdasd", new LoginPacket("asd", "asd"));
   }
 
   @Test
