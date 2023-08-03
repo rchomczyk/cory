@@ -21,11 +21,13 @@ import java.io.IOException;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
+import org.apache.commons.io.input.BOMInputStream;
 
 public class LoginPacket extends Packet {
 
   private String username;
   private String password;
+  private boolean access;
 
   public LoginPacket(String username, String password) {
     super();
@@ -41,12 +43,14 @@ public class LoginPacket extends Packet {
   public void write(PacketPacker packer) throws IOException {
     packer.packString(username);
     packer.packString(password);
+    packer.packBoolean(access);
   }
 
   @Override
   public void read(PacketUnpacker unpacker) throws IOException {
     username = unpacker.unpackString();
     password = unpacker.unpackString();
+    access = unpacker.unpackBoolean();
   }
 
   public String getUsername() {
@@ -55,5 +59,13 @@ public class LoginPacket extends Packet {
 
   public String getPassword() {
     return password;
+  }
+
+  public boolean hasAccess() {
+    return access;
+  }
+
+  public void setAccess(boolean access) {
+    this.access = access;
   }
 }

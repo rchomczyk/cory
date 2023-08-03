@@ -95,6 +95,11 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
+  public boolean hasNext() throws IOException {
+    return underlyingUnpacker.hasNext();
+  }
+
+  @Override
   public void close() throws IOException {
     underlyingUnpacker.close();
   }

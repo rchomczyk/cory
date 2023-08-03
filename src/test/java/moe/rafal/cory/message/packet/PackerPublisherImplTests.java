@@ -68,7 +68,7 @@ class PackerPublisherImplTests {
     LoginPacket packet = PacketTestsUtils.getLoginPacket();
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, payload) -> receivedPayload.set(payload));
+        (channelName, replyChannel, payload) -> receivedPayload.set(payload));
     packetPublisher.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)

@@ -18,17 +18,20 @@
 package moe.rafal.cory.message;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import moe.rafal.cory.integration.InjectNatsServer;
+import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
+import moe.rafal.cory.integration.InjectNatsServer;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,11 +54,23 @@ class NatsMessageBrokerTests {
   void publishAndObserveTest() {
     AtomicBoolean receivedPayload = new AtomicBoolean();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, payload) -> receivedPayload.set(true));
+        (channelName, payload, replyChannel) -> receivedPayload.set(true));
     messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilTrue(receivedPayload);
+  }
+
+  @Test
+  void requestTest() {
+    AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME, (channelName, replyChannel, payload) -> {
+      messageBroker.publish(replyChannel, BROADCAST_REQUEST_TEST_PAYLOAD);
+    });
+    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD, receivedPayload::set);
+    await().atMost(MAXIMUM_RESPONSE_PERIOD)
+        .untilAsserted(
+            () -> assertThat(receivedPayload.get()).isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
   }
 
   @Test

@@ -29,7 +29,7 @@ class PacketListenerDelegateTests {
     PacketListenerDelegate<LoginPacket> packetListener = new PacketListenerDelegate<>(
         LoginPacket.class) {
       @Override
-      public void receive(String channelName, LoginPacket packet) {
+      public void receive(String channelName, String replyChannel, LoginPacket packet) {
       }
     };
 

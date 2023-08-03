@@ -24,7 +24,9 @@ import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConn
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatObject;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -65,7 +67,7 @@ class CoryImplTests {
     AtomicReference<Packet> receivedPacket = new AtomicReference<>();
     cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
       @Override
-      public void receive(String channelName, LoginPacket packet) {
+      public void receive(String channelName, String repylChannel, LoginPacket packet) {
         receivedPacket.set(packet);
       }
     });
@@ -74,6 +76,27 @@ class CoryImplTests {
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> assertThat(receivedPacket.get())
             .isEqualTo(packet));
+  }
+
+  @Test
+  void requestTest() {
+    LoginPacket packet = getLoginPacket();
+    AtomicReference<LoginPacket> receivedPacket = new AtomicReference<>();
+    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
+      @Override
+      public void receive(String channelName, String replyChannel, LoginPacket packet) {
+        packet.setAccess(true);
+        cory.publish(replyChannel, packet);
+      }
+    });
+
+    cory.request(BROADCAST_CHANNEL_NAME, packet, response -> {
+      LoginPacket responseLogin = (LoginPacket) response;
+      receivedPacket.set(responseLogin);
+    });
+
+    await().atMost(MAXIMUM_RESPONSE_PERIOD)
+        .untilAsserted(() -> assertTrue(receivedPacket.get().hasAccess()));
   }
 
   @Test

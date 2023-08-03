@@ -18,10 +18,13 @@
 package moe.rafal.cory.message;
 
 import java.io.Closeable;
+import java.util.function.Consumer;
 
 public interface MessageBroker extends Closeable {
 
   void publish(String channelName, byte[] payload);
+
+  void request(String channelName, byte[] payload, Consumer<byte[]> callback);
 
   void observe(String channelName, MessageListener listener);
 }

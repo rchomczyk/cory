@@ -21,6 +21,8 @@ import io.nats.client.Connection;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.function.Consumer;
 import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {
@@ -41,10 +43,17 @@ class NatsMessageBroker implements MessageBroker {
   }
 
   @Override
+  public void request(String channelName, byte[] payload, Consumer<byte[]> callback) {
+    connection
+        .request(channelName, payload)
+        .thenAccept(message -> callback.accept(message.getData()));
+  }
+
+  @Override
   public void observe(String channelName, MessageListener listener) {
     connection
         .createDispatcher(
-            message -> listener.receive(channelName, message.getData()))
+            message -> listener.receive(channelName, message.getReplyTo(), message.getData()))
         .subscribe(channelName);
   }
 

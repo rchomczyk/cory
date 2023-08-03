@@ -17,10 +17,13 @@
 
 package moe.rafal.cory.message.packet;
 
+import java.util.function.Consumer;
 import moe.rafal.cory.Packet;
 
-@FunctionalInterface
-public interface PacketListener<T extends Packet> {
+public interface PacketRequester {
 
-  void receive(String channelName, String replyChannel, T packet);
+  <T extends Packet, R extends Packet> void request(String channelName, T packet, Consumer<R> callback);
+
+  <R extends Packet> void handle(byte[] message, Consumer<R> callback);
+
 }

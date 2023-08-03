@@ -17,10 +17,16 @@
 
 package moe.rafal.cory.message.packet;
 
-import moe.rafal.cory.Packet;
+import moe.rafal.cory.message.MessageBroker;
 
-@FunctionalInterface
-public interface PacketListener<T extends Packet> {
+public final class PacketRequesterFactory {
 
-  void receive(String channelName, String replyChannel, T packet);
+  private PacketRequesterFactory() {
+
+  }
+
+  public static PacketRequester producePacketRequester(MessageBroker messageBroker) {
+    return new PacketRequesterImpl(messageBroker);
+  }
+
 }
