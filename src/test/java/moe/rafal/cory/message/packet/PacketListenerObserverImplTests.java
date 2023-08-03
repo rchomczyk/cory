@@ -21,16 +21,21 @@ import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLogoutPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.MessageBrokerSpecification;
+import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,15 +49,18 @@ class PacketListenerObserverImplTests {
   private static final String BROADCAST_CHANNEL_NAME = "test-channel";
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;
+  private PacketGateway packetGateway;
+  private MessageBroker messageBroker;
   private PacketPublisher packetPublisher;
-  private PacketListenerObserver packetListenerObserver;
+  private PacketListenerObserverImpl packetListenerObserver;
 
   @BeforeEach
   void createMessageBrokerAndPacketPublisherWithPacketListenerObserver() {
-    MessageBroker messageBroker = produceMessageBroker(new MessageBrokerSpecification(
+    packetGateway = PacketGateway.INSTANCE;
+    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
     packetPublisher = new PacketPublisherImpl(messageBroker);
-    packetListenerObserver = new PacketListenerObserverImpl(messageBroker);
+    packetListenerObserver = new PacketListenerObserverImpl(messageBroker, packetGateway);
   }
 
   @Test
@@ -95,5 +103,29 @@ class PacketListenerObserverImplTests {
           assertThat(receivedPacket.get())
               .isEqualTo(loginPacket);
         });
+  }
+
+  @Test
+  void processIncomingPacketTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      LoginPacket packet = getLoginPacket();
+      packetGateway.writePacket(packet, packer);
+      LoginPacket processedPacket = packetListenerObserver.processIncomingPacket(
+          packer.toBinaryArray());
+      assertThat(processedPacket)
+          .isEqualTo(packet);
+    }
+  }
+
+  @Test
+  void processIncomingPacketShouldThrowWhenMalformedTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packString("Hello");
+      packer.packString("World");
+      byte[] content = packer.toBinaryArray();
+      assertThatCode(() -> packetListenerObserver.processIncomingPacket(content))
+          .isInstanceOf(PacketProcessingException.class)
+          .hasMessage("Could not process incoming packet, because of unexpected exception.");
+    }
   }
 }

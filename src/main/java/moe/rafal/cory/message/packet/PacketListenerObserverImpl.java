@@ -19,10 +19,8 @@ package moe.rafal.cory.message.packet;
 
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 
-import java.io.IOException;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
-import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
@@ -31,9 +29,9 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
 
-  PacketListenerObserverImpl(MessageBroker messageBroker) {
+  PacketListenerObserverImpl(MessageBroker messageBroker, PacketGateway packetGateway) {
     this.messageBroker = messageBroker;
-    this.packetGateway = PacketGateway.INSTANCE;
+    this.packetGateway = packetGateway;
   }
 
   @Override
@@ -52,12 +50,11 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         });
   }
 
-  @ExcludeFromJacocoGeneratedReport
-  private <T extends Packet> T processIncomingPacket(byte[] payload)
+  <T extends Packet> T processIncomingPacket(byte[] payload)
       throws PacketProcessingException {
     try (PacketUnpacker unpacker = producePacketUnpacker(payload)) {
       return packetGateway.readPacket(unpacker);
-    } catch (IOException exception) {
+    } catch (Exception exception) {
       throw new PacketProcessingException(
           "Could not process incoming packet, because of unexpected exception.",
           exception);

@@ -26,14 +26,14 @@ class PacketListenerDelegateTests {
 
   @Test
   void createPacketListenerDelegateTest() {
-    PacketListenerDelegate<LoginPacket> packetListenerDelegate = new PacketListenerDelegate<>(
+    PacketListenerDelegate<LoginPacket> packetListener = new PacketListenerDelegate<>(
         LoginPacket.class) {
       @Override
       public void receive(String channelName, LoginPacket packet) {
       }
     };
 
-    assertThat(packetListenerDelegate.getPacketType())
+    assertThat(packetListener.getPacketType())
         .isEqualTo(LoginPacket.class);
   }
 }
