@@ -29,12 +29,12 @@ import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 class PacketRequesterImpl implements PacketRequester {
 
+  private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
-  private final MessageBroker broker;
 
-  PacketRequesterImpl(MessageBroker broker) {
-    this.packetGateway = PacketGateway.INSTANCE;
-    this.broker = broker;
+  PacketRequesterImpl(MessageBroker broker, PacketGateway packetGateway) {
+    this.messageBroker = broker;
+    this.packetGateway = packetGateway;
   }
 
   @Override
@@ -42,7 +42,7 @@ class PacketRequesterImpl implements PacketRequester {
       Consumer<R> callback) {
     try (PacketPacker packer = PacketPackerFactory.producePacketPacker()) {
       packetGateway.writePacket(packet, packer);
-      broker.request(channelName, packer.toBinaryArray(), bytes -> handle(bytes, callback));
+      messageBroker.request(channelName, packer.toBinaryArray(), bytes -> handle(bytes, callback));
     } catch (IOException exception) {
       throw new PacketPublicationException(
           "Could not publish packet over the message broker, because of unexpected exception",
@@ -55,7 +55,7 @@ class PacketRequesterImpl implements PacketRequester {
     try (PacketUnpacker packetUnpacker = PacketUnpackerFactory.producePacketUnpacker(message)) {
       R response = packetGateway.readPacket(packetUnpacker);
       callback.accept(response);
-    } catch (IOException exception) {
+    } catch (Exception exception) {
       throw new PacketProcessingException(
           "Could not process incoming packet, because of unexpected exception.",
           exception);

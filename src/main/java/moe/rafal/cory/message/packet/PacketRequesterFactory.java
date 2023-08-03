@@ -17,6 +17,7 @@
 
 package moe.rafal.cory.message.packet;
 
+import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.message.MessageBroker;
 
 public final class PacketRequesterFactory {
@@ -25,8 +26,8 @@ public final class PacketRequesterFactory {
 
   }
 
-  public static PacketRequester producePacketRequester(MessageBroker messageBroker) {
-    return new PacketRequesterImpl(messageBroker);
+  public static PacketRequester producePacketRequester(MessageBroker messageBroker, PacketGateway packetGateway) {
+    return new PacketRequesterImpl(messageBroker, packetGateway);
   }
 
 }
