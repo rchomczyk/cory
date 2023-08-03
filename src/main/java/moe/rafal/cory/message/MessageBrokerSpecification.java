@@ -19,6 +19,8 @@ package moe.rafal.cory.message;
 
 public class MessageBrokerSpecification {
 
+  private static final String NON_SPECIFIED_USERNAME = "";
+  private static final String NON_SPECIFIED_PASSWORD = "";
   private final String connectionUri;
   private final String username;
   private final String password;
@@ -27,6 +29,16 @@ public class MessageBrokerSpecification {
     this.connectionUri = connectionUri;
     this.username = username;
     this.password = password;
+  }
+
+  public static MessageBrokerSpecification withDefaults(String connectionUri) {
+    return new MessageBrokerSpecification(connectionUri,
+        NON_SPECIFIED_USERNAME, NON_SPECIFIED_PASSWORD);
+  }
+
+  public static MessageBrokerSpecification withAuthorization(String connectionUri,
+      String username, String password) {
+    return new MessageBrokerSpecification(connectionUri, username, password);
   }
 
   public String getConnectionUri() {

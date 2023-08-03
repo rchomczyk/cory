@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 
 class MessageBrokerSpecificationTests {
 
+  private static final String NON_SPECIFIED_USERNAME = "";
+  private static final String NON_SPECIFIED_PASSWORD = "";
   private static final String EXPECTED_CONNECTION_URI = "nats://127.0.0.1:4222";
   private static final String EXPECTED_USERNAME = "shitzuu";
   private static final String EXPECTED_PASSWORD = "my-secret-password-123-!@#";
@@ -31,6 +33,38 @@ class MessageBrokerSpecificationTests {
       EXPECTED_CONNECTION_URI,
       EXPECTED_USERNAME,
       EXPECTED_PASSWORD);
+
+  @Test
+  void getSpecificationWithDefaultsTest() {
+    MessageBrokerSpecification specification = MessageBrokerSpecification.withDefaults(
+        EXPECTED_CONNECTION_URI);
+    assertThat(specification)
+        .extracting(
+            MessageBrokerSpecification::getConnectionUri,
+            MessageBrokerSpecification::getUsername,
+            MessageBrokerSpecification::getPassword)
+        .containsExactly(
+            EXPECTED_CONNECTION_URI,
+            NON_SPECIFIED_USERNAME,
+            NON_SPECIFIED_PASSWORD);
+  }
+
+  @Test
+  void getSpecificationWithAuthorizationTest() {
+    MessageBrokerSpecification specification = MessageBrokerSpecification.withAuthorization(
+        EXPECTED_CONNECTION_URI,
+        EXPECTED_USERNAME,
+        EXPECTED_PASSWORD);
+    assertThat(specification)
+        .extracting(
+            MessageBrokerSpecification::getConnectionUri,
+            MessageBrokerSpecification::getUsername,
+            MessageBrokerSpecification::getPassword)
+        .containsExactly(
+            EXPECTED_CONNECTION_URI,
+            EXPECTED_USERNAME,
+            EXPECTED_PASSWORD);
+  }
 
   @Test
   void getConnectionUriTest() {
