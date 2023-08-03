@@ -17,13 +17,9 @@
 
 package moe.rafal.cory.packet.message;
 
-public final class PacketListenerRegistryFactory {
+import moe.rafal.cory.packet.Packet;
 
-  private PacketListenerRegistryFactory() {
+public interface PacketListenerObserver {
 
-  }
-
-  public static PacketListenerRegistry producePacketListenerRegistry() {
-    return new MapBasedPacketListenerRegistry();
-  }
+  <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 }

@@ -17,13 +17,17 @@
 
 package moe.rafal.cory.packet.message;
 
-import java.util.Set;
 import moe.rafal.cory.packet.Packet;
 
-public interface PacketListenerRegistry {
+public abstract class PacketListenerDelegate<T extends Packet> implements PacketListener<T> {
 
-  <T extends Packet> void register(PacketListener<T> listener);
+  private final Class<T> packetType;
 
-  <T extends Packet> Set<PacketListener<? extends Packet>> getPacketListenersByPacketType(
-      Class<T> packetType);
+  protected PacketListenerDelegate(Class<T> packetType) {
+    this.packetType = packetType;
+  }
+
+  public Class<T> getPacketType() {
+    return packetType;
+  }
 }

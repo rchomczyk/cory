@@ -18,7 +18,6 @@
 package moe.rafal.cory.packet.message;
 
 import io.nats.client.Connection;
-import io.nats.client.Dispatcher;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
@@ -43,9 +42,10 @@ class NatsMessageBroker implements MessageBroker {
 
   @Override
   public void observe(String channelName, MessageListener listener) {
-    Dispatcher dispatcher = connection.createDispatcher(
-        message -> listener.receive(channelName, message.getData()));
-    dispatcher.subscribe(channelName);
+    connection
+        .createDispatcher(
+            message -> listener.receive(channelName, message.getData()))
+        .subscribe(channelName);
   }
 
   @ExcludeFromJacocoGeneratedReport
