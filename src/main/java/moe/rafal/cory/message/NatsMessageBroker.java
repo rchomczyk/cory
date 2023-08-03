@@ -22,9 +22,7 @@ import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {

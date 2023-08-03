@@ -18,11 +18,9 @@
 package moe.rafal.cory.message.packet;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
-import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.EMPTY_FUTURE;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
-import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
 import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -31,7 +29,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
@@ -67,7 +64,8 @@ public class PacketRequesterImplTests {
         .when(packetMock)
         .write(any());
     assertThatCode(() -> packetRequester.request(BROADCAST_CHANNEL_NAME, packetMock))
-        .isInstanceOf(PacketPublicationException.class);
+        .isInstanceOf(PacketPublicationException.class)
+        .hasMessage("Could not request packet over the message broker, because of unexpected exception.");
   }
 
   @Test
@@ -76,8 +74,9 @@ public class PacketRequesterImplTests {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();
-      assertThatCode(() -> packetRequester.handle(content, EMPTY_FUTURE))
-          .isInstanceOf(PacketProcessingException.class);
+      assertThatCode(() -> packetRequester.processIncomingPacket(content, EMPTY_FUTURE))
+          .isInstanceOf(PacketProcessingException.class)
+          .hasMessage("Could not process incoming request packet, because of unexpected exception.");
     }
   }
 }

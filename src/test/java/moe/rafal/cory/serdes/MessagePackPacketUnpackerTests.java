@@ -161,7 +161,8 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNonEmptyTest() throws IOException {
-    try (PacketUnpacker unpacker = producePacketUnpacker(getBinaryArrayOf(PacketPacker::packInt, 1))) {
+    try (PacketUnpacker unpacker = producePacketUnpacker(
+        getBinaryArrayOf(PacketPacker::packInt, 1))) {
       assertThat(unpacker.hasNext()).isTrue();
     }
   }

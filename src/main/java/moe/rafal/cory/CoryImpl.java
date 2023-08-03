@@ -19,7 +19,6 @@ package moe.rafal.cory;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 import moe.rafal.cory.message.packet.PacketListenerObserver;
@@ -47,7 +46,8 @@ class CoryImpl implements Cory {
   }
 
   @Override
-  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet) {
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
+      T packet) {
     return packetRequester.request(channelName, packet);
   }
 

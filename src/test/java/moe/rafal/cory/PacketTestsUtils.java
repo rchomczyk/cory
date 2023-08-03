@@ -42,7 +42,8 @@ public final class PacketTestsUtils {
   public static final String INCOMING_USERNAME = "kdoe";
   public static final String INCOMING_PASSWORD = "my-little-red-roses";
   public static final String DEFAULT_VALUE = "";
-  public static final CompletableFuture<? extends Packet> EMPTY_FUTURE = CompletableFuture.completedFuture(null);
+  public static final CompletableFuture<? extends Packet> EMPTY_FUTURE = CompletableFuture.completedFuture(
+      null);
 
   private PacketTestsUtils() {
 

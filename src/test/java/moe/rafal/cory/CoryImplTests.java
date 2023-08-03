@@ -85,9 +85,9 @@ class CoryImplTests {
     AtomicReference<LoginRequestPacket> receivedPacket = new AtomicReference<>();
     cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginRequestPacket.class) {
       @Override
-      public void receive(String channelName, String replyChannel, LoginRequestPacket packet) {
+      public void receive(String channelName, String replyChannelName, LoginRequestPacket packet) {
         packet.setAccess(true);
-        cory.publish(replyChannel, packet);
+        cory.publish(replyChannelName, packet);
       }
     });
     cory.request(BROADCAST_CHANNEL_NAME, packet).thenAccept(response -> receivedPacket.set(

@@ -18,13 +18,12 @@
 package moe.rafal.cory.message.packet;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import moe.rafal.cory.Packet;
 
 public interface PacketRequester {
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
 
-  <R extends Packet> void handle(byte[] message, CompletableFuture<R> future);
+  <R extends Packet> void processIncomingPacket(byte[] message, CompletableFuture<R> future);
 
 }

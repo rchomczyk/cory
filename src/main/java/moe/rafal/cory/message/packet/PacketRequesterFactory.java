@@ -26,7 +26,8 @@ public final class PacketRequesterFactory {
 
   }
 
-  public static PacketRequester producePacketRequester(MessageBroker messageBroker, PacketGateway packetGateway) {
+  public static PacketRequester producePacketRequester(MessageBroker messageBroker,
+      PacketGateway packetGateway) {
     return new PacketRequesterImpl(messageBroker, packetGateway);
   }
 

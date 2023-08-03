@@ -54,7 +54,7 @@ class NatsMessageBrokerTests {
   void publishAndObserveTest() {
     AtomicBoolean receivedPayload = new AtomicBoolean();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, payload, replyChannel) -> receivedPayload.set(true));
+        (channelName, payload, replyChannelName) -> receivedPayload.set(true));
     messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
@@ -64,8 +64,8 @@ class NatsMessageBrokerTests {
   @Test
   void requestTest() {
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
-    messageBroker.observe(BROADCAST_CHANNEL_NAME, (channelName, replyChannel, payload) -> {
-      messageBroker.publish(replyChannel, BROADCAST_REQUEST_TEST_PAYLOAD);
+    messageBroker.observe(BROADCAST_CHANNEL_NAME, (channelName, replyChannelName, payload) -> {
+      messageBroker.publish(replyChannelName, BROADCAST_REQUEST_TEST_PAYLOAD);
     });
     messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).thenAccept(
         receivedPayload::set);

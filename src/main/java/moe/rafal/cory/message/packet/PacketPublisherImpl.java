@@ -41,7 +41,7 @@ class PacketPublisherImpl implements PacketPublisher {
       messageBroker.publish(channelName, packer.toBinaryArray());
     } catch (IOException exception) {
       throw new PacketPublicationException(
-          "Could not publish packet over the message broker, because of unexpected exception",
+          "Could not publish packet over the message broker, because of unexpected exception.",
           exception);
     }
   }

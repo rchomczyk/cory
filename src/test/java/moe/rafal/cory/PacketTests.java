@@ -34,10 +34,10 @@ import java.io.IOException;
 import java.util.UUID;
 import moe.rafal.cory.message.MessageBrokerFactory;
 import moe.rafal.cory.message.MessageBrokerSpecification;
-import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketUnpacker;
+import moe.rafal.cory.subject.LoginPacket;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 

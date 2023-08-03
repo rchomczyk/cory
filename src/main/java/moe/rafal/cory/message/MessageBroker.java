@@ -19,7 +19,6 @@ package moe.rafal.cory.message;
 
 import java.io.Closeable;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 
 public interface MessageBroker extends Closeable {
 

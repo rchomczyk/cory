@@ -19,7 +19,6 @@ package moe.rafal.cory;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 
 public interface Cory {

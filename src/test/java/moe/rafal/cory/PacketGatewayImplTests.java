@@ -23,9 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
-import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
+import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.MalformedPacket;
 import org.junit.jupiter.api.Test;
 
