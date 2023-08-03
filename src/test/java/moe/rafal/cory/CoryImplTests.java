@@ -25,7 +25,6 @@ import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConn
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatObject;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -91,12 +90,10 @@ class CoryImplTests {
         cory.publish(replyChannel, packet);
       }
     });
-
     cory.request(BROADCAST_CHANNEL_NAME, packet, response -> {
       LoginRequestPacket responseLogin = (LoginRequestPacket) response;
       receivedPacket.set(responseLogin);
     });
-
     await().atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> assertTrue(receivedPacket.get().hasAccess()));
   }

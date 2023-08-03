@@ -44,6 +44,7 @@ public final class CoryBuilder {
     return new CoryImpl(
         messageBroker,
         producePacketPublisher(messageBroker),
-        producePacketRequester(messageBroker), producePacketListenerObserver(messageBroker, PacketGateway.INSTANCE));
+        producePacketRequester(messageBroker),
+        producePacketListenerObserver(messageBroker, PacketGateway.INSTANCE));
   }
 }

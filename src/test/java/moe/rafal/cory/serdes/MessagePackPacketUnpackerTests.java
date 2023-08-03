@@ -22,6 +22,8 @@ import static moe.rafal.cory.MessagePackAssertions.unpackValueAndAssertThatEqual
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -150,5 +152,19 @@ class MessagePackPacketUnpackerTests {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packInt,
         PacketUnpacker::unpackInt, value);
+  }
+
+  @Test
+  void hasNextEmptyTest() throws IOException {
+    try (PacketUnpacker unpacker = producePacketUnpacker(new byte[0])) {
+      assertFalse(unpacker.hasNext());
+    }
+  }
+
+  @Test
+  void hasNextNonEmptyTest() throws IOException {
+    try (PacketUnpacker unpacker = producePacketUnpacker(getBinaryArrayOf(PacketPacker::packInt, 1))) {
+      assertTrue(unpacker.hasNext());
+    }
   }
 }
