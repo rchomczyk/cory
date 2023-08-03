@@ -15,14 +15,16 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory;
 
-import moe.rafal.cory.Packet;
+import java.io.IOException;
+import moe.rafal.cory.message.packet.PacketListenerDelegate;
 
-public interface PacketListenerObserver {
+public interface Cory {
+
+  <T extends Packet> void publish(String channelName, T packet);
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
-  <T extends Packet> T processIncomingPacket(byte[] payload)
-      throws PacketProcessingException;
+  void close() throws IOException;
 }

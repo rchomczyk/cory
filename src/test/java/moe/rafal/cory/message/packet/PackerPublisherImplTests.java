@@ -21,6 +21,7 @@ import static moe.rafal.cory.PacketTestsUtils.INITIAL_PASSWORD;
 import static moe.rafal.cory.PacketTestsUtils.INITIAL_USERNAME;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -61,7 +62,7 @@ class PackerPublisherImplTests {
   void createMessageBrokerAndPacketPublisher() {
     messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = new PacketPublisherImpl(messageBroker);
+    packetPublisher = producePacketPublisher(messageBroker);
   }
 
   @Test

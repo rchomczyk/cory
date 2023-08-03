@@ -21,6 +21,8 @@ import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLogoutPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.packet.PacketListenerObserverFactory.producePacketListenerObserver;
+import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -50,17 +52,16 @@ class PacketListenerObserverImplTests {
   @InjectNatsServer
   private EmbeddedNatsServer natsServer;
   private PacketGateway packetGateway;
-  private MessageBroker messageBroker;
   private PacketPublisher packetPublisher;
-  private PacketListenerObserverImpl packetListenerObserver;
+  private PacketListenerObserver packetListenerObserver;
 
   @BeforeEach
   void createMessageBrokerAndPacketPublisherWithPacketListenerObserver() {
     packetGateway = PacketGateway.INSTANCE;
-    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
+    MessageBroker messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = new PacketPublisherImpl(messageBroker);
-    packetListenerObserver = new PacketListenerObserverImpl(messageBroker, packetGateway);
+    packetPublisher = producePacketPublisher(messageBroker);
+    packetListenerObserver = producePacketListenerObserver(messageBroker, packetGateway);
   }
 
   @Test
