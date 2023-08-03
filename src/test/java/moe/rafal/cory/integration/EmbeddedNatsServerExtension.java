@@ -41,6 +41,12 @@ public class EmbeddedNatsServerExtension implements BeforeEachCallback, AfterEac
     this.underlyingServer = new EmbeddedNatsServer(EmbeddedNatsConfig.defaultNatsServerConfig());
   }
 
+  public static String getNatsConnectionUri(EmbeddedNatsServer embeddedNatsServer) {
+    return String.format("nats://%s:%d",
+        embeddedNatsServer.getRunningHost(),
+        embeddedNatsServer.getRunningPort());
+  }
+
   @Override
   public void beforeEach(ExtensionContext extensionContext) throws Exception {
     underlyingServer.startServer();
@@ -49,12 +55,6 @@ public class EmbeddedNatsServerExtension implements BeforeEachCallback, AfterEac
   @Override
   public void afterEach(ExtensionContext extensionContext) {
     underlyingServer.stopServer();
-  }
-
-  public static String getNatsConnectionUri(EmbeddedNatsServer embeddedNatsServer) {
-    return String.format("nats://%s:%d",
-        embeddedNatsServer.getRunningHost(),
-        embeddedNatsServer.getRunningPort());
   }
 
   @Override

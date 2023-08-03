@@ -20,5 +20,5 @@ package moe.rafal.cory.message;
 @FunctionalInterface
 public interface MessageListener {
 
-  void receive(String channelName, byte[] payload);
+  void receive(String channelName, String replyChannelName, byte[] payload);
 }

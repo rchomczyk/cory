@@ -17,6 +17,7 @@
 
 package moe.rafal.cory.message.packet;
 
+import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.message.MessageBroker;
 
 public final class PacketPublisherFactory {
@@ -25,7 +26,8 @@ public final class PacketPublisherFactory {
 
   }
 
-  public static PacketPublisher producePacketPublisher(MessageBroker messageBroker) {
-    return new PacketPublisherImpl(messageBroker);
+  public static PacketPublisher producePacketPublisher(MessageBroker messageBroker,
+      PacketGateway packetGateway) {
+    return new PacketPublisherImpl(messageBroker, packetGateway);
   }
 }

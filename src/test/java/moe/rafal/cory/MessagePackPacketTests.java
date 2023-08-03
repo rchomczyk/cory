@@ -27,10 +27,10 @@ import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketUnpacker;
+import moe.rafal.cory.subject.LoginPacket;
 import org.junit.jupiter.api.Test;
 
 class MessagePackPacketTests {

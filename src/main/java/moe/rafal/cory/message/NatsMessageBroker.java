@@ -18,9 +18,11 @@
 package moe.rafal.cory.message;
 
 import io.nats.client.Connection;
+import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {
@@ -44,8 +46,15 @@ class NatsMessageBroker implements MessageBroker {
   public void observe(String channelName, MessageListener listener) {
     connection
         .createDispatcher(
-            message -> listener.receive(channelName, message.getData()))
+            message -> listener.receive(channelName, message.getReplyTo(), message.getData()))
         .subscribe(channelName);
+  }
+
+  @Override
+  public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
+    return connection
+        .request(channelName, payload)
+        .thenApply(Message::getData);
   }
 
   @ExcludeFromJacocoGeneratedReport

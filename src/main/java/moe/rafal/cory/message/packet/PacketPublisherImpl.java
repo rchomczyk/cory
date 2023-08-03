@@ -26,12 +26,12 @@ import moe.rafal.cory.serdes.PacketPackerFactory;
 
 class PacketPublisherImpl implements PacketPublisher {
 
-  private final PacketGateway packetGateway;
   private final MessageBroker messageBroker;
+  private final PacketGateway packetGateway;
 
-  PacketPublisherImpl(MessageBroker messageBroker) {
-    this.packetGateway = PacketGateway.INSTANCE;
+  PacketPublisherImpl(MessageBroker messageBroker, PacketGateway packetGateway) {
     this.messageBroker = messageBroker;
+    this.packetGateway = packetGateway;
   }
 
   @Override
@@ -41,7 +41,7 @@ class PacketPublisherImpl implements PacketPublisher {
       messageBroker.publish(channelName, packer.toBinaryArray());
     } catch (IOException exception) {
       throw new PacketPublicationException(
-          "Could not publish packet over the message broker, because of unexpected exception",
+          "Could not publish packet over the message broker, because of unexpected exception.",
           exception);
     }
   }

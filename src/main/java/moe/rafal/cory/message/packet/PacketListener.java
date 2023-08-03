@@ -22,5 +22,5 @@ import moe.rafal.cory.Packet;
 @FunctionalInterface
 public interface PacketListener<T extends Packet> {
 
-  void receive(String channelName, T packet);
+  void receive(String channelName, String replyChannelName, T packet);
 }

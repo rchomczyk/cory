@@ -15,16 +15,19 @@
  *
  */
 
-package moe.rafal.cory.message;
+package moe.rafal.cory.message.packet;
 
-import java.io.Closeable;
-import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.message.MessageBroker;
 
-public interface MessageBroker extends Closeable {
+public final class PacketRequesterFactory {
 
-  void publish(String channelName, byte[] payload);
+  private PacketRequesterFactory() {
 
-  void observe(String channelName, MessageListener listener);
+  }
 
-  CompletableFuture<byte[]> request(String channelName, byte[] payload);
+  public static PacketRequester producePacketRequester(MessageBroker messageBroker,
+      PacketGateway packetGateway) {
+    return new PacketRequesterImpl(messageBroker, packetGateway);
+  }
 }

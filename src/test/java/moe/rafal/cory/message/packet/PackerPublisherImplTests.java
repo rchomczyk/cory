@@ -36,9 +36,10 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.MessagePackAssertions;
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.PacketTestsUtils;
-import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
+import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.serdes.PacketUnpacker;
@@ -60,7 +61,7 @@ class PackerPublisherImplTests {
   void createMessageBrokerAndPacketPublisher() {
     messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = producePacketPublisher(messageBroker);
+    packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
   }
 
   @Test
@@ -68,7 +69,7 @@ class PackerPublisherImplTests {
     LoginPacket packet = PacketTestsUtils.getLoginPacket();
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, payload) -> receivedPayload.set(payload));
+        (channelName, replyChannelName, payload) -> receivedPayload.set(payload));
     packetPublisher.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
@@ -95,6 +96,8 @@ class PackerPublisherImplTests {
         .when(packetMock)
         .write(any());
     assertThatCode(() -> packetPublisher.publish(BROADCAST_CHANNEL_NAME, packetMock))
-        .isInstanceOf(PacketPublicationException.class);
+        .isInstanceOf(PacketPublicationException.class)
+        .hasMessage(
+            "Could not publish packet over the message broker, because of unexpected exception.");
   }
 }

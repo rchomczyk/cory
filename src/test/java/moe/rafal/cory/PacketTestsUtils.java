@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.UUID;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginPacketListener;
+import moe.rafal.cory.subject.LoginRequestPacket;
 import moe.rafal.cory.subject.LogoutPacket;
 import moe.rafal.cory.subject.MalformedPacket;
 
@@ -30,6 +31,8 @@ public final class PacketTestsUtils {
   public static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
   public static final String BROADCAST_CHANNEL_NAME = "test-channel";
   public static final byte[] BROADCAST_TEST_PAYLOAD = "Hello world".getBytes(
+      StandardCharsets.UTF_8);
+  public static final byte[] BROADCAST_REQUEST_TEST_PAYLOAD = "John".getBytes(
       StandardCharsets.UTF_8);
   public static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   public static final String INITIAL_USERNAME = "jdoe";
@@ -48,6 +51,10 @@ public final class PacketTestsUtils {
 
   public static LoginPacket getLoginPacket() {
     return new LoginPacket(INITIAL_USERNAME, INITIAL_PASSWORD);
+  }
+
+  public static LoginRequestPacket getLoginRequestPacket() {
+    return new LoginRequestPacket(INITIAL_USERNAME, INITIAL_PASSWORD);
   }
 
   public static LoginPacketListener getLoginPacketListener() {

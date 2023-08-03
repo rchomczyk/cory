@@ -48,4 +48,6 @@ public interface PacketUnpacker extends Closeable {
   double unpackDouble() throws IOException;
 
   int unpackMapHeader() throws IOException;
+
+  boolean hasNext() throws IOException;
 }

@@ -59,7 +59,7 @@ class PacketListenerObserverImplTests {
     packetGateway = PacketGateway.INSTANCE;
     MessageBroker messageBroker = produceMessageBroker(new MessageBrokerSpecification(
         getNatsConnectionUri(natsServer), "", ""));
-    packetPublisher = producePacketPublisher(messageBroker);
+    packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
     packetListenerObserver = producePacketListenerObserver(messageBroker, packetGateway);
   }
 
@@ -70,7 +70,7 @@ class PacketListenerObserverImplTests {
     packetListenerObserver.observe(BROADCAST_CHANNEL_NAME,
         new PacketListenerDelegate<>(LoginPacket.class) {
           @Override
-          public void receive(String channelName, LoginPacket packet) {
+          public void receive(String channelName, String replyChannelName, LoginPacket packet) {
             receivedPacket.set(packet);
           }
         });
@@ -89,7 +89,7 @@ class PacketListenerObserverImplTests {
     packetListenerObserver.observe(BROADCAST_CHANNEL_NAME,
         new PacketListenerDelegate<>(LoginPacket.class) {
           @Override
-          public void receive(String channelName, LoginPacket packet) {
+          public void receive(String channelName, String replyChannelName, LoginPacket packet) {
             receivedPacket.set(packet);
           }
         });
