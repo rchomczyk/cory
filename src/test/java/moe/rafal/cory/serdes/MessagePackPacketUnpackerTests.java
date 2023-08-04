@@ -24,6 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -150,6 +152,20 @@ class MessagePackPacketUnpackerTests {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packInt,
         PacketUnpacker::unpackInt, value);
+  }
+
+  @Test
+  void unpackInstantTest() throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packInstant,
+        PacketUnpacker::unpackInstant, Instant.now());
+  }
+
+  @Test
+  void unpackDurationTest() throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packDuration,
+        PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
   }
 
   @Test

@@ -22,6 +22,8 @@ import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -143,5 +145,19 @@ class MessagePackPacketPackerTests {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packMapHeader,
         PacketUnpacker::unpackMapHeader, value);
+  }
+
+  @Test
+  void packInstantTest() throws IOException {
+    packValueAndAssertThatContains(packetPacker,
+        PacketPacker::packInstant,
+        PacketUnpacker::unpackInstant, Instant.now());
+  }
+
+  @Test
+  void packDurationTest() throws IOException {
+    packValueAndAssertThatContains(packetPacker,
+        PacketPacker::packDuration,
+        PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
   }
 }

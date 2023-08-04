@@ -19,6 +19,8 @@ package moe.rafal.cory.serdes;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 
 public interface PacketUnpacker extends Closeable {
@@ -48,6 +50,10 @@ public interface PacketUnpacker extends Closeable {
   double unpackDouble() throws IOException;
 
   int unpackMapHeader() throws IOException;
+
+  Instant unpackInstant() throws IOException;
+
+  Duration unpackDuration() throws IOException;
 
   boolean hasNext() throws IOException;
 }

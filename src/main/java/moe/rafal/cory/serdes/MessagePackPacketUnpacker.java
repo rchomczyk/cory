@@ -18,7 +18,11 @@
 package moe.rafal.cory.serdes;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import org.msgpack.core.MessageUnpacker;
 
 class MessagePackPacketUnpacker implements PacketUnpacker {
@@ -71,7 +75,7 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public UUID unpackUUID() throws IOException {
-    return UUID.fromString(underlyingUnpacker.unpackString());
+    return unpackMappingValue(UUID::fromString);
   }
 
   @Override
@@ -92,6 +96,22 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   @Override
   public int unpackMapHeader() throws IOException {
     return underlyingUnpacker.unpackMapHeader();
+  }
+
+  @Override
+  public Instant unpackInstant() throws IOException {
+    return unpackMappingValue(Instant::parse);
+  }
+
+  @Override
+  public Duration unpackDuration() throws IOException {
+    return unpackMappingValue(Duration::parse);
+  }
+
+  private <T> T unpackMappingValue(Function<String, T> valueMapper) throws IOException {
+    return Optional.ofNullable(underlyingUnpacker.unpackString())
+        .map(valueMapper)
+        .orElse(null);
   }
 
   @Override
