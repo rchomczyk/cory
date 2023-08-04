@@ -23,6 +23,7 @@ import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.InjectNatsServer;
-import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginRequestPacket;
@@ -52,8 +52,7 @@ class CoryImplTests {
   @BeforeEach
   void setupCory() {
     cory = CoryBuilder.newBuilder()
-        .withMessageBroker(produceMessageBroker(
-            new MessageBrokerSpecification(getNatsConnectionUri(natsServer), "", "")))
+        .withMessageBroker(produceMessageBroker(of(getNatsConnectionUri(natsServer))))
         .build();
   }
 

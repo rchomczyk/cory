@@ -23,6 +23,7 @@ import static moe.rafal.cory.PacketTestsUtils.INITIAL_USERNAME;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +42,6 @@ import moe.rafal.cory.PacketTestsUtils;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -59,8 +59,7 @@ class PackerPublisherImplTests {
 
   @BeforeEach
   void createMessageBrokerAndPacketPublisher() {
-    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
-        getNatsConnectionUri(natsServer), "", ""));
+    messageBroker = produceMessageBroker(of(getNatsConnectionUri(natsServer)));
     packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
   }
 

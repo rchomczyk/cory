@@ -23,6 +23,7 @@ import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -46,8 +47,7 @@ class NatsMessageBrokerTests {
 
   @BeforeEach
   void createMessageBroker() {
-    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
-        getNatsConnectionUri(natsServer), "", ""));
+    messageBroker = produceMessageBroker(of(getNatsConnectionUri(natsServer)));
   }
 
   @Test

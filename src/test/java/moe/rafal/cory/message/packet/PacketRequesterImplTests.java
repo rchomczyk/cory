@@ -20,6 +20,7 @@ package moe.rafal.cory.message.packet;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -34,7 +35,6 @@ import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.InjectNatsServer;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.message.MessageBrokerSpecification;
 import moe.rafal.cory.serdes.PacketPacker;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,8 +51,7 @@ class PacketRequesterImplTests {
 
   @BeforeEach
   void createMessageBrokerAndPacketRequester() {
-    messageBroker = produceMessageBroker(new MessageBrokerSpecification(
-        getNatsConnectionUri(natsServer), "", ""));
+    messageBroker = produceMessageBroker(of(getNatsConnectionUri(natsServer)));
     packetRequester = producePacketRequester(messageBroker, PacketGateway.INSTANCE);
   }
 

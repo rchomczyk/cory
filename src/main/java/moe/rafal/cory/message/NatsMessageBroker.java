@@ -34,6 +34,7 @@ class NatsMessageBroker implements MessageBroker {
     this.connection = Nats.connect(Options.builder()
         .server(specification.getConnectionUri())
         .userInfo(specification.getUsername(), specification.getPassword())
+        .requestCleanupInterval(specification.getRequestCleanupInterval())
         .build());
   }
 
