@@ -17,8 +17,10 @@
 
 package moe.rafal.cory.message;
 
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 class MessageBrokerFactoryTests {
@@ -26,10 +28,11 @@ class MessageBrokerFactoryTests {
   private static final String INVALID_CONNECTION_URI = "nats://127.0.0.1:14322";
   private static final String INVALID_USERNAME = "shitzuu";
   private static final String INVALID_PASSWORD = "my-secret-password-123";
-  private final MessageBrokerSpecification specification = new MessageBrokerSpecification(
+  private final MessageBrokerSpecification specification = of(
       INVALID_CONNECTION_URI,
       INVALID_USERNAME,
-      INVALID_PASSWORD);
+      INVALID_PASSWORD,
+      Duration.ofSeconds(5));
 
   @Test
   void produceMessageBrokerThrowsWithoutServerTest() {

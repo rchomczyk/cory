@@ -17,6 +17,8 @@
 
 package moe.rafal.cory.message;
 
+import java.time.Duration;
+
 public class MessageBrokerSpecification {
 
   private static final String NON_SPECIFIED_USERNAME = "";
@@ -24,21 +26,25 @@ public class MessageBrokerSpecification {
   private final String connectionUri;
   private final String username;
   private final String password;
+  private final Duration requestCleanupInterval;
 
-  public MessageBrokerSpecification(String connectionUri, String username, String password) {
+  public MessageBrokerSpecification(String connectionUri, String username, String password,
+      Duration requestCleanupInterval) {
     this.connectionUri = connectionUri;
     this.username = username;
     this.password = password;
+    this.requestCleanupInterval = requestCleanupInterval;
   }
 
-  public static MessageBrokerSpecification withDefaults(String connectionUri) {
+  public static MessageBrokerSpecification of(String connectionUri) {
     return new MessageBrokerSpecification(connectionUri,
-        NON_SPECIFIED_USERNAME, NON_SPECIFIED_PASSWORD);
+        NON_SPECIFIED_USERNAME, NON_SPECIFIED_PASSWORD, Duration.ofSeconds(5));
   }
 
-  public static MessageBrokerSpecification withAuthorization(String connectionUri,
-      String username, String password) {
-    return new MessageBrokerSpecification(connectionUri, username, password);
+  public static MessageBrokerSpecification of(String connectionUri,
+      String username, String password, Duration requestCleanupInterval) {
+    return new MessageBrokerSpecification(connectionUri, username, password,
+        requestCleanupInterval);
   }
 
   public String getConnectionUri() {
@@ -51,5 +57,9 @@ public class MessageBrokerSpecification {
 
   public String getPassword() {
     return password;
+  }
+
+  public Duration getRequestCleanupInterval() {
+    return requestCleanupInterval;
   }
 }
