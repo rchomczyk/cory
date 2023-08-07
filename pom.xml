@@ -192,4 +192,15 @@
     </dependencies>
   </dependencyManagement>
 
+  <distributionManagement>
+    <repository>
+      <id>rafal-moe-repo-private</id>
+      <url>https://repo.rafal.moe/private/</url>
+    </repository>
+    <snapshotRepository>
+      <id>rafal-moe-repo-private</id>
+      <url>https://repo.rafal.moe/private/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
 </project>
