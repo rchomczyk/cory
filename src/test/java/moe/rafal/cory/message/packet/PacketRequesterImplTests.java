@@ -17,6 +17,7 @@
 
 package moe.rafal.cory.message.packet;
 
+import static java.lang.String.format;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
@@ -81,7 +82,7 @@ class PacketRequesterImplTests {
       assertThatCode(() -> packetRequester.processIncomingPacket(content).join())
           .isInstanceOf(CompletionException.class)
           .hasCauseInstanceOf(PacketProcessingException.class)
-          .hasMessage(String.format("%s: %s",
+          .hasMessage(format("%s: %s",
               PacketProcessingException.class.getName(),
               "Could not complete processing of incoming request packet, because of unexpected exception."));
     }

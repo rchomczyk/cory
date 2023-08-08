@@ -21,7 +21,7 @@ import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
-import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static moe.rafal.cory.integration.EmbeddedRedisServerExtension.getRedisConnectionUri;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -30,24 +30,23 @@ import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import org.junit.jupiter.api.BeforeAll;
+import moe.rafal.cory.integration.EmbeddedRedisServerExtension;
+import moe.rafal.cory.integration.InjectRedisServer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(EmbeddedRedisServerExtension.class)
 class RedisMessageBrokerTests {
 
-  private static RedisServer SERVER;
+  @InjectRedisServer
+  private RedisServer redisServer;
   private MessageBroker messageBroker;
 
-  @BeforeAll
-  static void createServer() throws IOException {
-    SERVER = RedisServer.newRedisServer().start();
-  }
-
   @BeforeEach
-  void createMessageBroker() throws IOException {
+  void createMessageBroker() {
     messageBroker = new RedisMessageBroker(
-        of(String.format("redis://%s:%d", SERVER.getHost(), SERVER.getBindPort())));
+        MessageBrokerSpecification.of(getRedisConnectionUri(redisServer)));
   }
 
   @Test
