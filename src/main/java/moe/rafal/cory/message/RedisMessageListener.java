@@ -20,7 +20,6 @@ package moe.rafal.cory.message;
 
 import io.lettuce.core.pubsub.RedisPubSubListener;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.UUID;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;
@@ -37,7 +36,7 @@ class RedisMessageListener implements RedisPubSubListener<String, byte[]> {
 
   @Override
   public void message(String channel, byte[] message) {
-    if(!channel.equals(this.channel)) {
+    if (!channel.equals(this.channel)) {
       return;
     }
     try (PacketUnpacker unpacker = PacketUnpackerFactory.producePacketUnpacker(message)) {
