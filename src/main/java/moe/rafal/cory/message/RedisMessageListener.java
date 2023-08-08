@@ -50,7 +50,7 @@ class RedisMessageListener implements RedisPubSubListener<String, byte[]> {
 
   @Override
   public void message(String pattern, String channel, byte[] message) {
-
+    message(String.format("%s:%s", pattern, channel), message);
   }
 
   @Override
