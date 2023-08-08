@@ -17,11 +17,15 @@
 
 package moe.rafal.cory.serdes;
 
+import static java.time.Duration.ZERO;
 import static moe.rafal.cory.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.MessagePackAssertions.unpackValueAndAssertThatEqualTo;
+import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -172,6 +176,17 @@ class MessagePackPacketUnpackerTests {
         PacketUnpacker::unpackInstant, value);
   }
 
+  @Test
+  void unpackInstantWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackInstant())
+            .isNull();
+      }
+    }
+  }
+
   private static Set<Instant> getInstantSubjects() {
     return Set.of(
         Instant.parse("2023-08-01T12:00:00.00Z"),
@@ -185,6 +200,17 @@ class MessagePackPacketUnpackerTests {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packDuration,
         PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
+  }
+
+  @Test
+  void unpackDurationWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackDuration())
+            .isNull();
+      }
+    }
   }
 
   private static Set<Duration> getDurationSubjects() {
@@ -206,5 +232,38 @@ class MessagePackPacketUnpackerTests {
       assertThat(unpacker.hasNext())
           .isTrue();
     }
+  }
+
+  @Test
+  void hasNextNilValueOnNilElement() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packNil();
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.hasNextNilValue())
+            .isTrue();
+      }
+    }
+  }
+
+  @Test
+  void hasNextNilValueOnAnyElement() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packDuration(ZERO);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.hasNextNilValue())
+            .isFalse();
+      }
+    }
+  }
+
+  @Test
+  void hasNextNilValueOnExhaustedUnpackerTest() throws IOException {
+    PacketUnpacker unpackerMock = mock(MessagePackPacketUnpacker.class);
+    when(unpackerMock.hasNext())
+        .thenReturn(false);
+    when(unpackerMock.hasNextNilValue())
+        .thenCallRealMethod();
+    assertThat(unpackerMock.hasNextNilValue())
+        .isFalse();
   }
 }

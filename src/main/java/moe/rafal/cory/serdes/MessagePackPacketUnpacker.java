@@ -17,12 +17,12 @@
 
 package moe.rafal.cory.serdes;
 
+import static org.msgpack.core.MessageFormat.NIL;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import org.msgpack.core.MessageUnpacker;
 
 class MessagePackPacketUnpacker implements PacketUnpacker {
@@ -75,7 +75,9 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public UUID unpackUUID() throws IOException {
-    return unpackMappingValue(UUID::fromString);
+    return new UUID(
+        underlyingUnpacker.unpackLong(),
+        underlyingUnpacker.unpackLong());
   }
 
   @Override
@@ -100,23 +102,30 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public Instant unpackInstant() throws IOException {
-    return unpackMappingValue(Instant::parse);
+    if (hasNextNilValue()) {
+      return null;
+    }
+
+    return Instant.parse(underlyingUnpacker.unpackString());
   }
 
   @Override
   public Duration unpackDuration() throws IOException {
-    return unpackMappingValue(Duration::parse);
-  }
+    if (hasNextNilValue()) {
+      return null;
+    }
 
-  private <T> T unpackMappingValue(Function<String, T> valueMapper) throws IOException {
-    return Optional.ofNullable(underlyingUnpacker.unpackString())
-        .map(valueMapper)
-        .orElse(null);
+    return Duration.parse(underlyingUnpacker.unpackString());
   }
 
   @Override
   public boolean hasNext() throws IOException {
     return underlyingUnpacker.hasNext();
+  }
+
+  @Override
+  public boolean hasNextNilValue() throws IOException {
+    return hasNext() && underlyingUnpacker.getNextFormat() == NIL;
   }
 
   @Override

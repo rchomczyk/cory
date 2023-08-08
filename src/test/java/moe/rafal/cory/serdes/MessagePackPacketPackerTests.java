@@ -19,6 +19,8 @@ package moe.rafal.cory.serdes;
 
 import static moe.rafal.cory.MessagePackAssertions.packValueAndAssertThatContains;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
+import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
@@ -165,6 +167,17 @@ class MessagePackPacketPackerTests {
         PacketUnpacker::unpackInstant, value);
   }
 
+  @Test
+  void packInstantWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packInstant(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackInstant())
+            .isNull();
+      }
+    }
+  }
+
   private static Set<Instant> getInstantSubjects() {
     return Set.of(
         Instant.parse("2023-08-01T12:00:00.00Z"),
@@ -178,6 +191,17 @@ class MessagePackPacketPackerTests {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packDuration,
         PacketUnpacker::unpackDuration, value);
+  }
+
+  @Test
+  void packDurationWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackDuration())
+            .isNull();
+      }
+    }
   }
 
   private static Set<Duration> getDurationSubjects() {
