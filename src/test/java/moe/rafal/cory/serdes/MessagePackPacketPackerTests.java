@@ -170,7 +170,7 @@ class MessagePackPacketPackerTests {
   @Test
   void packInstantWithNullValueTest() throws IOException {
     try (PacketPacker packer = producePacketPacker()) {
-      packer.packNil();
+      packer.packInstant(null);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackInstant())
             .isNull();
@@ -196,7 +196,7 @@ class MessagePackPacketPackerTests {
   @Test
   void packDurationWithNullValueTest() throws IOException {
     try (PacketPacker packer = producePacketPacker()) {
-      packer.packNil();
+      packer.packDuration(null);
       try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackDuration())
             .isNull();
