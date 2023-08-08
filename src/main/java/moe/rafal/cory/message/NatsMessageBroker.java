@@ -60,11 +60,12 @@ class NatsMessageBroker implements MessageBroker {
 
   @ExcludeFromJacocoGeneratedReport
   @Override
-  public void close() {
+  public void close() throws MessageBrokerClosingException {
     try {
       connection.close();
     } catch (InterruptedException exception) {
-      throw new RuntimeException(exception);
+      throw new MessageBrokerClosingException(
+          "Could not close message broker, because of unexpected exception.", exception);
     }
   }
 }
