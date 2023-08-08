@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
-import java.util.function.Function;
 import org.msgpack.core.MessageBufferPacker;
 
 class MessagePackPacketPacker implements PacketPacker {
@@ -112,24 +111,18 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packInstant(Instant value) throws IOException {
-    packMappingValue(value, Instant::toString);
-    return this;
+    return value == null ? packNil() : packString(value.toString());
   }
 
   @Override
   public PacketPacker packDuration(Duration value) throws IOException {
-    packMappingValue(value, Duration::toString);
-    return this;
+    return value == null ? packNil() : packString(value.toString());
   }
 
-  private <T> void packMappingValue(T value, Function<T, String> valueMapper)
-      throws IOException {
-    if (value == null) {
-      underlyingPacker.packNil();
-      return;
-    }
-
-    underlyingPacker.packString(valueMapper.apply(value));
+  @Override
+  public PacketPacker packNil() throws IOException {
+    underlyingPacker.packNil();
+    return this;
   }
 
   @Override

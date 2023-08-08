@@ -53,6 +53,8 @@ public interface PacketPacker extends Closeable {
 
   PacketPacker packDuration(Duration value) throws IOException;
 
+  PacketPacker packNil() throws IOException;
+
   PacketPacker flush() throws IOException;
 
   byte[] toBinaryArray();
