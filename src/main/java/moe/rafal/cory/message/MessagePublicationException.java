@@ -15,13 +15,11 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory.message;
 
-import moe.rafal.cory.message.MessagePublicationException;
+public class MessagePublicationException extends IllegalStateException {
 
-public class PacketPublicationException extends MessagePublicationException {
-
-  PacketPublicationException(String message, Throwable throwable) {
+  protected MessagePublicationException(String message, Throwable throwable) {
     super(message, throwable);
   }
 }

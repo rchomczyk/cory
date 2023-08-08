@@ -17,59 +17,44 @@
 
 package moe.rafal.cory.message;
 
+import static java.lang.String.format;
+import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 
-import io.lettuce.core.pubsub.RedisPubSubListener;
 import java.io.IOException;
-import java.util.UUID;
 import moe.rafal.cory.serdes.PacketUnpacker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
-class RedisMessageListener implements RedisPubSubListener<String, byte[]> {
+class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> {
 
-  private final String channel;
+  private final String subscribedTopic;
   private final MessageListener listener;
 
-  RedisMessageListener(String channel, MessageListener listener) {
-    this.channel = channel;
+  RedisMessageListener(String subscribedTopic, MessageListener listener) {
+    this.subscribedTopic = subscribedTopic;
     this.listener = listener;
   }
 
   @Override
-  public void message(String channel, byte[] message) {
-    if (!channel.equals(this.channel)) {
-      return;
-    }
-    try (PacketUnpacker unpacker = PacketUnpackerFactory.producePacketUnpacker(message)) {
-      UUID uuid = unpacker.unpackUUID();
-      byte[] payload = unpacker.unpackPayload();
-      listener.receive(channel, uuid.toString(), payload);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+  public void message(String channelName, byte[] message) {
+    boolean whetherIsSubscribedTopic = subscribedTopic.equals(channelName);
+    if (whetherIsSubscribedTopic) {
+      processIncomingMessage(channelName, message);
     }
   }
 
-  @Override
-  public void message(String pattern, String channel, byte[] message) {
-    message(String.format("%s:%s", pattern, channel), message);
+  private void processIncomingMessage(String channelName, byte[] message) {
+    try (PacketUnpacker unpacker = producePacketUnpacker(message)) {
+      listener.receive(channelName,
+          unpacker.unpackUUID().toString(),
+          unpacker.unpackPayload());
+    } catch (IOException exception) {
+      throw new MessageProcessingException(
+          "Could not process process incoming message with attached request unique id as a header, because of unexpected exception.",
+          exception);
+    }
   }
 
   @Override
-  public void subscribed(String channel, long count) {
-
-  }
-
-  @Override
-  public void psubscribed(String pattern, long count) {
-
-  }
-
-  @Override
-  public void unsubscribed(String channel, long count) {
-
-  }
-
-  @Override
-  public void punsubscribed(String pattern, long count) {
-
+  public void message(String pattern, String channelName, byte[] message) {
+    message(format("%s:%s", pattern, channelName), message);
   }
 }

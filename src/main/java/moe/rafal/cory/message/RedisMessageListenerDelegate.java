@@ -17,31 +17,23 @@
 
 package moe.rafal.cory.message;
 
-import io.lettuce.core.codec.RedisCodec;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import io.lettuce.core.pubsub.RedisPubSubListener;
 
-public class RedisDefaultCodec implements RedisCodec<String, byte[]> {
+public abstract class RedisMessageListenerDelegate<K, V> implements RedisPubSubListener<K, V> {
 
   @Override
-  public String decodeKey(ByteBuffer byteBuffer) {
-    return StandardCharsets.UTF_8.decode(byteBuffer).toString();
+  public void subscribed(K channel, long count) {
   }
 
   @Override
-  public byte[] decodeValue(ByteBuffer byteBuffer) {
-    byte[] array = new byte[byteBuffer.remaining()];
-    byteBuffer.get(array);
-    return array;
+  public void psubscribed(K pattern, long count) {
   }
 
   @Override
-  public ByteBuffer encodeKey(String string) {
-    return ByteBuffer.wrap(string.getBytes(StandardCharsets.UTF_8));
+  public void unsubscribed(K channel, long count) {
   }
 
   @Override
-  public ByteBuffer encodeValue(byte[] bytes) {
-    return ByteBuffer.wrap(bytes);
+  public void punsubscribed(K pattern, long count) {
   }
 }

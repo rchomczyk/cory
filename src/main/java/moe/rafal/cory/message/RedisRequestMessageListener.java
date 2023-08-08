@@ -21,20 +21,20 @@ import java.util.concurrent.CompletableFuture;
 
 public class RedisRequestMessageListener implements MessageListener {
 
-  private final String replyChannel;
-  private final CompletableFuture<byte[]> future;
+  private final String destinedChannelName;
+  private final CompletableFuture<byte[]> responseFuture;
 
-  public RedisRequestMessageListener(String replyChannel,
-      CompletableFuture<byte[]> future) {
-    this.replyChannel = replyChannel;
-    this.future = future;
+  public RedisRequestMessageListener(String destinedChannelName,
+      CompletableFuture<byte[]> responseFuture) {
+    this.destinedChannelName = destinedChannelName;
+    this.responseFuture = responseFuture;
   }
 
   @Override
-  public void receive(String channelName, String replyChannel, byte[] payload) {
-    if (!channelName.equals(this.replyChannel)) {
-      return;
+  public void receive(String channelName, String replyChannelName, byte[] payload) {
+    boolean whetherIsAwaitingTopic = destinedChannelName.equals(channelName);
+    if (whetherIsAwaitingTopic) {
+      responseFuture.complete(payload);
     }
-    future.complete(payload);
   }
 }

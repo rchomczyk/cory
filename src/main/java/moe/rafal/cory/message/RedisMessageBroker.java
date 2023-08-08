@@ -17,100 +17,112 @@
 
 package moe.rafal.cory.message;
 
+import static io.lettuce.core.support.ConnectionPoolSupport.createGenericObjectPool;
+import static java.util.UUID.randomUUID;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
+
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
-import io.lettuce.core.support.ConnectionPoolSupport;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 class RedisMessageBroker implements MessageBroker {
 
-  private final RedisClient client;
+  private static final RedisCodec<String, byte[]> DEFAULT_CODEC = new RedisBinaryCodec();
   private final MessageBrokerSpecification specification;
+  private final RedisClient redisClient;
   private final GenericObjectPool<StatefulRedisConnection<String, byte[]>> connectionPool;
-  private final StatefulRedisPubSubConnection<String, byte[]> subConnection;
-  private final Set<String> subscribedConnections = new HashSet<>();
+  private final StatefulRedisPubSubConnection<String, byte[]> subscribingConnection;
+  private final Set<String> subscribedTopics;
 
   RedisMessageBroker(MessageBrokerSpecification specification) {
     this.specification = specification;
-    this.client = RedisClient.create(RedisURI.create(specification.getConnectionUri()));
-    this.connectionPool = ConnectionPoolSupport.createGenericObjectPool(
-        () -> client.connect(new RedisDefaultCodec()), new GenericObjectPoolConfig<>());
-    this.subConnection = this.client.connectPubSub(new RedisDefaultCodec());
+    this.redisClient = RedisClient.create(RedisURI.create(specification.getConnectionUri()));
+    this.connectionPool = getRedisConnectionPool();
+    this.subscribingConnection = this.redisClient.connectPubSub(DEFAULT_CODEC);
+    this.subscribedTopics = new HashSet<>();
+  }
+
+  private GenericObjectPool<StatefulRedisConnection<String, byte[]>> getRedisConnectionPool() {
+    return createGenericObjectPool(() -> redisClient.connect(DEFAULT_CODEC),
+        new GenericObjectPoolConfig<>());
   }
 
   @Override
   public void publish(String channelName, byte[] payload) {
-    publishWithUuid(channelName, payload, UUID.randomUUID());
-  }
-
-  private void publishWithUuid(String channelName, byte[] payload, UUID uuid) {
-    try (StatefulRedisConnection<String, byte[]> borrow = connectionPool.borrowObject()) {
-      try (PacketPacker packer = PacketPackerFactory.producePacketPacker()) {
-        packer.packUUID(uuid);
-        packer.packBinaryHeader(payload.length);
-        packer.packPayload(payload);
-        borrow.sync().publish(channelName, packer.toBinaryArray());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    publishWithHeader(channelName, payload, randomUUID());
   }
 
   @Override
   public void observe(String channelName, MessageListener listener) {
-    subConnection.addListener(new RedisMessageListener(channelName, listener));
-    subscribe(channelName);
+    subscribingConnection.addListener(new RedisMessageListener(channelName, listener));
+    beginTopicObservation(channelName);
+  }
+
+  private void beginTopicObservation(String channelName) {
+    boolean whetherSubscriptionIsDuplicating = subscribedTopics.contains(channelName);
+    if (whetherSubscriptionIsDuplicating) {
+      return;
+    }
+
+    subscribedTopics.add(channelName);
+    subscribingConnection.sync().subscribe(channelName);
   }
 
   @Override
   public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-    UUID payloadUuid = UUID.randomUUID();
-    CompletableFuture<byte[]> future = new CompletableFuture<byte[]>()
-        .orTimeout(this.specification
-            .getRequestCleanupInterval()
-            .toSeconds(), TimeUnit.SECONDS)
-        .exceptionally(throwable -> {
-          unsubscribe(payloadUuid.toString());
+    UUID payloadUniqueId = randomUUID();
+
+    CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
+        .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
+        .exceptionally(exception -> {
+          cancelTopicObservation(payloadUniqueId.toString());
           return null;
         });
 
-    observe(payloadUuid.toString(),
-        new RedisRequestMessageListener(payloadUuid.toString(), future));
-    publishWithUuid(channelName, payload, payloadUuid);
-    return future;
+    observe(payloadUniqueId.toString(),
+        new RedisRequestMessageListener(payloadUniqueId.toString(), promisedResponse));
+    publishWithHeader(channelName, payload, payloadUniqueId);
+    return promisedResponse;
+  }
+
+  private void publishWithHeader(String channelName, byte[] payload, UUID requestUniqueId) {
+    try (StatefulRedisConnection<String, byte[]> borrow = connectionPool.borrowObject();
+        PacketPacker packer = producePacketPacker()) {
+      packer.packUUID(requestUniqueId);
+      packer.packBinaryHeader(payload.length);
+      packer.packPayload(payload);
+      borrow.sync().publish(channelName, packer.toBinaryArray());
+    } catch (Exception exception) {
+      throw new MessagePublicationException(
+          "Could not publish message with attached request unique id as a header, because of unexpected exception.",
+          exception);
+    }
+  }
+
+  private void cancelTopicObservation(String channelName) {
+    boolean whetherSubscriptionIsRegistered = subscribedTopics.contains(channelName);
+    if (whetherSubscriptionIsRegistered) {
+      subscribedTopics.remove(channelName);
+      subscribingConnection.sync().unsubscribe(channelName);
+    }
   }
 
   @Override
   public void close() throws IOException {
-    this.client.close();
-    this.subConnection.close();
+    this.redisClient.close();
     this.connectionPool.close();
-  }
-
-  private void subscribe(String channelName) {
-    if (!subscribedConnections.contains(channelName)) {
-      subscribedConnections.add(channelName);
-      subConnection.async().subscribe(channelName);
-    }
-  }
-
-  private void unsubscribe(String channelName) {
-    if (subscribedConnections.contains(channelName)) {
-      subscribedConnections.remove(channelName);
-      subConnection.async().unsubscribe(channelName);
-    }
+    this.subscribingConnection.close();
+    this.subscribedTopics.clear();
   }
 }
