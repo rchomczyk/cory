@@ -45,6 +45,12 @@ class MessagePackPacketPacker implements PacketPacker {
   }
 
   @Override
+  public PacketPacker packPayload(byte[] value) throws IOException {
+    underlyingPacker.writePayload(value);
+    return this;
+  }
+
+  @Override
   public PacketPacker packString(String value) throws IOException {
     underlyingPacker.packString(value);
     return this;

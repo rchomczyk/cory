@@ -31,6 +31,8 @@ public interface PacketUnpacker extends Closeable {
 
   int unpackBinaryHeader() throws IOException;
 
+  byte[] unpackPayload() throws IOException;
+
   String unpackString() throws IOException;
 
   boolean unpackBoolean() throws IOException;

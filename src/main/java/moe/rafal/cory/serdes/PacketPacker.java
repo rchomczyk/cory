@@ -29,6 +29,8 @@ public interface PacketPacker extends Closeable {
 
   PacketPacker packBinaryHeader(int value) throws IOException;
 
+  PacketPacker  packPayload(byte[] value) throws IOException;
+
   PacketPacker packString(String value) throws IOException;
 
   PacketPacker packBoolean(boolean value) throws IOException;
