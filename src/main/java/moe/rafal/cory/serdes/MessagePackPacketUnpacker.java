@@ -75,7 +75,9 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public UUID unpackUUID() throws IOException {
-    return unpackMappingValue(UUID::fromString);
+    return new UUID(
+        underlyingUnpacker.unpackLong(),
+        underlyingUnpacker.unpackLong());
   }
 
   @Override

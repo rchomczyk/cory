@@ -76,7 +76,13 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packUUID(UUID value) throws IOException {
-    packMappingValue(value, UUID::toString);
+    if (value == null) {
+      underlyingPacker.packNil();
+      return this;
+    }
+
+    underlyingPacker.packLong(value.getMostSignificantBits());
+    underlyingPacker.packLong(value.getLeastSignificantBits());
     return this;
   }
 
