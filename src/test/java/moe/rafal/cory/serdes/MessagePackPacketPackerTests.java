@@ -22,6 +22,7 @@ import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
@@ -34,7 +35,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketPackerTests {
 
-  private static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   private final PacketPacker packetPacker = producePacketPacker();
 
   @AfterEach
@@ -130,11 +130,19 @@ class MessagePackPacketPackerTests {
         PacketUnpacker::unpackLong, value);
   }
 
-  @Test
-  void packUUIDTest() throws IOException {
+  @MethodSource("getUuidSubjects")
+  @ParameterizedTest
+  void packUUIDTest(UUID value) throws IOException {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packUUID,
-        PacketUnpacker::unpackUUID, NIL_UNIQUE_ID);
+        PacketUnpacker::unpackUUID, value);
+  }
+
+  private static Set<UUID> getUuidSubjects() {
+    return Set.of(
+        UUID.nameUUIDFromBytes("test_subject_1".getBytes(StandardCharsets.UTF_8)),
+        UUID.nameUUIDFromBytes("test_subject_2".getBytes(StandardCharsets.UTF_8)),
+        UUID.nameUUIDFromBytes("test_subject_3".getBytes(StandardCharsets.UTF_8)));
   }
 
   @ValueSource(shorts = {10, 30, 4})
@@ -169,17 +177,30 @@ class MessagePackPacketPackerTests {
         PacketUnpacker::unpackMapHeader, value);
   }
 
-  @Test
-  void packInstantTest() throws IOException {
+  @MethodSource("getInstantSubjects")
+  @ParameterizedTest
+  void packInstantTest(Instant value) throws IOException {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packInstant,
-        PacketUnpacker::unpackInstant, Instant.now());
+        PacketUnpacker::unpackInstant, value);
   }
 
-  @Test
-  void packDurationTest() throws IOException {
+  private static Set<Instant> getInstantSubjects() {
+    return Set.of(
+        Instant.parse("2023-08-01T12:00:00.00Z"),
+        Instant.parse("2023-08-02T12:00:00.00Z"),
+        Instant.parse("2023-08-03T12:00:00.00Z"));
+  }
+
+  @MethodSource("getDurationSubjects")
+  @ParameterizedTest
+  void packDurationTest(Duration value) throws IOException {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packDuration,
-        PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
+        PacketUnpacker::unpackDuration, value);
+  }
+
+  private static Set<Duration> getDurationSubjects() {
+    return Set.of(Duration.ofSeconds(30), Duration.ofHours(2), Duration.ofDays(1));
   }
 }
