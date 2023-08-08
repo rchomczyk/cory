@@ -24,10 +24,12 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketPackerTests {
@@ -66,6 +68,26 @@ class MessagePackPacketPackerTests {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packBinaryHeader,
         PacketUnpacker::unpackBinaryHeader, value);
+  }
+
+
+  @MethodSource("getBinaries")
+  @ParameterizedTest
+  void packBinary(byte[] value) throws IOException {
+    packValueAndAssertThatContains(packetPacker,
+        (packer, givenValue) -> {
+          packer.packBinaryHeader(givenValue.length);
+          packer.packPayload(givenValue);
+        },
+        PacketUnpacker::unpackPayload, value);
+
+  }
+
+  private static Set<byte[]> getBinaries() {
+    return Set.of(
+        new byte[] {1, 2, 3, 4, -1},
+        new byte[] {Byte.MIN_VALUE, Byte.MAX_VALUE},
+        new byte[] {60, 90, 30, 110});
   }
 
   @ValueSource(strings = {"test_string_1", "test_string_2", "test_string_3"})

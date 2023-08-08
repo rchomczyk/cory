@@ -17,6 +17,68 @@
 
 package moe.rafal.cory.message;
 
-public class RedisMessageBrokerTests {
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
+import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
+import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.awaitility.Awaitility.await;
 
+import com.github.fppt.jedismock.RedisServer;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+class RedisMessageBrokerTests {
+
+  private static RedisServer SERVER;
+  private MessageBroker messageBroker;
+
+  @BeforeAll
+  static void createServer() throws IOException {
+    SERVER = RedisServer.newRedisServer().start();
+  }
+
+  @BeforeEach
+  void createMessageBroker() throws IOException {
+    messageBroker = new RedisMessageBroker(
+        of(String.format("redis://%s:%d", SERVER.getHost(), SERVER.getBindPort())));
+  }
+
+  @Test
+  void publishAndObserveTest() {
+    AtomicBoolean receivedPayload = new AtomicBoolean();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+        (channelName, payload, replyChannelName) -> receivedPayload.set(true));
+    messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
+    await()
+        .atMost(MAXIMUM_RESPONSE_PERIOD)
+        .untilTrue(receivedPayload);
+  }
+
+  @Test
+  void requestTest() {
+    AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+        (channelName, replyChannelName, payload) -> messageBroker.publish(replyChannelName,
+            BROADCAST_REQUEST_TEST_PAYLOAD));
+    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).thenAccept(
+        receivedPayload::set);
+    await()
+        .atMost(MAXIMUM_RESPONSE_PERIOD)
+        .untilAsserted(() -> assertThat(receivedPayload.get())
+            .isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
+  }
+
+  @Test
+  void closeTest() throws IOException {
+    messageBroker.close();
+    assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))
+        .isInstanceOf(RuntimeException.class);
+  }
 }

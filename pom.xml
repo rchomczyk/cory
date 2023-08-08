@@ -50,6 +50,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>com.github.fppt</groupId>
+      <artifactId>jedis-mock</artifactId>
+      <version>1.0.9</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <version>3.24.2</version>
