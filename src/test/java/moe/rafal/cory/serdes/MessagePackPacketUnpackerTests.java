@@ -24,17 +24,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketUnpackerTests {
 
-  private static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   private static final int DEFAULT_VALUE = 0;
 
   @AfterEach
@@ -115,11 +117,19 @@ class MessagePackPacketUnpackerTests {
         PacketUnpacker::unpackLong, value);
   }
 
-  @Test
-  void unpackUUIDTest() throws IOException {
+  @MethodSource("getUuidSubjects")
+  @ParameterizedTest
+  void unpackUUIDTest(UUID value) throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packUUID,
-        PacketUnpacker::unpackUUID, NIL_UNIQUE_ID);
+        PacketUnpacker::unpackUUID, value);
+  }
+
+  private static Set<UUID> getUuidSubjects() {
+    return Set.of(
+        UUID.nameUUIDFromBytes("test_subject_1".getBytes(StandardCharsets.UTF_8)),
+        UUID.nameUUIDFromBytes("test_subject_2".getBytes(StandardCharsets.UTF_8)),
+        UUID.nameUUIDFromBytes("test_subject_3".getBytes(StandardCharsets.UTF_8)));
   }
 
   @ValueSource(shorts = {10, 30, 4})
@@ -154,18 +164,31 @@ class MessagePackPacketUnpackerTests {
         PacketUnpacker::unpackInt, value);
   }
 
-  @Test
-  void unpackInstantTest() throws IOException {
+  @MethodSource("getInstantSubjects")
+  @ParameterizedTest
+  void unpackInstantTest(Instant value) throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packInstant,
-        PacketUnpacker::unpackInstant, Instant.now());
+        PacketUnpacker::unpackInstant, value);
   }
 
-  @Test
+  private static Set<Instant> getInstantSubjects() {
+    return Set.of(
+        Instant.parse("2023-08-01T12:00:00.00Z"),
+        Instant.parse("2023-08-02T12:00:00.00Z"),
+        Instant.parse("2023-08-03T12:00:00.00Z"));
+  }
+
+  @MethodSource("getDurationSubjects")
+  @ParameterizedTest
   void unpackDurationTest() throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packDuration,
         PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
+  }
+
+  private static Set<Duration> getDurationSubjects() {
+    return Set.of(Duration.ofSeconds(30), Duration.ofHours(2), Duration.ofDays(1));
   }
 
   @Test
