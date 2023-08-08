@@ -23,7 +23,9 @@ import java.lang.reflect.Field;
 import java.util.function.Predicate;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
+import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -32,7 +34,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.support.ModifierSupport;
 
-public class EmbeddedNatsServerExtension implements BeforeEachCallback, AfterEachCallback,
+public class EmbeddedNatsServerExtension implements BeforeAllCallback, AfterAllCallback,
     TestInstancePostProcessor, ParameterResolver {
 
   private final EmbeddedNatsServer underlyingServer;
@@ -48,12 +50,12 @@ public class EmbeddedNatsServerExtension implements BeforeEachCallback, AfterEac
   }
 
   @Override
-  public void beforeEach(ExtensionContext extensionContext) throws Exception {
+  public void beforeAll(ExtensionContext extensionContext) throws Exception {
     underlyingServer.startServer();
   }
 
   @Override
-  public void afterEach(ExtensionContext extensionContext) {
+  public void afterAll(ExtensionContext extensionContext) {
     underlyingServer.stopServer();
   }
 
