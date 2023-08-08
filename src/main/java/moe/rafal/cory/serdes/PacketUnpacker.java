@@ -58,4 +58,6 @@ public interface PacketUnpacker extends Closeable {
   Duration unpackDuration() throws IOException;
 
   boolean hasNext() throws IOException;
+
+  boolean hasNextNilValue() throws IOException;
 }
