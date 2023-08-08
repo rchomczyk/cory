@@ -24,6 +24,8 @@ import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -256,9 +258,12 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNilValueOnExhaustedUnpackerTest() throws IOException {
-    try (PacketUnpacker unpacker = producePacketUnpacker(new byte[0])) {
-      assertThat(unpacker.hasNextNilValue())
-          .isFalse();
-    }
+    PacketUnpacker unpackerMock = mock(MessagePackPacketUnpacker.class);
+    when(unpackerMock.hasNext())
+        .thenReturn(false);
+    when(unpackerMock.hasNextNilValue())
+        .thenCallRealMethod();
+    assertThat(unpackerMock.hasNextNilValue())
+        .isFalse();
   }
 }
