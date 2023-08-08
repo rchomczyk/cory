@@ -23,19 +23,22 @@ import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {
 
   private final Connection connection;
 
+  NatsMessageBroker(Connection connection) {
+    this.connection = connection;
+  }
+
   NatsMessageBroker(MessageBrokerSpecification specification)
       throws IOException, InterruptedException {
-    this.connection = Nats.connect(Options.builder()
+    this(Nats.connect(Options.builder()
         .server(specification.getConnectionUri())
         .userInfo(specification.getUsername(), specification.getPassword())
         .requestCleanupInterval(specification.getRequestCleanupInterval())
-        .build());
+        .build()));
   }
 
   @Override
@@ -58,7 +61,6 @@ class NatsMessageBroker implements MessageBroker {
         .thenApply(Message::getData);
   }
 
-  @ExcludeFromJacocoGeneratedReport
   @Override
   public void close() throws MessageBrokerClosingException {
     try {

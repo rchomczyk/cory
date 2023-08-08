@@ -27,7 +27,10 @@ import static moe.rafal.cory.message.MessageBrokerSpecification.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
+import io.nats.client.Connection;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -80,5 +83,18 @@ class NatsMessageBrokerTests {
     messageBroker.close();
     assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))
         .isInstanceOf(IllegalStateException.class);
+  }
+
+  @Test
+  void closeShouldThrowTest() throws IOException, InterruptedException {
+    Connection connectionMock = mock(Connection.class);
+    doThrow(new IOException())
+        .when(connectionMock)
+        .close();
+    try (MessageBroker messageBroker = new NatsMessageBroker(connectionMock)) {
+      assertThatCode(messageBroker::close)
+          .isInstanceOf(MessageBrokerClosingException.class)
+          .hasMessage("Could not close message broker, because of unexpected exception.");
+    }
   }
 }
