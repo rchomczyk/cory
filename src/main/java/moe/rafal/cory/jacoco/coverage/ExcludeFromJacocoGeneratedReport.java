@@ -15,14 +15,15 @@
  *
  */
 
-package moe.rafal.cory.message;
+package moe.rafal.cory.jacoco.coverage;
 
-import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class MessageBrokerClosingException extends IllegalStateException {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
+public @interface ExcludeFromJacocoGeneratedReport {
 
-  @ExcludeFromJacocoGeneratedReport
-  MessageBrokerClosingException(String message, Throwable throwable) {
-    super(message, throwable);
-  }
 }
