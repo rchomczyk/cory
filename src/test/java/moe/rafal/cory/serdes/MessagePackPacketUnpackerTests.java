@@ -253,4 +253,12 @@ class MessagePackPacketUnpackerTests {
       }
     }
   }
+
+  @Test
+  void hasNextNilValueOnExhaustedUnpackerTest() throws IOException {
+    try (PacketUnpacker unpacker = producePacketUnpacker(new byte[0])) {
+      assertThat(unpacker.hasNextNilValue())
+          .isFalse();
+    }
+  }
 }
