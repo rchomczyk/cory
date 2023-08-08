@@ -23,6 +23,7 @@ import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 
 class NatsMessageBroker implements MessageBroker {
 
@@ -61,6 +62,7 @@ class NatsMessageBroker implements MessageBroker {
         .thenApply(Message::getData);
   }
 
+  @ExcludeFromJacocoGeneratedReport
   @Override
   public void close() throws MessageBrokerClosingException {
     try {
