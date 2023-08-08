@@ -22,6 +22,7 @@ import io.nats.client.Message;
 import io.nats.client.Nats;
 import io.nats.client.Options;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.jacoco.ExcludeFromJacocoGeneratedReport;
 
@@ -52,9 +53,9 @@ class NatsMessageBroker implements MessageBroker {
   }
 
   @Override
-  public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
+  public CompletableFuture<byte[]> request(String channelName, byte[] payload, Duration timeout) {
     return connection
-        .request(channelName, payload)
+        .requestWithTimeout(channelName, payload, timeout)
         .thenApply(Message::getData);
   }
 

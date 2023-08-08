@@ -21,6 +21,7 @@ import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
@@ -41,9 +42,15 @@ class PacketRequesterImpl implements PacketRequester {
   @Override
   public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
       T packet) {
+    return request(channelName, packet, Duration.ofSeconds(3));
+  }
+
+  @Override
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
+      T packet, Duration timeout) {
     try (PacketPacker packer = producePacketPacker()) {
       packetGateway.writePacket(packet, packer);
-      return messageBroker.request(channelName, packer.toBinaryArray())
+      return messageBroker.request(channelName, packer.toBinaryArray(), timeout)
           .thenCompose(this::processIncomingPacket);
     } catch (IOException exception) {
       throw new PacketPublicationException(

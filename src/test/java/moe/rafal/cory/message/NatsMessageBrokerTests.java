@@ -18,6 +18,7 @@
 package moe.rafal.cory.message;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_DURATION;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
@@ -29,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
@@ -67,12 +70,27 @@ class NatsMessageBrokerTests {
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
         (channelName, replyChannelName, payload) -> messageBroker.publish(replyChannelName,
             BROADCAST_REQUEST_TEST_PAYLOAD));
-    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).thenAccept(
+    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD, BROADCAST_REQUEST_DURATION).thenAccept(
         receivedPayload::set);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> assertThat(receivedPayload.get())
             .isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
+  }
+
+  @Test
+  void requestTimeoutTest() {
+    AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+        (channelName, replyChannelName, payload) -> {
+      Thread.sleep(5000L);
+            messageBroker.publish(replyChannelName,
+            BROADCAST_REQUEST_TEST_PAYLOAD);
+    });
+    byte[] future = messageBroker.request(BROADCAST_CHANNEL_NAME,
+        BROADCAST_TEST_PAYLOAD, Duration.ofMillis(5)).join();
+
+
   }
 
   @Test

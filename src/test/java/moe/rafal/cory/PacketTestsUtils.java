@@ -34,6 +34,7 @@ public final class PacketTestsUtils {
       StandardCharsets.UTF_8);
   public static final byte[] BROADCAST_REQUEST_TEST_PAYLOAD = "John".getBytes(
       StandardCharsets.UTF_8);
+  public static final Duration BROADCAST_REQUEST_DURATION = Duration.ofSeconds(3);
   public static final UUID NIL_UNIQUE_ID = new UUID(0, 0);
   public static final String INITIAL_USERNAME = "jdoe";
   public static final String INITIAL_PASSWORD = "my-secret-password";

@@ -17,12 +17,15 @@
 
 package moe.rafal.cory.message.packet;
 
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
 
 public interface PacketRequester {
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
+
+  <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet, Duration timeout);
 
   <T extends Packet> CompletableFuture<T> processIncomingPacket(byte[] message)
       throws PacketProcessingException;

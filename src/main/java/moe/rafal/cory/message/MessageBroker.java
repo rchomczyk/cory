@@ -18,6 +18,7 @@
 package moe.rafal.cory.message;
 
 import java.io.Closeable;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
 public interface MessageBroker extends Closeable {
@@ -26,5 +27,6 @@ public interface MessageBroker extends Closeable {
 
   void observe(String channelName, MessageListener listener);
 
-  CompletableFuture<byte[]> request(String channelName, byte[] payload);
+  CompletableFuture<byte[]> request(String channelName, byte[] payload, Duration timeout);
+
 }

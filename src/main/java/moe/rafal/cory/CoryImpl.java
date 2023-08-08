@@ -18,6 +18,7 @@
 package moe.rafal.cory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
@@ -55,6 +56,12 @@ class CoryImpl implements Cory {
   public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
       T packet) {
     return packetRequester.request(channelName, packet);
+  }
+
+  @Override
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
+      T packet, Duration timeout) {
+    return packetRequester.request(channelName, packet, timeout);
   }
 
   @Override
