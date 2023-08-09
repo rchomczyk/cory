@@ -121,11 +121,6 @@ class RedisMessageBrokerTests {
   }
 
   @Test
-  void cancelTopicObservationShouldIgnoreTest() {
-
-  }
-
-  @Test
   void closeTest() throws IOException {
     messageBroker.close();
     assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))

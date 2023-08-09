@@ -18,10 +18,9 @@
 package moe.rafal.cory.message;
 
 import static java.lang.String.format;
-import static java.util.UUID.randomUUID;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
-import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
+import static moe.rafal.cory.message.RedisMessageBrokerTestsUtils.getPayloadWithRequestUniqueId;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -30,8 +29,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.util.UUID;
-import moe.rafal.cory.serdes.PacketPacker;
 import org.junit.jupiter.api.Test;
 
 class RedisMessageListenerTests {
@@ -53,7 +50,7 @@ class RedisMessageListenerTests {
   }
 
   @Test
-  void verifyWhetherExceptionIsThrownByProcessIncomingMessageTest() {
+  void verifyWhetherExceptionIsThrownByProcessIncomingMessageTest() throws IOException {
     MessageListener messageListenerMock = mock(MessageListener.class);
     doAnswer(invocationOnMock -> {
       throw new IOException();
@@ -67,15 +64,5 @@ class RedisMessageListenerTests {
         .isInstanceOf(MessageProcessingException.class)
         .hasMessage(
             "Could not process process incoming message with attached request unique id as a header, because of unexpected exception.");
-  }
-
-  private byte[] getPayloadWithRequestUniqueId() throws IOException {
-    UUID requestUniqueId = randomUUID();
-    try (PacketPacker packer = producePacketPacker()) {
-      packer.packUUID(requestUniqueId);
-      packer.packBinaryHeader(BROADCAST_TEST_PAYLOAD.length);
-      packer.packPayload(BROADCAST_TEST_PAYLOAD);
-      return packer.toBinaryArray();
-    }
   }
 }
