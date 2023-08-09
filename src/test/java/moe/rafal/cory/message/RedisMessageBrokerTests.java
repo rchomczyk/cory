@@ -24,9 +24,9 @@ import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME_SECOND;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
-import static moe.rafal.cory.PacketTestsUtils.DEFAULT_VALUE;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedRedisServerExtension.getRedisConnectionUri;
+import static moe.rafal.cory.message.RedisMessageBrokerFactory.produceRedisMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -36,6 +36,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import com.github.fppt.jedismock.RedisServer;
+import io.lettuce.core.RedisURI;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -57,13 +58,10 @@ class RedisMessageBrokerTests {
 
   @BeforeEach
   void createMessageBroker() {
-    messageBroker = new RedisMessageBroker(
-        MessageBrokerSpecification.of(getRedisConnectionUri(redisServer)));
-    messageBrokerWhichIsFailing = new RedisMessageBroker(
-        MessageBrokerSpecification.of(getRedisConnectionUri(redisServer),
-            DEFAULT_VALUE,
-            DEFAULT_VALUE,
-            ZERO));
+    messageBroker = (RedisMessageBroker) produceRedisMessageBroker(
+        RedisURI.create(getRedisConnectionUri(redisServer)));
+    messageBrokerWhichIsFailing = (RedisMessageBroker) produceRedisMessageBroker(
+        RedisURI.create(getRedisConnectionUri(redisServer)), ZERO);
   }
 
   @Test
@@ -80,10 +78,12 @@ class RedisMessageBrokerTests {
   @Test
   void beginTopicObservationShouldIgnoreTest() {
     RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
-    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
-    }));
-    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
-    }));
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME,
+        ((channelName, replyChannelName, payload) -> {
+        }));
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME,
+        ((channelName, replyChannelName, payload) -> {
+        }));
     verify(redisMessageBrokerMock)
         .beginTopicObservation(any());
   }
@@ -91,8 +91,9 @@ class RedisMessageBrokerTests {
   @Test
   void beginTopicObservationShouldBeCalledTest() {
     RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
-    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
-    }));
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME,
+        ((channelName, replyChannelName, payload) -> {
+        }));
     verify(redisMessageBrokerMock)
         .beginTopicObservation(any());
   }

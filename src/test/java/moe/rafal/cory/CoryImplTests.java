@@ -22,13 +22,13 @@ import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
-import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
-import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.nats.client.Options;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedNatsServerExtension;
@@ -52,7 +52,9 @@ class CoryImplTests {
   @BeforeEach
   void setupCory() {
     cory = CoryBuilder.newBuilder()
-        .withMessageBroker(produceMessageBroker(of(getNatsConnectionUri(natsServer))))
+        .withMessageBroker(produceNatsMessageBroker(Options.builder()
+            .server(getNatsConnectionUri(natsServer))
+            .build()))
         .build();
   }
 

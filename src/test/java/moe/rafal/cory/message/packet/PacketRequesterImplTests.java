@@ -20,8 +20,7 @@ package moe.rafal.cory.message.packet;
 import static java.lang.String.format;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
-import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
-import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -29,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import io.nats.client.Options;
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import moe.rafal.cory.Packet;
@@ -52,7 +52,9 @@ class PacketRequesterImplTests {
 
   @BeforeEach
   void createMessageBrokerAndPacketRequester() {
-    messageBroker = produceMessageBroker(of(getNatsConnectionUri(natsServer)));
+    messageBroker = produceNatsMessageBroker(Options.builder()
+        .server(getNatsConnectionUri(natsServer))
+        .build());
     packetRequester = producePacketRequester(messageBroker, PacketGateway.INSTANCE);
   }
 
