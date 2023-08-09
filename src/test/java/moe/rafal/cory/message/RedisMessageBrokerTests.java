@@ -29,6 +29,8 @@ import static org.awaitility.Awaitility.await;
 
 import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedRedisServerExtension;
@@ -87,6 +89,18 @@ class RedisMessageBrokerTests {
         .during(MAXIMUM_RESPONSE_PERIOD.minusSeconds(1))
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilFalse(whetherPayloadWasReceived);
+  }
+
+  @Test
+  void responseShouldNotArriveIfAnotherTopicTest() {
+    String generatedChannelName = UUID.randomUUID().toString();
+    CompletableFuture<byte[]> responseFuture = new CompletableFuture<>();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME, new RedisRequestMessageListener(generatedChannelName, responseFuture));
+    messageBroker.publish(BROADCAST_CHANNEL_NAME_SECOND, BROADCAST_TEST_PAYLOAD);
+    await()
+        .during(MAXIMUM_RESPONSE_PERIOD.minusSeconds(1))
+        .atMost(MAXIMUM_RESPONSE_PERIOD)
+        .until(() -> !responseFuture.isDone());
   }
 
   @Test
