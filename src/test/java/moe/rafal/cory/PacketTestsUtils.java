@@ -30,6 +30,7 @@ public final class PacketTestsUtils {
 
   public static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
   public static final String BROADCAST_CHANNEL_NAME = "test-channel";
+  public static final String BROADCAST_CHANNEL_NAME_SECOND = "test-channel-2";
   public static final byte[] BROADCAST_TEST_PAYLOAD = "Hello world".getBytes(
       StandardCharsets.UTF_8);
   public static final byte[] BROADCAST_REQUEST_TEST_PAYLOAD = "John".getBytes(

@@ -18,6 +18,7 @@
 package moe.rafal.cory.message;
 
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
+import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME_SECOND;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
@@ -72,6 +73,20 @@ class RedisMessageBrokerTests {
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilAsserted(() -> assertThat(receivedPayload.get())
             .isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
+  }
+
+  @Test
+  void requestShouldIgnoreAnotherTopicTest() {
+    AtomicBoolean whetherPayloadWasReceived = new AtomicBoolean();
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+        (channelName, replyChannelName, payload) -> messageBroker.publish(
+            BROADCAST_CHANNEL_NAME_SECOND,
+            BROADCAST_REQUEST_TEST_PAYLOAD));
+    messageBroker.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
+    await()
+        .during(MAXIMUM_RESPONSE_PERIOD.minusSeconds(1))
+        .atMost(MAXIMUM_RESPONSE_PERIOD)
+        .untilFalse(whetherPayloadWasReceived);
   }
 
   @Test
