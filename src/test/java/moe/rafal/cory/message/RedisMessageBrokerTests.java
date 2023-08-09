@@ -32,11 +32,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
@@ -82,13 +79,13 @@ class RedisMessageBrokerTests {
 
   @Test
   void beginTopicObservationShouldIgnoreTest() {
-    RedisMessageBroker redisMessageBrokerMock = mock(RedisMessageBroker.class);
-    when(redisMessageBrokerMock.whetherSubscriptionExists(any()))
-        .thenReturn(true);
-    verify(redisMessageBrokerMock, times(0))
-        .beginTopicObservation(any());
-    messageBroker.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
     }));
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    }));
+    verify(redisMessageBrokerMock)
+        .beginTopicObservation(any());
   }
 
   @Test
