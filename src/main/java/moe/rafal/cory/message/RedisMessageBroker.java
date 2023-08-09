@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.serdes.PacketPacker;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.jetbrains.annotations.VisibleForTesting;
 
 class RedisMessageBroker implements MessageBroker {
 
@@ -66,19 +67,16 @@ class RedisMessageBroker implements MessageBroker {
   @Override
   public void observe(String channelName, MessageListener listener) {
     subscribingConnection.addListener(new RedisMessageListener(channelName, listener));
-    beginTopicObservation(channelName);
-  }
-
-  private void beginTopicObservation(String channelName) {
     if (whetherSubscriptionExists(channelName)) {
       return;
     }
-    subscribedTopics.add(channelName);
-    subscribingConnection.sync().subscribe(channelName);
+    beginTopicObservation(channelName);
   }
 
-  private boolean whetherSubscriptionExists(String channelName) {
-    return subscribedTopics.contains(channelName);
+  @VisibleForTesting
+  void beginTopicObservation(String channelName) {
+    subscribedTopics.add(channelName);
+    subscribingConnection.sync().subscribe(channelName);
   }
 
   @Override
@@ -88,8 +86,12 @@ class RedisMessageBroker implements MessageBroker {
     CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
         .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
         .exceptionally(exception -> {
-          cancelTopicObservation(payloadUniqueId.toString());
-          return null;
+          if (whetherSubscriptionExists(channelName)) {
+            cancelTopicObservation(payloadUniqueId.toString());
+          }
+          throw new MessageProcessingException(
+              "Could not process incoming response, because of unexpected exception.",
+              exception);
         });
 
     observe(payloadUniqueId.toString(),
@@ -112,11 +114,10 @@ class RedisMessageBroker implements MessageBroker {
     }
   }
 
-  private void cancelTopicObservation(String channelName) {
-    if (whetherSubscriptionExists(channelName)) {
-      subscribedTopics.remove(channelName);
-      subscribingConnection.sync().unsubscribe(channelName);
-    }
+  @VisibleForTesting
+  void cancelTopicObservation(String channelName) {
+    subscribedTopics.remove(channelName);
+    subscribingConnection.sync().unsubscribe(channelName);
   }
 
   @Override
@@ -125,5 +126,10 @@ class RedisMessageBroker implements MessageBroker {
     this.connectionPool.close();
     this.subscribingConnection.close();
     this.subscribedTopics.clear();
+  }
+
+  @VisibleForTesting
+  boolean whetherSubscriptionExists(String channelName) {
+    return subscribedTopics.contains(channelName);
   }
 }

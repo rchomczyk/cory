@@ -26,6 +26,11 @@ import static moe.rafal.cory.integration.EmbeddedRedisServerExtension.getRedisCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
@@ -64,6 +69,17 @@ class RedisMessageBrokerTests {
   }
 
   @Test
+  void beginTopicObservationShouldIgnoreTest() {
+    RedisMessageBroker redisMessageBrokerMock = mock(RedisMessageBroker.class);
+    when(redisMessageBrokerMock.whetherSubscriptionExists(any()))
+        .thenReturn(true);
+    verify(redisMessageBrokerMock, times(0))
+        .beginTopicObservation(any());
+    messageBroker.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    }));
+  }
+
+  @Test
   void requestTest() {
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
@@ -95,12 +111,18 @@ class RedisMessageBrokerTests {
   void responseShouldNotArriveIfAnotherTopicTest() {
     String generatedChannelName = UUID.randomUUID().toString();
     CompletableFuture<byte[]> responseFuture = new CompletableFuture<>();
-    messageBroker.observe(BROADCAST_CHANNEL_NAME, new RedisRequestMessageListener(generatedChannelName, responseFuture));
+    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+        new RedisRequestMessageListener(generatedChannelName, responseFuture));
     messageBroker.publish(BROADCAST_CHANNEL_NAME_SECOND, BROADCAST_TEST_PAYLOAD);
     await()
         .during(MAXIMUM_RESPONSE_PERIOD.minusSeconds(1))
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .until(() -> !responseFuture.isDone());
+  }
+
+  @Test
+  void cancelTopicObservationShouldIgnoreTest() {
+
   }
 
   @Test
