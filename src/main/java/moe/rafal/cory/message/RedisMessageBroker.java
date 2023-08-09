@@ -19,7 +19,7 @@ package moe.rafal.cory.message;
 
 import static io.lettuce.core.support.ConnectionPoolSupport.createGenericObjectPool;
 import static java.util.UUID.randomUUID;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 
 import io.lettuce.core.RedisClient;
@@ -28,6 +28,7 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.codec.RedisCodec;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -41,17 +42,17 @@ import org.jetbrains.annotations.VisibleForTesting;
 class RedisMessageBroker implements MessageBroker {
 
   private static final RedisCodec<String, byte[]> DEFAULT_CODEC = new RedisBinaryCodec();
-  private final MessageBrokerSpecification specification;
+  private final Duration requestCleanupInterval;
   private final RedisClient redisClient;
   private final GenericObjectPool<StatefulRedisConnection<String, byte[]>> connectionPool;
   private final StatefulRedisPubSubConnection<String, byte[]> subscribingConnection;
   private final Set<String> subscribedTopics;
 
-  RedisMessageBroker(MessageBrokerSpecification specification) {
-    this.specification = specification;
-    this.redisClient = RedisClient.create(RedisURI.create(specification.getConnectionUri()));
+  RedisMessageBroker(RedisURI redisUri, Duration requestCleanupInterval) {
+    this.redisClient = RedisClient.create(redisUri);
+    this.requestCleanupInterval = requestCleanupInterval;
     this.connectionPool = createRedisConnectionPool();
-    this.subscribingConnection = this.redisClient.connectPubSub(DEFAULT_CODEC);
+    this.subscribingConnection = redisClient.connectPubSub(DEFAULT_CODEC);
     this.subscribedTopics = new HashSet<>();
   }
 
@@ -85,7 +86,7 @@ class RedisMessageBroker implements MessageBroker {
     UUID payloadUniqueId = randomUUID();
 
     CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
-        .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
+        .orTimeout(requestCleanupInterval.toNanos(), NANOSECONDS)
         .exceptionally(exception -> handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
 
     observe(payloadUniqueId.toString(),
@@ -128,10 +129,10 @@ class RedisMessageBroker implements MessageBroker {
 
   @Override
   public void close() throws IOException {
-    this.redisClient.close();
-    this.connectionPool.close();
-    this.subscribingConnection.close();
-    this.subscribedTopics.clear();
+    redisClient.close();
+    connectionPool.close();
+    subscribingConnection.close();
+    subscribedTopics.clear();
   }
 
   @VisibleForTesting

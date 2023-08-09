@@ -22,8 +22,7 @@ import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLogoutPacket;
 import static moe.rafal.cory.integration.EmbeddedNatsServerExtension.getNatsConnectionUri;
-import static moe.rafal.cory.message.MessageBrokerFactory.produceMessageBroker;
-import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static moe.rafal.cory.message.packet.PacketListenerObserverFactory.producePacketListenerObserver;
 import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
@@ -31,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 
+import io.nats.client.Options;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.Packet;
@@ -57,8 +57,9 @@ class PacketListenerObserverImplTests {
   @BeforeEach
   void createMessageBrokerAndPacketPublisherWithPacketListenerObserver() {
     packetGateway = PacketGateway.INSTANCE;
-    MessageBroker messageBroker = produceMessageBroker(
-        of(getNatsConnectionUri(natsServer)));
+    MessageBroker messageBroker = produceNatsMessageBroker(Options.builder()
+        .server(getNatsConnectionUri(natsServer))
+        .build());
     packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
     packetListenerObserver = producePacketListenerObserver(messageBroker, packetGateway);
   }

@@ -17,6 +17,8 @@
 
 package moe.rafal.cory;
 
+import static java.time.Duration.ofSeconds;
+
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.UUID;
@@ -28,7 +30,7 @@ import moe.rafal.cory.subject.MalformedPacket;
 
 public final class PacketTestsUtils {
 
-  public static final Duration MAXIMUM_RESPONSE_PERIOD = Duration.ofSeconds(2);
+  public static final Duration MAXIMUM_RESPONSE_PERIOD = ofSeconds(2);
   public static final String BROADCAST_CHANNEL_NAME = "test-channel";
   public static final String BROADCAST_CHANNEL_NAME_SECOND = "test-channel-2";
   public static final byte[] BROADCAST_TEST_PAYLOAD = "Hello world".getBytes(

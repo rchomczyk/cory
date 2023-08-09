@@ -17,21 +17,25 @@
 
 package moe.rafal.cory.message;
 
-import java.io.IOException;
+import static java.time.Duration.*;
 
-public final class MessageBrokerFactory {
+import io.lettuce.core.RedisURI;
+import java.time.Duration;
 
-  private MessageBrokerFactory() {
+public final class RedisMessageBrokerFactory {
+
+  private static final Duration DEFAULT_REQUEST_CLEANUP_INTERVAL = ofSeconds(5);
+
+  private RedisMessageBrokerFactory() {
 
   }
 
-  public static MessageBroker produceMessageBroker(MessageBrokerSpecification specification)
-      throws MessageBrokerInstantiationException {
-    try {
-      return new NatsMessageBroker(specification);
-    } catch (IOException | InterruptedException exception) {
-      throw new MessageBrokerInstantiationException(
-          "Could not instantiate message broker, because of unexpected exception.", exception);
-    }
+  public static MessageBroker produceRedisMessageBroker(RedisURI redisUri,
+      Duration requestCleanupInterval) {
+    return new RedisMessageBroker(redisUri, requestCleanupInterval);
+  }
+
+  public static MessageBroker produceRedisMessageBroker(RedisURI redisUri) {
+    return produceRedisMessageBroker(redisUri, DEFAULT_REQUEST_CLEANUP_INTERVAL);
   }
 }
