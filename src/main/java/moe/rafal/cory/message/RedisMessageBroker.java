@@ -85,19 +85,23 @@ class RedisMessageBroker implements MessageBroker {
 
     CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
         .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
-        .exceptionally(exception -> {
-          if (whetherSubscriptionExists(channelName)) {
-            cancelTopicObservation(payloadUniqueId.toString());
-          }
-          throw new MessageProcessingException(
-              "Could not process incoming response, because of unexpected exception.",
-              exception);
-        });
+        .exceptionally(
+            exception -> processResponseProcessingFailure(exception, channelName, payloadUniqueId));
 
     observe(payloadUniqueId.toString(),
         new RedisRequestMessageListener(payloadUniqueId.toString(), promisedResponse));
     publishWithHeader(channelName, payload, payloadUniqueId);
     return promisedResponse;
+  }
+
+  private <T> T processResponseProcessingFailure(
+      Throwable exceptionCause, String channelName, UUID payloadUniqueId) {
+    if (whetherSubscriptionExists(channelName)) {
+      cancelTopicObservation(payloadUniqueId.toString());
+    }
+    throw new MessageProcessingException(
+        "Could not process incoming response, because of unexpected exception.",
+        exceptionCause);
   }
 
   private void publishWithHeader(String channelName, byte[] payload, UUID requestUniqueId) {
