@@ -17,25 +17,28 @@
 
 package moe.rafal.cory.message;
 
+import static java.lang.String.format;
+import static java.time.Duration.ZERO;
 import static java.util.UUID.randomUUID;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME_SECOND;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
+import static moe.rafal.cory.PacketTestsUtils.DEFAULT_VALUE;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.EmbeddedRedisServerExtension.getRedisConnectionUri;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.EmbeddedRedisServerExtension;
@@ -49,12 +52,18 @@ class RedisMessageBrokerTests {
 
   @InjectRedisServer
   private RedisServer redisServer;
-  private MessageBroker messageBroker;
+  private RedisMessageBroker messageBroker;
+  private RedisMessageBroker messageBrokerWhichIsFailing;
 
   @BeforeEach
   void createMessageBroker() {
     messageBroker = new RedisMessageBroker(
         MessageBrokerSpecification.of(getRedisConnectionUri(redisServer)));
+    messageBrokerWhichIsFailing = new RedisMessageBroker(
+        MessageBrokerSpecification.of(getRedisConnectionUri(redisServer),
+            DEFAULT_VALUE,
+            DEFAULT_VALUE,
+            ZERO));
   }
 
   @Test
@@ -70,13 +79,22 @@ class RedisMessageBrokerTests {
 
   @Test
   void beginTopicObservationShouldIgnoreTest() {
-    RedisMessageBroker redisMessageBrokerMock = mock(RedisMessageBroker.class);
-    when(redisMessageBrokerMock.whetherSubscriptionExists(any()))
-        .thenReturn(true);
-    verify(redisMessageBrokerMock, times(0))
-        .beginTopicObservation(any());
-    messageBroker.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
     }));
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    }));
+    verify(redisMessageBrokerMock)
+        .beginTopicObservation(any());
+  }
+
+  @Test
+  void beginTopicObservationShouldBeCalledTest() {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    }));
+    verify(redisMessageBrokerMock)
+        .beginTopicObservation(any());
   }
 
   @Test
@@ -105,6 +123,37 @@ class RedisMessageBrokerTests {
         .during(MAXIMUM_RESPONSE_PERIOD.minusSeconds(1))
         .atMost(MAXIMUM_RESPONSE_PERIOD)
         .untilFalse(whetherPayloadWasReceived);
+  }
+
+  @Test
+  void requestShouldHandleProcessingResponseFailureTest() {
+    assertThatCode(() ->
+        messageBrokerWhichIsFailing.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).join())
+        .isInstanceOf(CompletionException.class)
+        .hasCauseInstanceOf(MessageProcessingException.class)
+        .hasMessage(format("%s: %s",
+            MessageProcessingException.class.getName(),
+            "Could not process incoming response, because of unexpected exception."));
+  }
+
+  @Test
+  void requestShouldHandleProcessingResponseFailureWhenObservingTest() {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBrokerWhichIsFailing);
+    doNothing()
+        .when(redisMessageBrokerMock)
+        .cancelTopicObservation(any());
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME,
+        ((channelName, replyChannelName, payload) -> {
+        }));
+    assertThatCode(() ->
+        redisMessageBrokerMock.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).join())
+        .isInstanceOf(CompletionException.class)
+        .hasCauseInstanceOf(MessageProcessingException.class)
+        .hasMessage(format("%s: %s",
+            MessageProcessingException.class.getName(),
+            "Could not process incoming response, because of unexpected exception."));
+    verify(redisMessageBrokerMock)
+        .cancelTopicObservation(any());
   }
 
   @Test

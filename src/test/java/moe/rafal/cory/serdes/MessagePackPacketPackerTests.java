@@ -17,6 +17,8 @@
 
 package moe.rafal.cory.serdes;
 
+import static java.lang.Byte.MAX_VALUE;
+import static java.lang.Byte.MIN_VALUE;
 import static moe.rafal.cory.MessagePackAssertions.packValueAndAssertThatContains;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
@@ -73,7 +75,7 @@ class MessagePackPacketPackerTests {
   }
 
 
-  @MethodSource("getBinaries")
+  @MethodSource("getBinarySubjects")
   @ParameterizedTest
   void packBinary(byte[] value) throws IOException {
     packValueAndAssertThatContains(packetPacker,
@@ -85,10 +87,10 @@ class MessagePackPacketPackerTests {
 
   }
 
-  private static Set<byte[]> getBinaries() {
+  private static Set<byte[]> getBinarySubjects() {
     return Set.of(
         new byte[] {1, 2, 3, 4, -1},
-        new byte[] {Byte.MIN_VALUE, Byte.MAX_VALUE},
+        new byte[] {MIN_VALUE, MAX_VALUE},
         new byte[] {60, 90, 30, 110});
   }
 

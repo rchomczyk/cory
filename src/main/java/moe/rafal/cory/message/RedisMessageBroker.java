@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 import moe.rafal.cory.serdes.PacketPacker;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -49,12 +50,12 @@ class RedisMessageBroker implements MessageBroker {
   RedisMessageBroker(MessageBrokerSpecification specification) {
     this.specification = specification;
     this.redisClient = RedisClient.create(RedisURI.create(specification.getConnectionUri()));
-    this.connectionPool = getRedisConnectionPool();
+    this.connectionPool = createRedisConnectionPool();
     this.subscribingConnection = this.redisClient.connectPubSub(DEFAULT_CODEC);
     this.subscribedTopics = new HashSet<>();
   }
 
-  private GenericObjectPool<StatefulRedisConnection<String, byte[]>> getRedisConnectionPool() {
+  private GenericObjectPool<StatefulRedisConnection<String, byte[]>> createRedisConnectionPool() {
     return createGenericObjectPool(() -> redisClient.connect(DEFAULT_CODEC),
         new GenericObjectPoolConfig<>());
   }
@@ -85,8 +86,7 @@ class RedisMessageBroker implements MessageBroker {
 
     CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
         .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
-        .exceptionally(
-            exception -> processResponseProcessingFailure(exception, channelName, payloadUniqueId));
+        .exceptionally(exception -> handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
 
     observe(payloadUniqueId.toString(),
         new RedisRequestMessageListener(payloadUniqueId.toString(), promisedResponse));
@@ -94,7 +94,8 @@ class RedisMessageBroker implements MessageBroker {
     return promisedResponse;
   }
 
-  private <T> T processResponseProcessingFailure(
+  @VisibleForTesting
+  <T> T handleResponseProcessingFailure(
       Throwable exceptionCause, String channelName, UUID payloadUniqueId) {
     if (whetherSubscriptionExists(channelName)) {
       cancelTopicObservation(payloadUniqueId.toString());
@@ -118,6 +119,7 @@ class RedisMessageBroker implements MessageBroker {
     }
   }
 
+  @ExcludeFromJacocoGeneratedReport
   @VisibleForTesting
   void cancelTopicObservation(String channelName) {
     subscribedTopics.remove(channelName);
