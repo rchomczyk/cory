@@ -92,6 +92,15 @@ class RedisMessageBrokerTests {
   }
 
   @Test
+  void beginTopicObservationShouldBeCalledTest() {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBroker);
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME, ((channelName, replyChannelName, payload) -> {
+    }));
+    verify(redisMessageBrokerMock)
+        .beginTopicObservation(any());
+  }
+
+  @Test
   void requestTest() {
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
