@@ -85,8 +85,7 @@ class RedisMessageBroker implements MessageBroker {
 
     CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
         .orTimeout(specification.getRequestCleanupInterval().toSeconds(), SECONDS)
-        .exceptionally(
-            exception -> handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
+        .exceptionally(exception -> handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
 
     observe(payloadUniqueId.toString(),
         new RedisRequestMessageListener(payloadUniqueId.toString(), promisedResponse));
