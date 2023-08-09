@@ -17,10 +17,8 @@
 
 package moe.rafal.cory.message;
 
-import java.io.IOException;
-
 @FunctionalInterface
 public interface MessageListener {
 
-  void receive(String channelName, String replyChannelName, byte[] payload) throws IOException;
+  void receive(String channelName, String replyChannelName, byte[] payload);
 }
