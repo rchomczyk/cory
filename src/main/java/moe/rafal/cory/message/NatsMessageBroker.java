@@ -19,9 +19,6 @@ package moe.rafal.cory.message;
 
 import io.nats.client.Connection;
 import io.nats.client.Message;
-import io.nats.client.Nats;
-import io.nats.client.Options;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 
@@ -31,15 +28,6 @@ class NatsMessageBroker implements MessageBroker {
 
   NatsMessageBroker(Connection connection) {
     this.connection = connection;
-  }
-
-  NatsMessageBroker(MessageBrokerSpecification specification)
-      throws IOException, InterruptedException {
-    this(Nats.connect(Options.builder()
-        .server(specification.getConnectionUri())
-        .userInfo(specification.getUsername(), specification.getPassword())
-        .requestCleanupInterval(specification.getRequestCleanupInterval())
-        .build()));
   }
 
   @Override

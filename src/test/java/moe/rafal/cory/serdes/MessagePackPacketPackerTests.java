@@ -19,6 +19,9 @@ package moe.rafal.cory.serdes;
 
 import static java.lang.Byte.MAX_VALUE;
 import static java.lang.Byte.MIN_VALUE;
+import static java.time.Duration.ofDays;
+import static java.time.Duration.ofHours;
+import static java.time.Duration.ofSeconds;
 import static moe.rafal.cory.MessagePackAssertions.packValueAndAssertThatContains;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
@@ -227,6 +230,6 @@ class MessagePackPacketPackerTests {
   }
 
   private static Set<Duration> getDurationSubjects() {
-    return Set.of(Duration.ofSeconds(30), Duration.ofHours(2), Duration.ofDays(1));
+    return Set.of(ofSeconds(30), ofHours(2), ofDays(1));
   }
 }

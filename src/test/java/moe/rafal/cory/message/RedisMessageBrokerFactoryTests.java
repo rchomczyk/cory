@@ -17,27 +17,21 @@
 
 package moe.rafal.cory.message;
 
-import static moe.rafal.cory.message.MessageBrokerSpecification.of;
+import static moe.rafal.cory.message.RedisMessageBrokerFactory.produceRedisMessageBroker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-import java.time.Duration;
+import io.lettuce.core.RedisConnectionException;
+import io.lettuce.core.RedisURI;
 import org.junit.jupiter.api.Test;
 
-class MessageBrokerFactoryTests {
+class RedisMessageBrokerFactoryTests {
 
-  private static final String INVALID_CONNECTION_URI = "nats://127.0.0.1:14322";
-  private static final String INVALID_USERNAME = "shitzuu";
-  private static final String INVALID_PASSWORD = "my-secret-password-123";
-  private final MessageBrokerSpecification specification = of(
-      INVALID_CONNECTION_URI,
-      INVALID_USERNAME,
-      INVALID_PASSWORD,
-      Duration.ofSeconds(5));
+  private static final String INVALID_CONNECTION_URI = "redis://127.0.0.1:11647";
 
   @Test
-  void produceMessageBrokerThrowsWithoutServerTest() {
-    // noinspection all
-    assertThatCode(() -> MessageBrokerFactory.produceMessageBroker(specification))
-        .isInstanceOf(MessageBrokerInstantiationException.class);
+  void produceRedisMessageBrokerThrowsWithoutServerTest() {
+    assertThatCode(() -> produceRedisMessageBroker(RedisURI.create(INVALID_CONNECTION_URI)))
+        .isInstanceOf(RedisConnectionException.class)
+        .hasMessageStartingWith("Unable to connect to ");
   }
 }

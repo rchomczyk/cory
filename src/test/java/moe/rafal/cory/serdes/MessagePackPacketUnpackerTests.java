@@ -18,6 +18,9 @@
 package moe.rafal.cory.serdes;
 
 import static java.time.Duration.ZERO;
+import static java.time.Duration.ofDays;
+import static java.time.Duration.ofHours;
+import static java.time.Duration.ofSeconds;
 import static moe.rafal.cory.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.MessagePackAssertions.unpackValueAndAssertThatEqualTo;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
@@ -199,7 +202,7 @@ class MessagePackPacketUnpackerTests {
   void unpackDurationTest() throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packDuration,
-        PacketUnpacker::unpackDuration, Duration.ofSeconds(30));
+        PacketUnpacker::unpackDuration, ofSeconds(30));
   }
 
   @Test
@@ -214,7 +217,7 @@ class MessagePackPacketUnpackerTests {
   }
 
   private static Set<Duration> getDurationSubjects() {
-    return Set.of(Duration.ofSeconds(30), Duration.ofHours(2), Duration.ofDays(1));
+    return Set.of(ofSeconds(30), ofHours(2), ofDays(1));
   }
 
   @Test
