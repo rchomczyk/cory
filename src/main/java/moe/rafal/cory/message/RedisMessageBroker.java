@@ -70,13 +70,15 @@ class RedisMessageBroker implements MessageBroker {
   }
 
   private void beginTopicObservation(String channelName) {
-    boolean whetherSubscriptionIsDuplicating = subscribedTopics.contains(channelName);
-    if (whetherSubscriptionIsDuplicating) {
+    if (whetherSubscriptionExists(channelName)) {
       return;
     }
-
     subscribedTopics.add(channelName);
     subscribingConnection.sync().subscribe(channelName);
+  }
+
+  private boolean whetherSubscriptionExists(String channelName) {
+    return subscribedTopics.contains(channelName);
   }
 
   @Override
@@ -111,8 +113,7 @@ class RedisMessageBroker implements MessageBroker {
   }
 
   private void cancelTopicObservation(String channelName) {
-    boolean whetherSubscriptionIsRegistered = subscribedTopics.contains(channelName);
-    if (whetherSubscriptionIsRegistered) {
+    if (whetherSubscriptionExists(channelName)) {
       subscribedTopics.remove(channelName);
       subscribingConnection.sync().unsubscribe(channelName);
     }

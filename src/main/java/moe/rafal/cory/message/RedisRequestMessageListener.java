@@ -32,9 +32,12 @@ public class RedisRequestMessageListener implements MessageListener {
 
   @Override
   public void receive(String channelName, String replyChannelName, byte[] payload) {
-    boolean whetherIsAwaitingTopic = destinedChannelName.equals(channelName);
-    if (whetherIsAwaitingTopic) {
+    if (whetherAwaitsTopic(channelName)) {
       responseFuture.complete(payload);
     }
+  }
+
+  private boolean whetherAwaitsTopic(String currentChannelName) {
+    return destinedChannelName.equals(currentChannelName);
   }
 }
