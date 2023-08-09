@@ -22,6 +22,7 @@ import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 
 import java.io.IOException;
 import moe.rafal.cory.serdes.PacketUnpacker;
+import org.jetbrains.annotations.VisibleForTesting;
 
 class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> {
 
@@ -41,7 +42,8 @@ class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> 
     }
   }
 
-  private void processIncomingMessage(String channelName, byte[] message) {
+  @VisibleForTesting
+  void processIncomingMessage(String channelName, byte[] message) {
     try (PacketUnpacker unpacker = producePacketUnpacker(message)) {
       listener.receive(channelName,
           unpacker.unpackUUID().toString(),

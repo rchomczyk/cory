@@ -17,6 +17,8 @@
 
 package moe.rafal.cory;
 
+import static java.util.UUID.randomUUID;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,7 +34,7 @@ public abstract class Packet {
   }
 
   protected Packet() {
-    this(UUID.randomUUID());
+    this(randomUUID());
   }
 
   public abstract void write(PacketPacker packer) throws IOException;

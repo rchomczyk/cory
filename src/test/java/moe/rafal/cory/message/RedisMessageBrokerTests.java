@@ -17,6 +17,7 @@
 
 package moe.rafal.cory.message;
 
+import static java.util.UUID.randomUUID;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME_SECOND;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_REQUEST_TEST_PAYLOAD;
@@ -34,7 +35,6 @@ import static org.mockito.Mockito.when;
 
 import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -109,7 +109,7 @@ class RedisMessageBrokerTests {
 
   @Test
   void responseShouldNotArriveIfAnotherTopicTest() {
-    String generatedChannelName = UUID.randomUUID().toString();
+    String generatedChannelName = randomUUID().toString();
     CompletableFuture<byte[]> responseFuture = new CompletableFuture<>();
     messageBroker.observe(BROADCAST_CHANNEL_NAME,
         new RedisRequestMessageListener(generatedChannelName, responseFuture));
