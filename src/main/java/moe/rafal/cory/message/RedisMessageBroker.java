@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 import moe.rafal.cory.serdes.PacketPacker;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -118,6 +119,7 @@ class RedisMessageBroker implements MessageBroker {
     }
   }
 
+  @ExcludeFromJacocoGeneratedReport
   @VisibleForTesting
   void cancelTopicObservation(String channelName) {
     subscribedTopics.remove(channelName);
