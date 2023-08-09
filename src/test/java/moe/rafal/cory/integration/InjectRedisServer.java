@@ -15,13 +15,17 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory.integration;
 
-import moe.rafal.cory.message.MessagePublicationException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-public class PacketPublicationException extends MessagePublicationException {
+@Target({ElementType.FIELD, ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+@ExtendWith(EmbeddedRedisServerExtension.class)
+public @interface InjectRedisServer {
 
-  PacketPublicationException(String message, Throwable throwable) {
-    super(message, throwable);
-  }
 }

@@ -17,7 +17,9 @@
 
 package moe.rafal.cory.message.packet;
 
-public class PacketProcessingException extends IllegalStateException {
+import moe.rafal.cory.message.MessageProcessingException;
+
+public class PacketProcessingException extends MessageProcessingException {
 
   PacketProcessingException(String message, Throwable throwable) {
     super(message, throwable);

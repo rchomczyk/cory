@@ -20,10 +20,10 @@ package moe.rafal.cory.integration;
 import static java.lang.String.format;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
 
+import com.github.fppt.jedismock.RedisServer;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
-import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
-import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -33,35 +33,35 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.support.ModifierSupport;
 
-public class EmbeddedNatsServerExtension implements BeforeAllCallback, AfterAllCallback,
+public class EmbeddedRedisServerExtension implements BeforeAllCallback, AfterAllCallback,
     TestInstancePostProcessor, ParameterResolver {
 
-  private final EmbeddedNatsServer underlyingServer;
+  private final RedisServer underlyingServer;
 
-  public EmbeddedNatsServerExtension() {
-    this.underlyingServer = new EmbeddedNatsServer(EmbeddedNatsConfig.defaultNatsServerConfig());
+  public EmbeddedRedisServerExtension() {
+    this.underlyingServer = RedisServer.newRedisServer();
   }
 
-  public static String getNatsConnectionUri(EmbeddedNatsServer embeddedNatsServer) {
-    return format("nats://%s:%d",
-        embeddedNatsServer.getRunningHost(),
-        embeddedNatsServer.getRunningPort());
+  public static String getRedisConnectionUri(RedisServer embeddedRedisServer) {
+    return format("redis://%s:%d",
+        embeddedRedisServer.getHost(),
+        embeddedRedisServer.getBindPort());
   }
 
   @Override
   public void beforeAll(ExtensionContext extensionContext) throws Exception {
-    underlyingServer.startServer();
+    underlyingServer.start();
   }
 
   @Override
-  public void afterAll(ExtensionContext extensionContext) {
-    underlyingServer.stopServer();
+  public void afterAll(ExtensionContext extensionContext) throws IOException {
+    underlyingServer.stop();
   }
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext,
       ExtensionContext extensionContext) throws ParameterResolutionException {
-    return parameterContext.isAnnotated(InjectNatsServer.class);
+    return parameterContext.isAnnotated(InjectRedisServer.class);
   }
 
   @Override
@@ -77,7 +77,7 @@ public class EmbeddedNatsServerExtension implements BeforeAllCallback, AfterAllC
   }
 
   private void injectFields(Class<?> testClass, Object testInstance, Predicate<Field> predicate) {
-    findAnnotatedFields(testClass, InjectNatsServer.class, predicate)
+    findAnnotatedFields(testClass, InjectRedisServer.class, predicate)
         .forEach(field -> {
           try {
             field.setAccessible(true);

@@ -49,6 +49,11 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
+  public byte[] unpackPayload() throws IOException {
+    return underlyingUnpacker.readPayload(unpackBinaryHeader());
+  }
+
+  @Override
   public String unpackString() throws IOException {
     return underlyingUnpacker.unpackString();
   }

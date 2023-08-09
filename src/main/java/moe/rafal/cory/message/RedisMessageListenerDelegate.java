@@ -15,13 +15,27 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory.message;
 
-import moe.rafal.cory.message.MessagePublicationException;
+import io.lettuce.core.pubsub.RedisPubSubListener;
+import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 
-public class PacketPublicationException extends MessagePublicationException {
+@ExcludeFromJacocoGeneratedReport
+abstract class RedisMessageListenerDelegate<K, V> implements RedisPubSubListener<K, V> {
 
-  PacketPublicationException(String message, Throwable throwable) {
-    super(message, throwable);
+  @Override
+  public void subscribed(K channel, long count) {
+  }
+
+  @Override
+  public void psubscribed(K pattern, long count) {
+  }
+
+  @Override
+  public void unsubscribed(K channel, long count) {
+  }
+
+  @Override
+  public void punsubscribed(K pattern, long count) {
   }
 }
