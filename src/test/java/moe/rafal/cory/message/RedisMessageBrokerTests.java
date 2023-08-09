@@ -31,7 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -126,6 +128,26 @@ class RedisMessageBrokerTests {
         .hasMessage(format("%s: %s",
             MessageProcessingException.class.getName(),
             "Could not process incoming response, because of unexpected exception."));
+  }
+
+  @Test
+  void requestShouldHandleProcessingResponseFailureWhenObservingTest() {
+    RedisMessageBroker redisMessageBrokerMock = spy(messageBrokerWhichIsFailing);
+    doNothing()
+        .when(redisMessageBrokerMock)
+        .cancelTopicObservation(any());
+    redisMessageBrokerMock.observe(BROADCAST_CHANNEL_NAME,
+        ((channelName, replyChannelName, payload) -> {
+        }));
+    assertThatCode(() ->
+        redisMessageBrokerMock.request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).join())
+        .isInstanceOf(CompletionException.class)
+        .hasCauseInstanceOf(MessageProcessingException.class)
+        .hasMessage(format("%s: %s",
+            MessageProcessingException.class.getName(),
+            "Could not process incoming response, because of unexpected exception."));
+    verify(redisMessageBrokerMock)
+        .cancelTopicObservation(any());
   }
 
   @Test
