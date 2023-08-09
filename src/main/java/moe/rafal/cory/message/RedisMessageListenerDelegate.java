@@ -21,7 +21,7 @@ import io.lettuce.core.pubsub.RedisPubSubListener;
 import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
 
 @ExcludeFromJacocoGeneratedReport
-public abstract class RedisMessageListenerDelegate<K, V> implements RedisPubSubListener<K, V> {
+abstract class RedisMessageListenerDelegate<K, V> implements RedisPubSubListener<K, V> {
 
   @Override
   public void subscribed(K channel, long count) {

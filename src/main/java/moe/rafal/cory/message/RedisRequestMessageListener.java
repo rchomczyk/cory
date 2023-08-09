@@ -19,7 +19,7 @@ package moe.rafal.cory.message;
 
 import java.util.concurrent.CompletableFuture;
 
-public class RedisRequestMessageListener implements MessageListener {
+class RedisRequestMessageListener implements MessageListener {
 
   private final String destinedChannelName;
   private final CompletableFuture<byte[]> responseFuture;
