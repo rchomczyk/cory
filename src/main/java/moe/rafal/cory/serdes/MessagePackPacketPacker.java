@@ -126,6 +126,11 @@ class MessagePackPacketPacker implements PacketPacker {
   }
 
   @Override
+  public PacketPacker packEnum(Enum<?> value) throws IOException {
+    return value == null ? packNil() : packString(value.name());
+  }
+
+  @Override
   public PacketPacker packNil() throws IOException {
     underlyingPacker.packNil();
     return this;

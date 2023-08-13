@@ -57,6 +57,8 @@ public interface PacketUnpacker extends Closeable {
 
   Duration unpackDuration() throws IOException;
 
+  <T extends Enum<T>> T unpackEnum(Class<T> expectedType) throws IOException;
+
   boolean hasNext() throws IOException;
 
   boolean hasNextNilValue() throws IOException;

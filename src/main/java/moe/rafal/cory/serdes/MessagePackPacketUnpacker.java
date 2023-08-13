@@ -124,6 +124,15 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
+  public <T extends Enum<T>> T unpackEnum(Class<T> expectedType) throws IOException {
+    if (hasNextNilValue()) {
+      return null;
+    }
+
+    return Enum.valueOf(expectedType, underlyingUnpacker.unpackString());
+  }
+
+  @Override
   public boolean hasNext() throws IOException {
     return underlyingUnpacker.hasNext();
   }

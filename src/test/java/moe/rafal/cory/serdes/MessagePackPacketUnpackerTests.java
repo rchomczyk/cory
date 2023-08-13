@@ -25,6 +25,9 @@ import static moe.rafal.cory.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.MessagePackAssertions.unpackValueAndAssertThatEqualTo;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
+import static moe.rafal.cory.subject.GameState.AWAITING;
+import static moe.rafal.cory.subject.GameState.COUNTING;
+import static moe.rafal.cory.subject.GameState.RUNNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;
@@ -36,6 +39,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
+import moe.rafal.cory.subject.GameState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -199,10 +203,10 @@ class MessagePackPacketUnpackerTests {
 
   @MethodSource("getDurationSubjects")
   @ParameterizedTest
-  void unpackDurationTest() throws IOException {
+  void unpackDurationTest(Duration value) throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packDuration,
-        PacketUnpacker::unpackDuration, ofSeconds(30));
+        PacketUnpacker::unpackDuration, value);
   }
 
   @Test
@@ -218,6 +222,29 @@ class MessagePackPacketUnpackerTests {
 
   private static Set<Duration> getDurationSubjects() {
     return Set.of(ofSeconds(30), ofHours(2), ofDays(1));
+  }
+
+  @MethodSource("getEnumSubjects")
+  @ParameterizedTest
+  void unpackEnumTest(GameState value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packEnum,
+        packetUnpacker -> packetUnpacker.unpackEnum(GameState.class), value);
+  }
+
+  @Test
+  void unpackEnumWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packEnum(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackEnum(GameState.class))
+            .isNull();
+      }
+    }
+  }
+
+  private static Set<GameState> getEnumSubjects() {
+    return Set.of(AWAITING, COUNTING, RUNNING);
   }
 
   @Test
