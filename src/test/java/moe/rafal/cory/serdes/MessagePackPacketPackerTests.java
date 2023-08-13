@@ -25,6 +25,9 @@ import static java.time.Duration.ofSeconds;
 import static moe.rafal.cory.MessagePackAssertions.packValueAndAssertThatContains;
 import static moe.rafal.cory.serdes.PacketPackerFactory.producePacketPacker;
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
+import static moe.rafal.cory.subject.GameState.AWAITING;
+import static moe.rafal.cory.subject.GameState.COUNTING;
+import static moe.rafal.cory.subject.GameState.RUNNING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -34,6 +37,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
+import moe.rafal.cory.subject.GameState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -92,9 +96,9 @@ class MessagePackPacketPackerTests {
 
   private static Set<byte[]> getBinarySubjects() {
     return Set.of(
-        new byte[] {1, 2, 3, 4, -1},
-        new byte[] {MIN_VALUE, MAX_VALUE},
-        new byte[] {60, 90, 30, 110});
+        new byte[]{1, 2, 3, 4, -1},
+        new byte[]{MIN_VALUE, MAX_VALUE},
+        new byte[]{60, 90, 30, 110});
   }
 
   @ValueSource(strings = {"test_string_1", "test_string_2", "test_string_3"})
@@ -231,5 +235,28 @@ class MessagePackPacketPackerTests {
 
   private static Set<Duration> getDurationSubjects() {
     return Set.of(ofSeconds(30), ofHours(2), ofDays(1));
+  }
+
+  @MethodSource("getEnumSubjects")
+  @ParameterizedTest
+  void packEnumTest(GameState value) throws IOException {
+    packValueAndAssertThatContains(packetPacker,
+        PacketPacker::packEnum,
+        packetUnpacker -> packetUnpacker.unpackEnum(GameState.class), value);
+  }
+
+  @Test
+  void packEnumWithNullValueTest() throws IOException {
+    try (PacketPacker packer = producePacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker = producePacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackEnum(GameState.class))
+            .isNull();
+      }
+    }
+  }
+
+  private static Set<GameState> getEnumSubjects() {
+    return Set.of(AWAITING, COUNTING, RUNNING);
   }
 }
