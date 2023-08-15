@@ -37,7 +37,7 @@ class MessagePackPacketTests {
 
   @Test
   void writeTest() throws IOException {
-    LoginPacket packet = PacketTestsUtils.getLoginPacket();
+    LoginPacket packet = getLoginPacket();
     try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
       packet.write(packer);
       try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(

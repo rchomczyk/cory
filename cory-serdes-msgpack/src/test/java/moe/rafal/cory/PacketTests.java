@@ -18,6 +18,7 @@
 package moe.rafal.cory;
 
 import static moe.rafal.cory.MessagePackAssertions.assertThatUnpackerContains;
+import static moe.rafal.cory.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.PacketTestsUtils.DEFAULT_VALUE;
 import static moe.rafal.cory.PacketTestsUtils.INCOMING_PASSWORD;
 import static moe.rafal.cory.PacketTestsUtils.INCOMING_USERNAME;
@@ -96,7 +97,7 @@ class PacketTests {
   @Test
   void readTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    byte[] content = MessagePackAssertions.getBinaryArrayOf((packer, expectedValue) -> {
+    byte[] content = getBinaryArrayOf((packer, expectedValue) -> {
       packer.packString(INCOMING_USERNAME);
       packer.packString(INCOMING_PASSWORD);
     }, DEFAULT_VALUE);

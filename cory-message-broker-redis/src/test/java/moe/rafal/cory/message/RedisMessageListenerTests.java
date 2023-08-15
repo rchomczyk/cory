@@ -40,7 +40,7 @@ class RedisMessageListenerTests {
 
   @Test
   void verifyWhetherMessageProxiesCallTest() {
-    RedisMessageListener redisMessageListenerMock = Mockito.mock(RedisMessageListener.class);
+    RedisMessageListener redisMessageListenerMock = mock(RedisMessageListener.class);
     doCallRealMethod()
         .when(redisMessageListenerMock)
         .message(any(), any(), any());
