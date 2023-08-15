@@ -147,6 +147,18 @@ class MessagePackPacketPackerTests {
         PacketUnpacker::unpackUUID, value);
   }
 
+  @Test
+  void packUUIDWithNullValueTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+      packer.packUUID(null);
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+          packer.toBinaryArray())) {
+        assertThat(unpacker.unpackUUID())
+            .isNull();
+      }
+    }
+  }
+
   private static Set<UUID> getUuidSubjects() {
     return Set.of(
         UUID.nameUUIDFromBytes("test_subject_1".getBytes(StandardCharsets.UTF_8)),

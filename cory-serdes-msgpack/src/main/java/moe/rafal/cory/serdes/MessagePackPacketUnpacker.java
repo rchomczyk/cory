@@ -80,6 +80,10 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public UUID unpackUUID() throws IOException {
+    if (hasNextNilValue()) {
+      return null;
+    }
+
     return new UUID(
         underlyingUnpacker.unpackLong(),
         underlyingUnpacker.unpackLong());
