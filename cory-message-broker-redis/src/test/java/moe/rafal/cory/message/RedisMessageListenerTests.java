@@ -31,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import java.io.IOException;
 import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class RedisMessageListenerTests {
 
