@@ -17,8 +17,6 @@
 
 package moe.rafal.cory.message.packet;
 
-import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
-
 import java.util.concurrent.CompletionStage;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;

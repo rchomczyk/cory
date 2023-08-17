@@ -30,7 +30,9 @@ public final class PacketListenerObserverFactory {
   public static PacketListenerObserver producePacketListenerObserver(
       MessageBroker messageBroker,
       PacketGateway packetGateway,
+      PacketPublisher packetPublisher,
       PacketUnpackerFactory packetUnpackerFactory) {
-    return new PacketListenerObserverImpl(messageBroker, packetGateway, packetUnpackerFactory);
+    return new PacketListenerObserverImpl(
+        messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
   }
 }

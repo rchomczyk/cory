@@ -73,12 +73,15 @@ public final class CoryBuilder {
     }
 
     PacketGateway packetGateway = PacketGateway.INSTANCE;
-    PacketPublisher packetPublisher = producePacketPublisher(messageBroker, packetGateway);
-    PacketRequester packetRequester = producePacketRequester(messageBroker, packetGateway);
+    PacketPublisher packetPublisher = producePacketPublisher(
+        messageBroker, packetGateway, packetPackerFactory);
+    PacketRequester packetRequester = producePacketRequester(
+        messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
     return new CoryImpl(
         messageBroker,
         packetPublisher,
         packetRequester,
-        producePacketListenerObserver(messageBroker, packetGateway, packetPublisher));
+        producePacketListenerObserver(
+            messageBroker, packetGateway, packetPublisher, packetUnpackerFactory));
   }
 }
