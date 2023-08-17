@@ -26,8 +26,8 @@ public final class PacketListenerObserverFactory {
 
   }
 
-  public static PacketListenerObserver producePacketListenerObserver(MessageBroker messageBroker,
-      PacketGateway packetGateway) {
-    return new PacketListenerObserverImpl(messageBroker, packetGateway);
+  public static PacketListenerObserver producePacketListenerObserver(
+      MessageBroker messageBroker, PacketGateway packetGateway, PacketPublisher packetPublisher) {
+    return new PacketListenerObserverImpl(messageBroker, packetGateway, packetPublisher);
   }
 }
