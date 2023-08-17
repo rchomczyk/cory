@@ -52,6 +52,12 @@ class CoryImpl implements Cory {
   }
 
   @Override
+  public <T extends Packet> void observeWithProcessing(String channelName,
+      PacketListenerDelegate<T> packetListener) {
+    packetListenerObserver.observeWithProcessing(channelName, packetListener);
+  }
+
+  @Override
   public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
       T packet) {
     return packetRequester.request(channelName, packet);

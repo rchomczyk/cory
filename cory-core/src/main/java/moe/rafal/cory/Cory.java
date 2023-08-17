@@ -27,6 +27,9 @@ public interface Cory {
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
+  <T extends Packet> void observeWithProcessing(
+      String channelName, PacketListenerDelegate<T> packetListener);
+
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
 
   void close() throws IOException;
