@@ -25,7 +25,7 @@ public interface PacketListener<T extends Packet> {
 
   }
 
-  default <Y extends Packet> Y process(String channelName, String replyChannelName, T packet) {
+  default <Y> Y process(String channelName, String replyChannelName, T packet) {
     return null;
   }
 }

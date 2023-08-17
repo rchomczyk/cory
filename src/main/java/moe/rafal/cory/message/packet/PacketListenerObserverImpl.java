@@ -19,6 +19,7 @@ package moe.rafal.cory.message.packet;
 
 import static moe.rafal.cory.serdes.PacketUnpackerFactory.producePacketUnpacker;
 
+import java.util.concurrent.CompletionStage;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.message.MessageBroker;
@@ -54,18 +55,29 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   }
 
   @Override
-  public <T extends Packet, Y extends Packet> void observeWithProcessing(String channelName,
+  public <T extends Packet, Y> void observeWithProcessing(String channelName,
       PacketListenerDelegate<T> packetListener) {
     messageBroker.observe(channelName,
         (ignored, replyChannelName, payload) -> {
-          Packet packet = processIncomingPacket(payload);
+          Packet requestPacket = processIncomingPacket(payload);
 
           boolean whetherListensForPacket = packetListener.getPacketType()
-              .equals(packet.getClass());
+              .equals(requestPacket.getClass());
           if (whetherListensForPacket) {
             // noinspection unchecked
-            Y replyPacket = packetListener.process(channelName, replyChannelName, (T) packet);
-            packetPublisher.publish(replyChannelName, replyPacket);
+            Y processingResult = packetListener.process(channelName, replyChannelName,
+                (T) requestPacket);
+            if (processingResult instanceof Packet) {
+              packetPublisher.publish(replyChannelName, (Packet) processingResult);
+            } else if (processingResult instanceof CompletionStage) {
+              ((CompletionStage<?>) processingResult)
+                  .thenAccept(packet -> packetPublisher.publish(replyChannelName, (Packet) packet))
+                  .exceptionally(exception -> {
+                    throw new PacketPublicationException(
+                        "Could not publish processed packet, because of unexpected exception.",
+                        exception);
+                  });
+            }
           }
         });
   }
