@@ -68,6 +68,7 @@ class PacketListenerObserverImplTests {
     packetListenerObserver = producePacketListenerObserver(
         messageBroker,
         packetGateway,
+        packetPublisher,
         MessagePackPacketUnpackerFactory.INSTANCE);
   }
 
