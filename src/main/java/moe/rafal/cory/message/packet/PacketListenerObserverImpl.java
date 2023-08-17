@@ -28,10 +28,13 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
 
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
+  private final PacketPublisher packetPublisher;
 
-  PacketListenerObserverImpl(MessageBroker messageBroker, PacketGateway packetGateway) {
+  PacketListenerObserverImpl(
+      MessageBroker messageBroker, PacketGateway packetGateway, PacketPublisher packetPublisher) {
     this.messageBroker = messageBroker;
     this.packetGateway = packetGateway;
+    this.packetPublisher = packetPublisher;
   }
 
   @Override
@@ -46,6 +49,23 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
           if (whetherListensForPacket) {
             // noinspection unchecked
             packetListener.receive(channelName, replyChannelName, (T) packet);
+          }
+        });
+  }
+
+  @Override
+  public <T extends Packet, Y extends Packet> void observeWithProcessing(String channelName,
+      PacketListenerDelegate<T> packetListener) {
+    messageBroker.observe(channelName,
+        (ignored, replyChannelName, payload) -> {
+          Packet packet = processIncomingPacket(payload);
+
+          boolean whetherListensForPacket = packetListener.getPacketType()
+              .equals(packet.getClass());
+          if (whetherListensForPacket) {
+            // noinspection unchecked
+            Y replyPacket = packetListener.process(channelName, replyChannelName, (T) packet);
+            packetPublisher.publish(replyChannelName, replyPacket);
           }
         });
   }

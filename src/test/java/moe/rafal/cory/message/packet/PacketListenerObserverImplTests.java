@@ -61,7 +61,8 @@ class PacketListenerObserverImplTests {
         .server(getNatsConnectionUri(natsServer))
         .build());
     packetPublisher = producePacketPublisher(messageBroker, PacketGateway.INSTANCE);
-    packetListenerObserver = producePacketListenerObserver(messageBroker, packetGateway);
+    packetListenerObserver = producePacketListenerObserver(
+        messageBroker, packetGateway, packetPublisher);
   }
 
   @Test

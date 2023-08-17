@@ -19,8 +19,13 @@ package moe.rafal.cory.message.packet;
 
 import moe.rafal.cory.Packet;
 
-@FunctionalInterface
 public interface PacketListener<T extends Packet> {
 
-  void receive(String channelName, String replyChannelName, T packet);
+  default void receive(String channelName, String replyChannelName, T packet) {
+
+  }
+
+  default <Y extends Packet> Y process(String channelName, String replyChannelName, T packet) {
+    return null;
+  }
 }

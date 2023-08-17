@@ -22,6 +22,8 @@ import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacket
 import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
 
 import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.message.packet.PacketPublisher;
+import moe.rafal.cory.message.packet.PacketRequester;
 
 public final class CoryBuilder {
 
@@ -47,10 +49,12 @@ public final class CoryBuilder {
     }
 
     PacketGateway packetGateway = PacketGateway.INSTANCE;
+    PacketPublisher packetPublisher = producePacketPublisher(messageBroker, packetGateway);
+    PacketRequester packetRequester = producePacketRequester(messageBroker, packetGateway);
     return new CoryImpl(
         messageBroker,
-        producePacketPublisher(messageBroker, packetGateway),
-        producePacketRequester(messageBroker, packetGateway),
-        producePacketListenerObserver(messageBroker, packetGateway));
+        packetPublisher,
+        packetRequester,
+        producePacketListenerObserver(messageBroker, packetGateway, packetPublisher));
   }
 }
