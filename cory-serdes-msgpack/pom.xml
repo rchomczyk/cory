@@ -23,6 +23,12 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>com.pivovarit</groupId>
+      <artifactId>throwing-function</artifactId>
+      <version>1.5.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>moe.rafal</groupId>
       <artifactId>cory-core</artifactId>
       <version>${project.parent.version}</version>

@@ -17,11 +17,13 @@
 
 package moe.rafal.cory.serdes;
 
+import com.pivovarit.function.ThrowingBiConsumer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 import org.msgpack.core.MessageBufferPacker;
+import org.msgpack.core.MessagePacker;
 
 class MessagePackPacketPacker implements PacketPacker {
 
@@ -51,62 +53,50 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packString(String value) throws IOException {
-    underlyingPacker.packString(value);
-    return this;
+    return packOrNil(value, MessagePacker::packString);
   }
 
   @Override
-  public PacketPacker packBoolean(boolean value) throws IOException {
-    underlyingPacker.packBoolean(value);
-    return this;
+  public PacketPacker packBoolean(Boolean value) throws IOException {
+    return packOrNil(value, MessagePacker::packBoolean);
   }
 
   @Override
-  public PacketPacker packInt(int value) throws IOException {
-    underlyingPacker.packInt(value);
-    return this;
+  public PacketPacker packInt(Integer value) throws IOException {
+    return packOrNil(value, MessagePacker::packInt);
   }
 
   @Override
-  public PacketPacker packByte(byte value) throws IOException {
-    underlyingPacker.packByte(value);
-    return this;
+  public PacketPacker packByte(Byte value) throws IOException {
+    return packOrNil(value, MessagePacker::packByte);
   }
 
   @Override
-  public PacketPacker packLong(long value) throws IOException {
-    underlyingPacker.packLong(value);
-    return this;
+  public PacketPacker packLong(Long value) throws IOException {
+    return packOrNil(value, MessagePacker::packLong);
   }
 
   @Override
   public PacketPacker packUUID(UUID value) throws IOException {
-    if (value == null) {
-      underlyingPacker.packNil();
-      return this;
-    }
-
-    underlyingPacker.packLong(value.getMostSignificantBits());
-    underlyingPacker.packLong(value.getLeastSignificantBits());
-    return this;
+    return packOrNil(value, (packer, ignored) -> {
+      packer.packLong(value.getMostSignificantBits());
+      packer.packLong(value.getLeastSignificantBits());
+    });
   }
 
   @Override
-  public PacketPacker packShort(short value) throws IOException {
-    underlyingPacker.packShort(value);
-    return this;
+  public PacketPacker packShort(Short value) throws IOException {
+    return packOrNil(value, MessagePacker::packShort);
   }
 
   @Override
-  public PacketPacker packFloat(float value) throws IOException {
-    underlyingPacker.packFloat(value);
-    return this;
+  public PacketPacker packFloat(Float value) throws IOException {
+    return packOrNil(value, MessagePacker::packFloat);
   }
 
   @Override
-  public PacketPacker packDouble(double value) throws IOException {
-    underlyingPacker.packDouble(value);
-    return this;
+  public PacketPacker packDouble(Double value) throws IOException {
+    return packOrNil(value, MessagePacker::packDouble);
   }
 
   @Override
@@ -150,5 +140,16 @@ class MessagePackPacketPacker implements PacketPacker {
   @Override
   public void close() throws IOException {
     underlyingPacker.close();
+  }
+
+  private <T> PacketPacker packOrNil(T value,
+      ThrowingBiConsumer<MessagePacker, T, IOException> packFunction) throws IOException {
+    if (value == null) {
+      underlyingPacker.packNil();
+      return this;
+    }
+
+    packFunction.accept(underlyingPacker, value);
+    return this;
   }
 }

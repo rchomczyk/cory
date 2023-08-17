@@ -19,6 +19,7 @@ package moe.rafal.cory.serdes;
 
 import static org.msgpack.core.MessageFormat.NIL;
 
+import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -59,23 +60,23 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
-  public boolean unpackBoolean() throws IOException {
+  public Boolean unpackBoolean() throws IOException {
     return underlyingUnpacker.unpackBoolean();
   }
 
   @Override
-  public int unpackInt() throws IOException {
-    return underlyingUnpacker.unpackInt();
+  public Integer unpackInt() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackInt);
   }
 
   @Override
-  public byte unpackByte() throws IOException {
-    return underlyingUnpacker.unpackByte();
+  public Byte unpackByte() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackByte);
   }
 
   @Override
-  public long unpackLong() throws IOException {
-    return underlyingUnpacker.unpackLong();
+  public Long unpackLong() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackLong);
   }
 
   @Override
@@ -90,18 +91,18 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
-  public short unpackShort() throws IOException {
-    return underlyingUnpacker.unpackShort();
+  public Short unpackShort() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackShort);
   }
 
   @Override
-  public float unpackFloat() throws IOException {
-    return underlyingUnpacker.unpackFloat();
+  public Float unpackFloat() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackFloat);
   }
 
   @Override
-  public double unpackDouble() throws IOException {
-    return underlyingUnpacker.unpackDouble();
+  public Double unpackDouble() throws IOException {
+    return unpackOrNil(MessageUnpacker::unpackDouble);
   }
 
   @Override
@@ -149,5 +150,10 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   @Override
   public void close() throws IOException {
     underlyingUnpacker.close();
+  }
+
+  private <T> T unpackOrNil(ThrowingFunction<MessageUnpacker, T, IOException> unpackFunction)
+      throws IOException {
+    return hasNextNilValue() ? null : unpackFunction.apply(underlyingUnpacker);
   }
 }

@@ -33,21 +33,21 @@ public interface PacketPacker extends Closeable {
 
   PacketPacker packString(String value) throws IOException;
 
-  PacketPacker packBoolean(boolean value) throws IOException;
+  PacketPacker packBoolean(Boolean value) throws IOException;
 
-  PacketPacker packInt(int value) throws IOException;
+  PacketPacker packInt(Integer value) throws IOException;
 
-  PacketPacker packByte(byte value) throws IOException;
+  PacketPacker packByte(Byte value) throws IOException;
 
-  PacketPacker packLong(long value) throws IOException;
+  PacketPacker packLong(Long value) throws IOException;
 
   PacketPacker packUUID(UUID value) throws IOException;
 
-  PacketPacker packShort(short value) throws IOException;
+  PacketPacker packShort(Short value) throws IOException;
 
-  PacketPacker packFloat(float value) throws IOException;
+  PacketPacker packFloat(Float value) throws IOException;
 
-  PacketPacker packDouble(double value) throws IOException;
+  PacketPacker packDouble(Double value) throws IOException;
 
   PacketPacker packMapHeader(int value) throws IOException;
 

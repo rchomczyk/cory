@@ -35,21 +35,21 @@ public interface PacketUnpacker extends Closeable {
 
   String unpackString() throws IOException;
 
-  boolean unpackBoolean() throws IOException;
+  Boolean unpackBoolean() throws IOException;
 
-  int unpackInt() throws IOException;
+  Integer unpackInt() throws IOException;
 
-  byte unpackByte() throws IOException;
+  Byte unpackByte() throws IOException;
 
-  long unpackLong() throws IOException;
+  Long unpackLong() throws IOException;
 
   UUID unpackUUID() throws IOException;
 
-  short unpackShort() throws IOException;
+  Short unpackShort() throws IOException;
 
-  float unpackFloat() throws IOException;
+  Float unpackFloat() throws IOException;
 
-  double unpackDouble() throws IOException;
+  Double unpackDouble() throws IOException;
 
   int unpackMapHeader() throws IOException;
 
