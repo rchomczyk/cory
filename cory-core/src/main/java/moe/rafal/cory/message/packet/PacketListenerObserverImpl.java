@@ -66,14 +66,16 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
       boolean whetherListensForPacket = packetListener.getPacketType()
           .equals(requestPacket.getClass());
       if (whetherListensForPacket) {
+        String gotoChannelName =
+            packetListener.isPublishedOnReplyChannel() ? replyChannelName : channelName;
         // noinspection unchecked
         Object processingResult = packetListener.process(channelName, replyChannelName,
             (T) requestPacket);
         if (processingResult instanceof Packet) {
-          packetPublisher.publish(replyChannelName, (Packet) processingResult);
+          packetPublisher.publish(gotoChannelName, (Packet) processingResult);
         } else if (processingResult instanceof CompletionStage) {
           ((CompletionStage<?>) processingResult)
-              .thenAccept(packet -> packetPublisher.publish(replyChannelName, (Packet) packet))
+              .thenAccept(packet -> packetPublisher.publish(gotoChannelName, (Packet) packet))
               .exceptionally(exception -> {
                 throw new PacketPublicationException(
                     "Could not publish processed packet, because of unexpected exception.",

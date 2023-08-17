@@ -22,12 +22,22 @@ import moe.rafal.cory.Packet;
 public abstract class PacketListenerDelegate<T extends Packet> implements PacketListener<T> {
 
   private final Class<T> packetType;
+  private final boolean publishOnReplyChannel;
+
+  protected PacketListenerDelegate(Class<T> packetType, boolean publishOnReplyChannel) {
+    this.packetType = packetType;
+    this.publishOnReplyChannel = publishOnReplyChannel;
+  }
 
   protected PacketListenerDelegate(Class<T> packetType) {
-    this.packetType = packetType;
+    this(packetType, true);
   }
 
   public Class<T> getPacketType() {
     return packetType;
+  }
+
+  public boolean isPublishedOnReplyChannel() {
+    return publishOnReplyChannel;
   }
 }
