@@ -41,45 +41,43 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   @Override
   public <T extends Packet> void observe(String channelName,
       PacketListenerDelegate<T> packetListener) {
-    messageBroker.observe(channelName,
-        (ignored, replyChannelName, payload) -> {
-          Packet packet = processIncomingPacket(payload);
+    messageBroker.observe(channelName, (ignored, replyChannelName, payload) -> {
+      Packet packet = processIncomingPacket(payload);
 
-          boolean whetherListensForPacket = packetListener.getPacketType()
-              .equals(packet.getClass());
-          if (whetherListensForPacket) {
-            // noinspection unchecked
-            packetListener.receive(channelName, replyChannelName, (T) packet);
-          }
-        });
+      boolean whetherListensForPacket = packetListener.getPacketType()
+          .equals(packet.getClass());
+      if (whetherListensForPacket) {
+        // noinspection unchecked
+        packetListener.receive(channelName, replyChannelName, (T) packet);
+      }
+    });
   }
 
   @Override
   public <T extends Packet, Y> void observeWithProcessing(String channelName,
       PacketListenerDelegate<T> packetListener) {
-    messageBroker.observe(channelName,
-        (ignored, replyChannelName, payload) -> {
-          Packet requestPacket = processIncomingPacket(payload);
+    messageBroker.observe(channelName, (ignored, replyChannelName, payload) -> {
+      Packet requestPacket = processIncomingPacket(payload);
 
-          boolean whetherListensForPacket = packetListener.getPacketType()
-              .equals(requestPacket.getClass());
-          if (whetherListensForPacket) {
-            // noinspection unchecked
-            Y processingResult = packetListener.process(channelName, replyChannelName,
-                (T) requestPacket);
-            if (processingResult instanceof Packet) {
-              packetPublisher.publish(replyChannelName, (Packet) processingResult);
-            } else if (processingResult instanceof CompletionStage) {
-              ((CompletionStage<?>) processingResult)
-                  .thenAccept(packet -> packetPublisher.publish(replyChannelName, (Packet) packet))
-                  .exceptionally(exception -> {
-                    throw new PacketPublicationException(
-                        "Could not publish processed packet, because of unexpected exception.",
-                        exception);
-                  });
-            }
-          }
-        });
+      boolean whetherListensForPacket = packetListener.getPacketType()
+          .equals(requestPacket.getClass());
+      if (whetherListensForPacket) {
+        // noinspection unchecked
+        Y processingResult = packetListener.process(channelName, replyChannelName,
+            (T) requestPacket);
+        if (processingResult instanceof Packet) {
+          packetPublisher.publish(replyChannelName, (Packet) processingResult);
+        } else if (processingResult instanceof CompletionStage) {
+          ((CompletionStage<?>) processingResult)
+              .thenAccept(packet -> packetPublisher.publish(replyChannelName, (Packet) packet))
+              .exceptionally(exception -> {
+                throw new PacketPublicationException(
+                    "Could not publish processed packet, because of unexpected exception.",
+                    exception);
+              });
+        }
+      }
+    });
   }
 
   @Override
