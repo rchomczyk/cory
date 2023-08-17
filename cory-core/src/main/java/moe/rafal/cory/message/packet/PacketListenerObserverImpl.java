@@ -58,7 +58,7 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   }
 
   @Override
-  public <T extends Packet, Y> void observeWithProcessing(String channelName,
+  public <T extends Packet> void observeWithProcessing(String channelName,
       PacketListenerDelegate<T> packetListener) {
     messageBroker.observe(channelName, (ignored, replyChannelName, payload) -> {
       Packet requestPacket = processIncomingPacket(payload);
@@ -67,7 +67,7 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
           .equals(requestPacket.getClass());
       if (whetherListensForPacket) {
         // noinspection unchecked
-        Y processingResult = packetListener.process(channelName, replyChannelName,
+        Object processingResult = packetListener.process(channelName, replyChannelName,
             (T) requestPacket);
         if (processingResult instanceof Packet) {
           packetPublisher.publish(replyChannelName, (Packet) processingResult);

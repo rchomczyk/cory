@@ -23,7 +23,7 @@ public interface PacketListenerObserver {
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
-  <T extends Packet, Y> void observeWithProcessing(
+  <T extends Packet> void observeWithProcessing(
       String channelName, PacketListenerDelegate<T> packetListener);
 
   <T extends Packet> T processIncomingPacket(byte[] payload)
