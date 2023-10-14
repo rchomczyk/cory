@@ -56,12 +56,12 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public String unpackString() throws IOException {
-    return underlyingUnpacker.unpackString();
+    return unpackOrNil(MessageUnpacker::unpackString);
   }
 
   @Override
   public Boolean unpackBoolean() throws IOException {
-    return underlyingUnpacker.unpackBoolean();
+    return unpackOrNil(MessageUnpacker::unpackBoolean);
   }
 
   @Override
