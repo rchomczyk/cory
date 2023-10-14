@@ -207,12 +207,12 @@
 
   <distributionManagement>
     <repository>
-      <id>rafal-moe-repo-private</id>
-      <url>https://repo.rafal.moe/private/</url>
+      <id>auroramc-pl-repo-releases</id>
+      <url>https://repo.auroramc.pl/releases/</url>
     </repository>
     <snapshotRepository>
-      <id>rafal-moe-repo-private</id>
-      <url>https://repo.rafal.moe/private/</url>
+      <id>auroramc-pl-repo-snapshots</id>
+      <url>https://repo.auroramc.pl/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
 
