@@ -22,6 +22,7 @@ import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedField
 
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
+import moe.rafal.cory.integration.FieldInjectionException;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsConfig;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
@@ -82,8 +83,12 @@ public class EmbeddedNatsServerExtension implements
           try {
             field.setAccessible(true);
             field.set(testInstance, underlyingServer);
-          } catch (Exception ex) {
-            throw new RuntimeException(ex);
+          } catch (Exception exception) {
+            throw new FieldInjectionException(
+                format("Could not inject %s into %s test class.",
+                    underlyingServer.getClass().getName(),
+                    testClass.getSimpleName()),
+                exception);
           }
         });
   }

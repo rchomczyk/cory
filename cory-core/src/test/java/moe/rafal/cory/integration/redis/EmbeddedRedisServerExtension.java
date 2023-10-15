@@ -24,6 +24,7 @@ import com.github.fppt.jedismock.RedisServer;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
+import moe.rafal.cory.integration.FieldInjectionException;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -82,8 +83,12 @@ public class EmbeddedRedisServerExtension implements
           try {
             field.setAccessible(true);
             field.set(testInstance, underlyingServer);
-          } catch (Exception ex) {
-            throw new RuntimeException(ex);
+          } catch (Exception exception) {
+            throw new FieldInjectionException(
+                format("Could not inject %s into %s test class.",
+                    underlyingServer.getClass().getName(),
+                    testClass.getSimpleName()),
+                exception);
           }
         });
   }
