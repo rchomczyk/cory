@@ -107,17 +107,17 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packInstant(Instant value) throws IOException {
-    return value == null ? packNil() : packString(value.toString());
+    return packOrNil(value, (packer, val) -> packer.packString(val.toString()));
   }
 
   @Override
   public PacketPacker packDuration(Duration value) throws IOException {
-    return value == null ? packNil() : packString(value.toString());
+    return packOrNil(value, (packer, val) -> packer.packLong(val.toMillis()));
   }
 
   @Override
   public PacketPacker packEnum(Enum<?> value) throws IOException {
-    return value == null ? packNil() : packString(value.name());
+    return packOrNil(value, (packer, val) -> packer.packString(val.name()));
   }
 
   @Override

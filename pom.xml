@@ -208,6 +208,22 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.6.3</version>
+        <configuration>
+          <doclint>all,-missing</doclint>
+        </configuration>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <resources>
       <resource>
@@ -231,12 +247,12 @@
 
   <distributionManagement>
     <repository>
-      <id>auroramc-pl-repo-releases</id>
-      <url>https://repo.auroramc.pl/releases/</url>
+      <id>eternalcode-repo-releases</id>
+      <url>https://repo.eternalcode.pl/releases/</url>
     </repository>
     <snapshotRepository>
-      <id>auroramc-pl-repo-snapshots</id>
-      <url>https://repo.auroramc.pl/snapshots/</url>
+      <id>eternalcode-repo-snapshots</id>
+      <url>https://repo.eternalcode.pl/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
 

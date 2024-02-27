@@ -112,29 +112,17 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public Instant unpackInstant() throws IOException {
-    if (hasNextNilValue()) {
-      return null;
-    }
-
-    return Instant.parse(underlyingUnpacker.unpackString());
+    return unpackOrNil(unpacker -> Instant.parse(unpacker.unpackString()));
   }
 
   @Override
   public Duration unpackDuration() throws IOException {
-    if (hasNextNilValue()) {
-      return null;
-    }
-
-    return Duration.parse(underlyingUnpacker.unpackString());
+    return unpackOrNil(unpacker -> Duration.ofMillis(unpacker.unpackLong()));
   }
 
   @Override
   public <T extends Enum<T>> T unpackEnum(Class<T> expectedType) throws IOException {
-    if (hasNextNilValue()) {
-      return null;
-    }
-
-    return Enum.valueOf(expectedType, underlyingUnpacker.unpackString());
+    return unpackOrNil(unpacker -> Enum.valueOf(expectedType, unpacker.unpackString()));
   }
 
   @Override
