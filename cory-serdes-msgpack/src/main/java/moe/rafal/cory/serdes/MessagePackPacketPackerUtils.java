@@ -22,6 +22,7 @@ import static java.lang.String.format;
 import com.pivovarit.function.ThrowingBiConsumer;
 import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -58,6 +59,8 @@ final class MessagePackPacketPackerUtils {
     PACKET_PACKER_BY_BOXED_TYPE.put(Instant.class, (packer, value) -> packer.packInstant((Instant) value));
     PACKET_PACKER_BY_BOXED_TYPE.put(Duration.class, (packer, value) -> packer.packDuration((Duration) value));
     PACKET_PACKER_BY_BOXED_TYPE.put(Enum.class, (packer, value) -> packer.packEnum((Enum<?>) value));
+    PACKET_PACKER_BY_BOXED_TYPE.put(Array.class, (packer, value) -> packer.packArray((Object[]) value));
+    PACKET_PACKER_BY_BOXED_TYPE.put(Map.class, (packer, value) -> packer.packMap((Map<?, ?>) value));
     PACKET_UNPACKER_BY_BOXED_TYPE = new HashMap<>();
     PACKET_UNPACKER_BY_BOXED_TYPE.put(String.class, PacketUnpacker::unpackString);
     PACKET_UNPACKER_BY_BOXED_TYPE.put(Boolean.class, PacketUnpacker::unpackBoolean);
@@ -71,6 +74,8 @@ final class MessagePackPacketPackerUtils {
     PACKET_UNPACKER_BY_BOXED_TYPE.put(Instant.class, PacketUnpacker::unpackInstant);
     PACKET_UNPACKER_BY_BOXED_TYPE.put(Duration.class, PacketUnpacker::unpackDuration);
     PACKET_UNPACKER_BY_BOXED_TYPE.put(Enum.class, PacketUnpacker::unpackEnum);
+    PACKET_UNPACKER_BY_BOXED_TYPE.put(Array.class, PacketUnpacker::unpackArray);
+    PACKET_UNPACKER_BY_BOXED_TYPE.put(Map.class, PacketUnpacker::unpackMap);
   }
 
   private MessagePackPacketPackerUtils() {
@@ -95,6 +100,14 @@ final class MessagePackPacketPackerUtils {
 
     if (type.isEnum()) {
       return Enum.class;
+    }
+
+    if (type.isArray()) {
+      return Array.class;
+    }
+
+    if (Map.class.isAssignableFrom(type)) {
+      return Map.class;
     }
 
     return type;
