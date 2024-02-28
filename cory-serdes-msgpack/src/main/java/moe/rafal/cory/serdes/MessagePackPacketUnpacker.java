@@ -189,7 +189,7 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
     final Class<?> type = getClassByNameOrThrow(className);
     final ThrowingFunction<PacketUnpacker, T, IOException> unpackerFunction =
         (ThrowingFunction<PacketUnpacker, T, IOException>) PACKET_UNPACKER_BY_BOXED_TYPE.get(
-            type
+            type.isEnum() ? Enum.class : type
         );
     return unpackerFunction.apply(this);
   }

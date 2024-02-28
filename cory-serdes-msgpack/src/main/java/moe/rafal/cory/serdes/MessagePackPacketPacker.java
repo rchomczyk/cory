@@ -152,16 +152,12 @@ class MessagePackPacketPacker implements PacketPacker {
   @Override
   public @SuppressWarnings("unchecked") <T> PacketPacker packAuto(final T value) throws IOException {
     return packOrNil(value, (packer, val) -> {
-      final Class<?> rawType = val.getClass();
       final Class<?> type = getBoxedType(val.getClass());
-      if (!rawType.isEnum()) {
-        this.packString(type.getName());
-      }
-
       final ThrowingBiConsumer<PacketPacker, T, IOException> packerFunction =
           (ThrowingBiConsumer<PacketPacker, T, IOException>) PACKET_PACKER_BY_BOXED_TYPE.get(
               type
           );
+      this.packString(type.getName());
       packerFunction.accept(this, val);
     });
   }
