@@ -254,7 +254,7 @@ class MessagePackPacketPackerTests {
   void packEnumTest(GameState value) throws IOException {
     packValueAndAssertThatContains(packetPacker,
         PacketPacker::packEnum,
-        packetUnpacker -> packetUnpacker.unpackEnum(GameState.class), value);
+        PacketUnpacker::unpackEnum, value);
   }
 
   @Test
@@ -263,8 +263,42 @@ class MessagePackPacketPackerTests {
       packer.packDuration(null);
       try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
           packer.toBinaryArray())) {
-        assertThat(unpacker.unpackEnum(GameState.class))
+        assertThat((GameState) unpacker.unpackEnum())
             .isNull();
+      }
+    }
+  }
+
+  @Test
+  void packAutoTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+      packer.packAuto(10);
+      packer.packAuto("test_string");
+      packer.packAuto(AWAITING);
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+          packer.toBinaryArray())) {
+        assertThat(unpacker.unpackString())
+            .isEqualTo(Integer.class.getName());
+        assertThat(unpacker.unpackInt())
+            .isEqualTo(10);
+        assertThat(unpacker.unpackString())
+            .isEqualTo(String.class.getName());
+        assertThat(unpacker.unpackString())
+            .isEqualTo("test_string");
+        assertThat((GameState) unpacker.unpackEnum())
+            .isEqualTo(AWAITING);
+      }
+    }
+  }
+
+  @Test
+  void packAutoWithNullValueTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+      packer.packAuto(null);
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+          packer.toBinaryArray())) {
+        assertThat(unpacker.hasNextNilValue())
+            .isTrue();
       }
     }
   }

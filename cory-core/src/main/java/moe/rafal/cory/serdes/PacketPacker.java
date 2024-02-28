@@ -21,11 +21,14 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 public interface PacketPacker extends Closeable {
 
   PacketPacker packArrayHeader(int value) throws IOException;
+
+  <V> PacketPacker packArray(V[] value) throws IOException;
 
   PacketPacker packBinaryHeader(int value) throws IOException;
 
@@ -49,6 +52,8 @@ public interface PacketPacker extends Closeable {
 
   PacketPacker packDouble(Double value) throws IOException;
 
+  <K, V> PacketPacker packMap(Map<K, V> value) throws IOException;
+
   PacketPacker packMapHeader(int value) throws IOException;
 
   PacketPacker packInstant(Instant value) throws IOException;
@@ -56,6 +61,8 @@ public interface PacketPacker extends Closeable {
   PacketPacker packDuration(Duration value) throws IOException;
 
   PacketPacker packEnum(Enum<?> value) throws IOException;
+
+  <T> PacketPacker packAuto(T value) throws IOException;
 
   PacketPacker packNil() throws IOException;
 

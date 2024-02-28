@@ -17,10 +17,14 @@
 
 package moe.rafal.cory.serdes;
 
+import static moe.rafal.cory.serdes.MessagePackPacketPackerUtils.PACKET_PACKER_BY_BOXED_TYPE;
+import static moe.rafal.cory.serdes.MessagePackPacketPackerUtils.getBoxedType;
+
 import com.pivovarit.function.ThrowingBiConsumer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePacker;
@@ -37,6 +41,16 @@ class MessagePackPacketPacker implements PacketPacker {
   public PacketPacker packArrayHeader(int value) throws IOException {
     underlyingPacker.packArrayHeader(value);
     return this;
+  }
+
+  @Override
+  public <V> PacketPacker packArray(final V[] value) throws IOException {
+    return packOrNil(value, (packer, val) -> {
+      packer.packArrayHeader(val.length);
+      for (final V currentValue : value) {
+        this.packAuto(currentValue);
+      }
+    });
   }
 
   @Override
@@ -106,6 +120,17 @@ class MessagePackPacketPacker implements PacketPacker {
   }
 
   @Override
+  public <K, V> PacketPacker packMap(final Map<K, V> value) throws IOException {
+    return packOrNil(value, (packer, val) -> {
+      packer.packMapHeader(val.size());
+      for (final Map.Entry<K, V> entry : value.entrySet()) {
+        this.packAuto(entry.getKey());
+        this.packAuto(entry.getValue());
+      }
+    });
+  }
+
+  @Override
   public PacketPacker packInstant(Instant value) throws IOException {
     return packOrNil(value, (packer, val) -> packer.packString(val.toString()));
   }
@@ -117,7 +142,27 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packEnum(Enum<?> value) throws IOException {
-    return packOrNil(value, (packer, val) -> packer.packString(val.name()));
+    return packOrNil(value, (packer, val) -> {
+      packer.packString(val.getDeclaringClass().getName());
+      packer.packString(val.name());
+    });
+  }
+
+  @Override
+  public @SuppressWarnings("unchecked") <T> PacketPacker packAuto(final T value) throws IOException {
+    return packOrNil(value, (packer, val) -> {
+      final Class<?> rawType = val.getClass();
+      final Class<?> type = getBoxedType(val.getClass());
+      if (!rawType.isEnum()) {
+        this.packString(type.getName());
+      }
+
+      final ThrowingBiConsumer<PacketPacker, T, IOException> packerFunction =
+          (ThrowingBiConsumer<PacketPacker, T, IOException>) PACKET_PACKER_BY_BOXED_TYPE.get(
+              type
+          );
+      packerFunction.accept(this, val);
+    });
   }
 
   @Override

@@ -17,15 +17,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.msgpack</groupId>
-      <artifactId>msgpack-core</artifactId>
-      <version>0.9.8</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>com.pivovarit</groupId>
       <artifactId>throwing-function</artifactId>
       <version>1.5.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.msgpack</groupId>
+      <artifactId>msgpack-core</artifactId>
+      <version>0.9.8</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
