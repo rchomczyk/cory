@@ -21,6 +21,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 public interface PacketUnpacker extends Closeable {
@@ -28,6 +29,8 @@ public interface PacketUnpacker extends Closeable {
   void skipValue() throws IOException;
 
   int unpackArrayHeader() throws IOException;
+
+  <V> V[] unpackArray() throws IOException;
 
   int unpackBinaryHeader() throws IOException;
 
@@ -53,11 +56,15 @@ public interface PacketUnpacker extends Closeable {
 
   int unpackMapHeader() throws IOException;
 
+  <K, V> Map<K, V> unpackMap() throws IOException;
+
   Instant unpackInstant() throws IOException;
 
   Duration unpackDuration() throws IOException;
 
-  <T extends Enum<T>> T unpackEnum(Class<T> expectedType) throws IOException;
+  <T extends Enum<T>> T unpackEnum() throws IOException;
+
+  <T> T unpackAuto() throws IOException;
 
   boolean hasNext() throws IOException;
 

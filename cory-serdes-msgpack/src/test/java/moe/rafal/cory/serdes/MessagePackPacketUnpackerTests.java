@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import moe.rafal.cory.subject.GameState;
@@ -78,6 +79,16 @@ class MessagePackPacketUnpackerTests {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packArrayHeader,
         PacketUnpacker::unpackArrayHeader, value);
+  }
+
+  @Test
+  void unpackArrayTest() throws IOException {
+    final String[] value = new String[] {"test_string_1", "test_string_2", "test_string_3"};
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packArray,
+        PacketUnpacker::unpackArray,
+        value
+    );
   }
 
   @ValueSource(ints = {40, 50, 60})
@@ -175,6 +186,17 @@ class MessagePackPacketUnpackerTests {
         PacketUnpacker::unpackInt, value);
   }
 
+  @Test
+  void unpackMapTest() throws IOException {
+    final Map<String, String> value = Map.of("test_key_1", "test_value_1", "test_key_2",
+        "test_value_2", "test_key_3", "test_value_3");
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packMap,
+        PacketUnpacker::unpackMap,
+        value
+    );
+  }
+
   @MethodSource("getInstantSubjects")
   @ParameterizedTest
   void unpackInstantTest(Instant value) throws IOException {
@@ -231,7 +253,7 @@ class MessagePackPacketUnpackerTests {
   void unpackEnumTest(GameState value) throws IOException {
     unpackValueAndAssertThatEqualTo(
         PacketPacker::packEnum,
-        packetUnpacker -> packetUnpacker.unpackEnum(GameState.class), value);
+        PacketUnpacker::unpackEnum, value);
   }
 
   @Test
@@ -240,7 +262,7 @@ class MessagePackPacketUnpackerTests {
       packer.packEnum(null);
       try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
           packer.toBinaryArray())) {
-        assertThat(unpacker.unpackEnum(GameState.class))
+        assertThat((GameState) unpacker.unpackEnum())
             .isNull();
       }
     }

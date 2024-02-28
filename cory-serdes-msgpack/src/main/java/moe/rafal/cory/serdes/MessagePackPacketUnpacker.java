@@ -17,12 +17,16 @@
 
 package moe.rafal.cory.serdes;
 
+import static moe.rafal.cory.serdes.MessagePackPacketPackerUtils.PACKET_UNPACKER_BY_BOXED_TYPE;
+import static moe.rafal.cory.serdes.MessagePackPacketPackerUtils.getClassByNameOrThrow;
 import static org.msgpack.core.MessageFormat.NIL;
 
 import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.msgpack.core.MessageUnpacker;
 
@@ -42,6 +46,18 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   @Override
   public int unpackArrayHeader() throws IOException {
     return underlyingUnpacker.unpackArrayHeader();
+  }
+
+  @Override
+  public @SuppressWarnings("unchecked") <V> V[] unpackArray() throws IOException {
+    final int length = underlyingUnpacker.unpackArrayHeader();
+
+    final V[] result = (V[]) new Object[length];
+    for (int index = 0; index < length; index++) {
+      result[index] = unpackAuto();
+    }
+
+    return result;
   }
 
   @Override
@@ -111,6 +127,22 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
+  public <K, V> Map<K, V> unpackMap()
+      throws IOException {
+    final int length = unpackMapHeader();
+
+    final Map<K, V> result = new HashMap<>(length);
+    for (int index = 0; index < length; index++) {
+      result.put(
+          unpackAuto(),
+          unpackAuto()
+      );
+    }
+
+    return result;
+  }
+
+  @Override
   public Instant unpackInstant() throws IOException {
     return unpackOrNil(unpacker -> Instant.parse(unpacker.unpackString()));
   }
@@ -121,8 +153,33 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
-  public <T extends Enum<T>> T unpackEnum(Class<T> expectedType) throws IOException {
-    return unpackOrNil(unpacker -> Enum.valueOf(expectedType, unpacker.unpackString()));
+  public @SuppressWarnings("unchecked") <T extends Enum<T>> T unpackEnum() throws IOException {
+    if (hasNextNilValue()) {
+      return null;
+    }
+
+    final String className = unpackString();
+    final Class<?> type = getClassByNameOrThrow(className);
+    if (type.isEnum()) {
+      return unpackOrNil(unpacker -> Enum.valueOf((Class<T>) type, unpacker.unpackString()));
+    }
+
+    return null;
+  }
+
+  @Override
+  public @SuppressWarnings("unchecked") <T> T unpackAuto() throws IOException {
+    if (hasNextNilValue()) {
+      return null;
+    }
+
+    final String className = underlyingUnpacker.unpackString();
+    final Class<?> type = getClassByNameOrThrow(className);
+    final ThrowingFunction<PacketUnpacker, T, IOException> unpackerFunction =
+        (ThrowingFunction<PacketUnpacker, T, IOException>) PACKET_UNPACKER_BY_BOXED_TYPE.get(
+            type
+        );
+    return unpackerFunction.apply(this);
   }
 
   @Override
