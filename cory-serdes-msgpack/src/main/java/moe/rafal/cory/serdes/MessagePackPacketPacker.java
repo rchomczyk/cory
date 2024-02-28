@@ -46,6 +46,7 @@ class MessagePackPacketPacker implements PacketPacker {
   @Override
   public <V> PacketPacker packArray(final V[] value) throws IOException {
     return packOrNil(value, (packer, val) -> {
+      packer.packString(val.getClass().getComponentType().getName());
       packer.packArrayHeader(val.length);
       for (final V currentValue : value) {
         this.packAuto(currentValue);

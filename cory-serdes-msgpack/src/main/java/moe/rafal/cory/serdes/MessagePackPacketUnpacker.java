@@ -23,6 +23,7 @@ import static org.msgpack.core.MessageFormat.NIL;
 
 import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -50,14 +51,21 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
   @Override
   public @SuppressWarnings("unchecked") <V> V[] unpackArray() throws IOException {
-    final int length = underlyingUnpacker.unpackArrayHeader();
-
-    final V[] result = (V[]) new Object[length];
-    for (int index = 0; index < length; index++) {
-      result[index] = unpackAuto();
+    if (hasNextNilValue()) {
+      return null;
     }
 
-    return result;
+    final String className = underlyingUnpacker.unpackString();
+    final Class<?> type = getClassByNameOrThrow(className);
+    return unpackOrNil(unpacker -> {
+      final int length = unpacker.unpackArrayHeader();
+      final V[] result = (V[]) Array.newInstance(type, length);
+      for (int index = 0; index < length; index++) {
+        result[index] = unpackAuto();
+      }
+
+      return result;
+    });
   }
 
   @Override
@@ -129,6 +137,10 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   @Override
   public <K, V> Map<K, V> unpackMap()
       throws IOException {
+    if (hasNextNilValue()) {
+      return null;
+    }
+
     final int length = unpackMapHeader();
 
     final Map<K, V> result = new HashMap<>(length);

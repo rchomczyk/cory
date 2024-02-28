@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import moe.rafal.cory.subject.GameState;
@@ -275,6 +276,8 @@ class MessagePackPacketPackerTests {
       packer.packAuto(10);
       packer.packAuto("test_string");
       packer.packAuto(AWAITING);
+      packer.packAuto(Map.of("key", "value", "key2", "value2"));
+      packer.packAuto(new String[]{"value", "value1", "value2"});
       try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackString())
@@ -287,6 +290,13 @@ class MessagePackPacketPackerTests {
             .isEqualTo("test_string");
         assertThat((GameState) unpacker.unpackEnum())
             .isEqualTo(AWAITING);
+        unpacker.skipValue();
+        assertThat(unpacker.unpackMap())
+            .containsKey("key")
+            .containsKey("key2");
+        unpacker.skipValue();
+        assertThat(unpacker.<String>unpackArray())
+            .contains("value", "value1", "value2");
       }
     }
   }
