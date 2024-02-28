@@ -288,6 +288,7 @@ class MessagePackPacketPackerTests {
             .isEqualTo(String.class.getName());
         assertThat(unpacker.unpackString())
             .isEqualTo("test_string");
+        unpacker.skipValue();
         assertThat((GameState) unpacker.unpackEnum())
             .isEqualTo(AWAITING);
         unpacker.skipValue();
