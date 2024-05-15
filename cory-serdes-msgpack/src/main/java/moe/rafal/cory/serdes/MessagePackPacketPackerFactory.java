@@ -23,12 +23,10 @@ public final class MessagePackPacketPackerFactory implements PacketPackerFactory
 
   public static final PacketPackerFactory INSTANCE = new MessagePackPacketPackerFactory();
 
-  private MessagePackPacketPackerFactory() {
-
-  }
+  private MessagePackPacketPackerFactory() {}
 
   @Override
-  public PacketPacker producePacketPacker() {
+  public PacketPacker getPacketPacker() {
     return new MessagePackPacketPacker(newDefaultBufferPacker());
   }
 }

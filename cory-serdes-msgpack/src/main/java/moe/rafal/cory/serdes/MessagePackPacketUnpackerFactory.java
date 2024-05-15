@@ -23,12 +23,10 @@ public class MessagePackPacketUnpackerFactory implements PacketUnpackerFactory {
 
   public static final PacketUnpackerFactory INSTANCE = new MessagePackPacketUnpackerFactory();
 
-  private MessagePackPacketUnpackerFactory() {
-
-  }
+  private MessagePackPacketUnpackerFactory() {}
 
   @Override
-  public PacketUnpacker producePacketUnpacker(byte[] content) {
+  public PacketUnpacker getPacketUnpacker(byte[] content) {
     return new MessagePackPacketUnpacker(newDefaultUnpacker(content));
   }
 }

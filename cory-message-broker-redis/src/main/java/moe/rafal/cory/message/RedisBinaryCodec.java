@@ -23,8 +23,7 @@ import java.nio.charset.StandardCharsets;
 
 class RedisBinaryCodec implements RedisCodec<String, byte[]> {
 
-  RedisBinaryCodec() {
-  }
+  RedisBinaryCodec() {}
 
   @Override
   public String decodeKey(ByteBuffer buffer) {

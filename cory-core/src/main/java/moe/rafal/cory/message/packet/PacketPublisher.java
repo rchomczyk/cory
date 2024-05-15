@@ -18,9 +18,21 @@
 package moe.rafal.cory.message.packet;
 
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.serdes.PacketPackerFactory;
 
 @FunctionalInterface
 public interface PacketPublisher {
+
+  static PacketPublisher getPacketPublisher(
+      LoggerFacade loggerFacade,
+      MessageBroker messageBroker,
+      PacketGateway packetGateway,
+      PacketPackerFactory packetPackerFactory) {
+    return new PacketPublisherImpl(loggerFacade, messageBroker, packetGateway, packetPackerFactory);
+  }
 
   <T extends Packet> void publish(String channelName, T packet) throws PacketPublicationException;
 }

@@ -44,9 +44,7 @@ class NatsMessageBroker implements MessageBroker {
 
   @Override
   public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-    return connection
-        .request(channelName, payload)
-        .thenApply(Message::getData);
+    return connection.request(channelName, payload).thenApply(Message::getData);
   }
 
   @Override

@@ -31,9 +31,7 @@ import moe.rafal.cory.serdes.PacketUnpacker;
 
 final class PojoPacketUtils {
 
-  private PojoPacketUtils() {
-
-  }
+  private PojoPacketUtils() {}
 
   static Field getDeclaredFieldByNameOrNull(final String name, final Class<?> clazz) {
     try {
@@ -46,9 +44,10 @@ final class PojoPacketUtils {
   static void writePojo(final PacketPacker packer, final Object value) throws IOException {
     final Class<?> type = value.getClass();
     try {
-      final List<Field> fields = Arrays.stream(type.getDeclaredFields())
-          .filter(not(field -> isTransient(field.getModifiers())))
-          .collect(toUnmodifiableList());
+      final List<Field> fields =
+          Arrays.stream(type.getDeclaredFields())
+              .filter(not(field -> isTransient(field.getModifiers())))
+              .collect(toUnmodifiableList());
 
       packer.packInt(fields.size());
       for (final Field field : fields) {
@@ -56,16 +55,12 @@ final class PojoPacketUtils {
       }
     } catch (final IllegalAccessException exception) {
       throw new PojoWritingException(
-          format(
-              "Could not write pojo with name %s",
-              type.getName()
-          ),
-          exception
-      );
+          format("Could not write pojo with name %s", type.getName()), exception);
     }
   }
 
-  private static void writeField(final PacketPacker packer, final Field field, final Object value) throws IllegalAccessException, IOException {
+  private static void writeField(final PacketPacker packer, final Field field, final Object value)
+      throws IllegalAccessException, IOException {
     field.setAccessible(true);
     packer.packString(field.getName());
     packer.packAuto(field.get(value));
@@ -80,12 +75,7 @@ final class PojoPacketUtils {
       }
     } catch (final IllegalAccessException exception) {
       throw new PojoParsingException(
-          format(
-              "Could not parse pojo with name %s",
-              type.getName()
-          ),
-          exception
-      );
+          format("Could not parse pojo with name %s", type.getName()), exception);
     }
   }
 
@@ -96,12 +86,7 @@ final class PojoPacketUtils {
     final String fieldName = unpacker.unpackString();
     final Field field = getDeclaredFieldByNameOrNull(fieldName, type);
     if (field == null) {
-      throw new PojoParsingException(
-          format(
-              "Could not find field with name %s",
-              fieldName
-          )
-      );
+      throw new PojoParsingException(format("Could not find field with name %s", fieldName));
     }
 
     field.setAccessible(true);

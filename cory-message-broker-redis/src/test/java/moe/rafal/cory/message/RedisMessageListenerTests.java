@@ -40,28 +40,31 @@ class RedisMessageListenerTests {
   @Test
   void verifyWhetherMessageProxiesCallTest() {
     RedisMessageListener redisMessageListenerMock = mock(RedisMessageListener.class);
-    doCallRealMethod()
-        .when(redisMessageListenerMock)
-        .message(any(), any(), any());
-    redisMessageListenerMock.message(EXPECTED_CHANNEL_PATTERN, EXPECTED_CHANNEL_NAME,
-        BROADCAST_TEST_PAYLOAD);
+    doCallRealMethod().when(redisMessageListenerMock).message(any(), any(), any());
+    redisMessageListenerMock.message(
+        EXPECTED_CHANNEL_PATTERN, EXPECTED_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
     verify(redisMessageListenerMock)
-        .message(format("%s:%s", EXPECTED_CHANNEL_PATTERN, EXPECTED_CHANNEL_NAME),
+        .message(
+            format("%s:%s", EXPECTED_CHANNEL_PATTERN, EXPECTED_CHANNEL_NAME),
             BROADCAST_TEST_PAYLOAD);
   }
 
   @Test
   void verifyWhetherExceptionIsThrownByProcessIncomingMessageTest() {
     MessageListener messageListenerMock = mock(MessageListener.class);
-    doAnswer(invocationOnMock -> {
-      throw new IOException();
-    })
+    doAnswer(
+            invocationOnMock -> {
+              throw new IOException();
+            })
         .when(messageListenerMock)
         .receive(any(), any(), any());
-    RedisMessageListener redisMessageListener = new RedisMessageListener(
-        MessagePackPacketUnpackerFactory.INSTANCE, BROADCAST_CHANNEL_NAME, messageListenerMock);
-    assertThatCode(() -> redisMessageListener.processIncomingMessage(BROADCAST_CHANNEL_NAME,
-        getPayloadWithRequestUniqueId()))
+    RedisMessageListener redisMessageListener =
+        new RedisMessageListener(
+            MessagePackPacketUnpackerFactory.INSTANCE, BROADCAST_CHANNEL_NAME, messageListenerMock);
+    assertThatCode(
+            () ->
+                redisMessageListener.processIncomingMessage(
+                    BROADCAST_CHANNEL_NAME, getPayloadWithRequestUniqueId()))
         .isInstanceOf(MessageProcessingException.class)
         .hasMessage(
             "Could not process process incoming message with attached request unique id as a header, because of unexpected exception.");

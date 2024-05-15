@@ -57,15 +57,16 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
     final String className = underlyingUnpacker.unpackString();
     final Class<?> type = getClassByNameOrThrow(className);
-    return unpackOrNil(unpacker -> {
-      final int length = unpacker.unpackArrayHeader();
-      final V[] result = (V[]) Array.newInstance(type, length);
-      for (int index = 0; index < length; index++) {
-        result[index] = unpackAuto();
-      }
+    return unpackOrNil(
+        unpacker -> {
+          final int length = unpacker.unpackArrayHeader();
+          final V[] result = (V[]) Array.newInstance(type, length);
+          for (int index = 0; index < length; index++) {
+            result[index] = unpackAuto();
+          }
 
-      return result;
-    });
+          return result;
+        });
   }
 
   @Override
@@ -109,9 +110,7 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
       return null;
     }
 
-    return new UUID(
-        underlyingUnpacker.unpackLong(),
-        underlyingUnpacker.unpackLong());
+    return new UUID(underlyingUnpacker.unpackLong(), underlyingUnpacker.unpackLong());
   }
 
   @Override
@@ -135,8 +134,7 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
   }
 
   @Override
-  public <K, V> Map<K, V> unpackMap()
-      throws IOException {
+  public <K, V> Map<K, V> unpackMap() throws IOException {
     if (hasNextNilValue()) {
       return null;
     }
@@ -145,10 +143,7 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
 
     final Map<K, V> result = new HashMap<>(length);
     for (int index = 0; index < length; index++) {
-      result.put(
-          unpackAuto(),
-          unpackAuto()
-      );
+      result.put(unpackAuto(), unpackAuto());
     }
 
     return result;
@@ -188,9 +183,8 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
     final String className = underlyingUnpacker.unpackString();
     final Class<?> type = getClassByNameOrThrow(className);
     final ThrowingFunction<PacketUnpacker, T, IOException> unpackerFunction =
-        (ThrowingFunction<PacketUnpacker, T, IOException>) PACKET_UNPACKER_BY_BOXED_TYPE.get(
-            type.isEnum() ? Enum.class : type
-        );
+        (ThrowingFunction<PacketUnpacker, T, IOException>)
+            PACKET_UNPACKER_BY_BOXED_TYPE.get(type.isEnum() ? Enum.class : type);
     return unpackerFunction.apply(this);
   }
 

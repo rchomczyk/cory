@@ -15,24 +15,19 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory.logger.impl;
 
-import moe.rafal.cory.PacketGateway;
-import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import java.util.logging.Level;
 
-public final class PacketListenerObserverFactory {
+public interface LoggerFacade {
 
-  private PacketListenerObserverFactory() {
-
+  static LoggerFacade getCoryLogger(final boolean debug) {
+    return new CoryLogger(debug);
   }
 
-  public static PacketListenerObserver producePacketListenerObserver(
-      MessageBroker messageBroker,
-      PacketGateway packetGateway,
-      PacketPublisher packetPublisher,
-      PacketUnpackerFactory packetUnpackerFactory) {
-    return new PacketListenerObserverImpl(
-        messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
+  static LoggerFacade getNoopLogger() {
+    return new NoopLogger();
   }
+
+  void log(final Level level, final String message, final Object... parameters);
 }

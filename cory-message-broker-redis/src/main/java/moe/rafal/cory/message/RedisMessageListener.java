@@ -31,7 +31,9 @@ class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> 
   private final MessageListener listener;
 
   RedisMessageListener(
-      PacketUnpackerFactory packetUnpackerFactory, String subscribedTopic, MessageListener listener) {
+      PacketUnpackerFactory packetUnpackerFactory,
+      String subscribedTopic,
+      MessageListener listener) {
     this.packetUnpackerFactory = packetUnpackerFactory;
     this.subscribedTopic = subscribedTopic;
     this.listener = listener;
@@ -47,11 +49,9 @@ class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> 
 
   @VisibleForTesting
   void processIncomingMessage(String channelName, byte[] message) {
-    try (PacketUnpacker unpacker = packetUnpackerFactory.producePacketUnpacker(message)){
-      listener.receive(channelName,
-          unpacker.unpackUUID().toString(),
-          unpacker.unpackPayload());
-    } catch(IOException exception){
+    try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(message)) {
+      listener.receive(channelName, unpacker.unpackUUID().toString(), unpacker.unpackPayload());
+    } catch (IOException exception) {
       throw new MessageProcessingException(
           "Could not process process incoming message with attached request unique id as a header, because of unexpected exception.",
           exception);

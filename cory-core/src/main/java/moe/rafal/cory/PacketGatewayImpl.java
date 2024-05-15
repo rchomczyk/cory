@@ -37,8 +37,10 @@ class PacketGatewayImpl implements PacketGateway {
   private <T extends Packet> T newPacketOf(Class<T> packetType) throws MalformedPacketException {
     try {
       return packetType.getDeclaredConstructor().newInstance();
-    } catch (NoSuchMethodException | InstantiationException | IllegalAccessException |
-             InvocationTargetException exception) {
+    } catch (NoSuchMethodException
+        | InstantiationException
+        | IllegalAccessException
+        | InvocationTargetException exception) {
       throw new MalformedPacketException(
           "Packet could not be produced, because of missing public constructor without any parameters.",
           exception);
@@ -64,16 +66,14 @@ class PacketGatewayImpl implements PacketGateway {
   }
 
   @Override
-  public <T extends Packet> void writePacket(T packet, PacketPacker packer)
-      throws IOException {
+  public <T extends Packet> void writePacket(T packet, PacketPacker packer) throws IOException {
     writePacketType(packet, packer);
     writePacketUniqueId(packet, packer);
     packet.write(packer);
   }
 
   @Override
-  public <T extends Packet> void writePacketType(T packet, PacketPacker packer)
-      throws IOException {
+  public <T extends Packet> void writePacketType(T packet, PacketPacker packer) throws IOException {
     packer.packString(packet.getClass().getName());
   }
 

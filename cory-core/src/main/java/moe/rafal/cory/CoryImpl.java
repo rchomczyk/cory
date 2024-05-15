@@ -17,9 +17,13 @@
 
 package moe.rafal.cory;
 
+import static java.util.logging.Level.FINER;
+
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.logger.impl.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.message.packet.PacketListener;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
 import moe.rafal.cory.message.packet.PacketListenerObserver;
 import moe.rafal.cory.message.packet.PacketPublisher;
@@ -27,13 +31,23 @@ import moe.rafal.cory.message.packet.PacketRequester;
 
 class CoryImpl implements Cory {
 
+  private static final String CHANNEL_OBSERVED =
+      "Channel %s is now being observed by %s listener for incoming packets.";
+  private static final String CHANNEL_OBSERVED_WITH_PROCESSING =
+      "Channel %s is now being observed by %s listener for incoming packets to process.";
+  private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketPublisher packetPublisher;
   private final PacketRequester packetRequester;
   private final PacketListenerObserver packetListenerObserver;
 
-  CoryImpl(MessageBroker messageBroker, PacketPublisher packetPublisher,
-      PacketRequester packetRequester, PacketListenerObserver packetListenerObserver) {
+  CoryImpl(
+      LoggerFacade loggerFacade,
+      MessageBroker messageBroker,
+      PacketPublisher packetPublisher,
+      PacketRequester packetRequester,
+      PacketListenerObserver packetListenerObserver) {
+    this.loggerFacade = loggerFacade;
     this.messageBroker = messageBroker;
     this.packetPublisher = packetPublisher;
     this.packetRequester = packetRequester;
@@ -46,25 +60,37 @@ class CoryImpl implements Cory {
   }
 
   @Override
-  public <T extends Packet> void observe(String channelName,
-      PacketListenerDelegate<T> packetListener) {
+  public <T extends Packet> void observe(
+      String channelName, PacketListenerDelegate<T> packetListener) {
+    logChannelObservation(channelName, packetListener);
     packetListenerObserver.observe(channelName, packetListener);
   }
 
   @Override
-  public <T extends Packet> void observeWithProcessing(String channelName,
-      PacketListenerDelegate<T> packetListener) {
+  public <T extends Packet> void observeWithProcessing(
+      String channelName, PacketListenerDelegate<T> packetListener) {
+    logChannelObservationWithProcessing(channelName, packetListener);
     packetListenerObserver.observeWithProcessing(channelName, packetListener);
   }
 
   @Override
-  public <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName,
-      T packet) {
+  public <T extends Packet, R extends Packet> CompletableFuture<R> request(
+      String channelName, T packet) {
     return packetRequester.request(channelName, packet);
   }
 
   @Override
   public void close() throws IOException {
     messageBroker.close();
+  }
+
+  private void logChannelObservation(String channelName, PacketListener<?> packetListener) {
+    loggerFacade.log(FINER, CHANNEL_OBSERVED, channelName, packetListener.getClass().getName());
+  }
+
+  private void logChannelObservationWithProcessing(
+      String channelName, PacketListener<?> packetListener) {
+    loggerFacade.log(
+        FINER, CHANNEL_OBSERVED_WITH_PROCESSING, channelName, packetListener.getClass().getName());
   }
 }

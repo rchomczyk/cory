@@ -20,8 +20,9 @@ package moe.rafal.cory.message.packet;
 import static java.lang.String.format;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNatsConnectionUri;
+import static moe.rafal.cory.logger.impl.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
-import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
+import static moe.rafal.cory.message.packet.PacketRequester.getPacketRequester;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -34,6 +35,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
+import moe.rafal.cory.logger.impl.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
 import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
@@ -46,29 +48,29 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class PacketRequesterImplTests {
 
-  @InjectNatsServer
-  private EmbeddedNatsServer natsServer;
+  private final LoggerFacade loggerFacade = getNoopLogger();
+  @InjectNatsServer private EmbeddedNatsServer natsServer;
   private MessageBroker messageBroker;
   private PacketRequester packetRequester;
 
   @BeforeEach
   void createMessageBrokerAndPacketRequester() {
-    messageBroker = produceNatsMessageBroker(Options.builder()
-        .server(getNatsConnectionUri(natsServer))
-        .build());
-    packetRequester = producePacketRequester(
-        messageBroker,
-        PacketGateway.INSTANCE,
-        MessagePackPacketPackerFactory.INSTANCE,
-        MessagePackPacketUnpackerFactory.INSTANCE);
+    messageBroker =
+        produceNatsMessageBroker(
+            Options.builder().server(getNatsConnectionUri(natsServer)).build());
+    packetRequester =
+        getPacketRequester(
+            loggerFacade,
+            messageBroker,
+            PacketGateway.INSTANCE,
+            MessagePackPacketPackerFactory.INSTANCE,
+            MessagePackPacketUnpackerFactory.INSTANCE);
   }
 
   @Test
   void requestShouldThrowWhenWriteFails() throws IOException {
     Packet packetMock = mock(Packet.class);
-    doThrow(new IOException())
-        .when(packetMock)
-        .write(any());
+    doThrow(new IOException()).when(packetMock).write(any());
     assertThatCode(() -> packetRequester.request(BROADCAST_CHANNEL_NAME, packetMock))
         .isInstanceOf(PacketPublicationException.class)
         .hasMessage(
@@ -78,24 +80,26 @@ class PacketRequesterImplTests {
   @Test
   void requestShouldThrowWhenReadFails() throws IOException {
     PacketGateway packetGatewayMock = mock(PacketGateway.class);
-    doThrow(new IOException())
-        .when(packetGatewayMock)
-        .readPacket(any());
-    packetRequester = producePacketRequester(
-        messageBroker,
-        packetGatewayMock,
-        MessagePackPacketPackerFactory.INSTANCE,
-        MessagePackPacketUnpackerFactory.INSTANCE);
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    doThrow(new IOException()).when(packetGatewayMock).readPacket(any());
+    packetRequester =
+        getPacketRequester(
+            loggerFacade,
+            messageBroker,
+            packetGatewayMock,
+            MessagePackPacketPackerFactory.INSTANCE,
+            MessagePackPacketUnpackerFactory.INSTANCE);
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();
       assertThatCode(() -> packetRequester.processIncomingPacket(content).join())
           .isInstanceOf(CompletionException.class)
           .hasCauseInstanceOf(PacketProcessingException.class)
-          .hasMessage(format("%s: %s",
-              PacketProcessingException.class.getName(),
-              "Could not complete processing of incoming request packet, because of unexpected exception."));
+          .hasMessage(
+              format(
+                  "%s: %s",
+                  PacketProcessingException.class.getName(),
+                  "Could not complete processing of incoming request packet, because of unexpected exception."));
     }
   }
 }

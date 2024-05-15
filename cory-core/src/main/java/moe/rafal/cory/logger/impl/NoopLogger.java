@@ -15,22 +15,12 @@
  *
  */
 
-package moe.rafal.cory.message.packet;
+package moe.rafal.cory.logger.impl;
 
-import moe.rafal.cory.PacketGateway;
-import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
+import java.util.logging.Level;
 
-public final class PacketPublisherFactory {
+class NoopLogger implements LoggerFacade {
 
-  private PacketPublisherFactory() {
-
-  }
-
-  public static PacketPublisher producePacketPublisher(
-      MessageBroker messageBroker,
-      PacketGateway packetGateway,
-      PacketPackerFactory packetPackerFactory) {
-    return new PacketPublisherImpl(messageBroker, packetGateway, packetPackerFactory);
-  }
+  @Override
+  public void log(final Level level, final String message, final Object... parameters) {}
 }

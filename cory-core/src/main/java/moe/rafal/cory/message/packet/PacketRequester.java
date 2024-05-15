@@ -19,8 +19,23 @@ package moe.rafal.cory.message.packet;
 
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 public interface PacketRequester {
+
+  static PacketRequester getPacketRequester(
+      LoggerFacade loggerFacade,
+      MessageBroker messageBroker,
+      PacketGateway packetGateway,
+      PacketPackerFactory packetPackerFactory,
+      PacketUnpackerFactory packetUnpackerFactory) {
+    return new PacketRequesterImpl(
+        loggerFacade, messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
+  }
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);
 

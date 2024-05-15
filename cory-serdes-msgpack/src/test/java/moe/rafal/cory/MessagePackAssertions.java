@@ -37,7 +37,7 @@ public final class MessagePackAssertions {
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
       T expectedValue)
       throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         packer.toBinaryArray())) {
       assertThatUnpackerContains(unpacker, valueResolver, expectedValue);
     }
@@ -64,7 +64,7 @@ public final class MessagePackAssertions {
       ThrowingBiConsumer<PacketPacker, T, IOException> packerInitializer,
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
       T expectedValue) throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         getBinaryArrayOf(packerInitializer, expectedValue))) {
       assertThat(valueResolver.apply(unpacker))
           .isEqualTo(expectedValue);
@@ -75,7 +75,7 @@ public final class MessagePackAssertions {
       ThrowingBiConsumer<PacketPacker, T, IOException> packetInitializer,
       T expectedValue)
       throws IOException {
-    PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker();
+    PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker();
     packetInitializer.accept(packer, expectedValue);
     return packer.toBinaryArray();
   }

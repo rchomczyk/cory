@@ -22,6 +22,7 @@ import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNatsConnectionUri;
+import static moe.rafal.cory.logger.impl.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -50,19 +51,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class CoryImplTests {
 
-  @InjectNatsServer
-  private EmbeddedNatsServer natsServer;
+  @InjectNatsServer private EmbeddedNatsServer natsServer;
   private Cory cory;
 
   @BeforeEach
   void setupCory() {
-    cory = CoryBuilder.newBuilder()
-        .withMessageBroker(produceNatsMessageBroker(Options.builder()
-            .server(getNatsConnectionUri(natsServer))
-            .build()))
-        .withPacketPackerFactory(MessagePackPacketPackerFactory.INSTANCE)
-        .withPacketUnpackerFactory(MessagePackPacketUnpackerFactory.INSTANCE)
-        .build();
+    cory =
+        CoryBuilder.newBuilder()
+            .withLoggerFacade(getNoopLogger())
+            .withMessageBroker(
+                produceNatsMessageBroker(
+                    Options.builder().server(getNatsConnectionUri(natsServer)).build()))
+            .withPacketPackerFactory(MessagePackPacketPackerFactory.INSTANCE)
+            .withPacketUnpackerFactory(MessagePackPacketUnpackerFactory.INSTANCE)
+            .build();
   }
 
   @AfterEach
@@ -74,30 +76,34 @@ class CoryImplTests {
   void publishAndObserveTest() {
     LoginPacket packet = getLoginPacket();
     AtomicReference<Packet> receivedPacket = new AtomicReference<>();
-    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginPacket.class) {
-      @Override
-      public void receive(String channelName, String replyChannelName, LoginPacket packet) {
-        receivedPacket.set(packet);
-      }
-    });
+    cory.observe(
+        BROADCAST_CHANNEL_NAME,
+        new PacketListenerDelegate<>(LoginPacket.class) {
+          @Override
+          public void receive(String channelName, String replyChannelName, LoginPacket packet) {
+            receivedPacket.set(packet);
+          }
+        });
     cory.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilAsserted(() -> assertThat(receivedPacket.get())
-            .isEqualTo(packet));
+        .untilAsserted(() -> assertThat(receivedPacket.get()).isEqualTo(packet));
   }
 
   @Test
   void requestTest() {
     LoginRequestPacket packet = getLoginRequestPacket();
     AtomicReference<LoginRequestPacket> receivedPacket = new AtomicReference<>();
-    cory.observe(BROADCAST_CHANNEL_NAME, new PacketListenerDelegate<>(LoginRequestPacket.class) {
-      @Override
-      public void receive(String channelName, String replyChannelName, LoginRequestPacket packet) {
-        packet.setAccess(true);
-        cory.publish(replyChannelName, packet);
-      }
-    });
+    cory.observe(
+        BROADCAST_CHANNEL_NAME,
+        new PacketListenerDelegate<>(LoginRequestPacket.class) {
+          @Override
+          public void receive(
+              String channelName, String replyChannelName, LoginRequestPacket packet) {
+            packet.setAccess(true);
+            cory.publish(replyChannelName, packet);
+          }
+        });
     cory.request(BROADCAST_CHANNEL_NAME, packet)
         .thenAccept(response -> receivedPacket.set((LoginRequestPacket) response));
     await()
@@ -107,7 +113,6 @@ class CoryImplTests {
 
   @Test
   void closeTest() {
-    assertThatCode(() -> cory.close())
-        .doesNotThrowAnyException();
+    assertThatCode(() -> cory.close()).doesNotThrowAnyException();
   }
 }

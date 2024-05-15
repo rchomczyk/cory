@@ -51,7 +51,7 @@ class MessagePackPacketUnpackerTests {
 
   @AfterEach
   void closePacketUnpacker() {
-    assertThatCode(() -> MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    assertThatCode(() -> MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         new byte[0]).close())
         .doesNotThrowAnyException();
   }
@@ -63,7 +63,7 @@ class MessagePackPacketUnpackerTests {
       packer.packString("test_string_2");
       packer.packString("test_string_3");
     }, DEFAULT_VALUE);
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         content)) {
       assertThat(unpacker.unpackString())
           .isEqualTo("test_string_1");
@@ -207,9 +207,9 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackInstantWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackInstant())
             .isNull();
@@ -234,9 +234,9 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackDurationWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackDuration())
             .isNull();
@@ -258,9 +258,9 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackEnumWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packEnum(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat((GameState) unpacker.unpackEnum())
             .isNull();
@@ -274,7 +274,7 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextOnEmptyUnpackerTest() throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         new byte[0])) {
       assertThat(unpacker.hasNext())
           .isFalse();
@@ -283,7 +283,7 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextOnExhaustedUnpackerTest() throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         getBinaryArrayOf(PacketPacker::packInt, 1))) {
       assertThat(unpacker.hasNext())
           .isTrue();
@@ -292,9 +292,9 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNilValueOnNilElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packNil();
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue())
             .isTrue();
@@ -304,9 +304,9 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNilValueOnAnyElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packDuration(ZERO);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue())
             .isFalse();
