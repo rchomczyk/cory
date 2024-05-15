@@ -17,11 +17,8 @@
 
 package moe.rafal.cory.message;
 
-import moe.rafal.cory.jacoco.coverage.ExcludeFromJacocoGeneratedReport;
-
 public class MessageBrokerClosingException extends IllegalStateException {
 
-  @ExcludeFromJacocoGeneratedReport
   MessageBrokerClosingException(String message, Throwable throwable) {
     super(message, throwable);
   }
