@@ -27,12 +27,10 @@ import moe.rafal.cory.serdes.PacketPacker;
 
 final class RedisMessageBrokerTestsUtils {
 
-  private RedisMessageBrokerTestsUtils() {
-
-  }
+  private RedisMessageBrokerTestsUtils() {}
 
   static byte[] getPayloadWithRequestUniqueId(UUID requestUniqueId) throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(BROADCAST_TEST_PAYLOAD.length);
       packer.packPayload(BROADCAST_TEST_PAYLOAD);

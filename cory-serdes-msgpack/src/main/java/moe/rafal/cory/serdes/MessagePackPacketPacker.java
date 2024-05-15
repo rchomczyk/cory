@@ -45,13 +45,15 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public <V> PacketPacker packArray(final V[] value) throws IOException {
-    return packOrNil(value, (packer, val) -> {
-      packer.packString(val.getClass().getComponentType().getName());
-      packer.packArrayHeader(val.length);
-      for (final V currentValue : value) {
-        this.packAuto(currentValue);
-      }
-    });
+    return packOrNil(
+        value,
+        (packer, val) -> {
+          packer.packString(val.getClass().getComponentType().getName());
+          packer.packArrayHeader(val.length);
+          for (final V currentValue : value) {
+            this.packAuto(currentValue);
+          }
+        });
   }
 
   @Override
@@ -93,10 +95,12 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packUUID(UUID value) throws IOException {
-    return packOrNil(value, (packer, ignored) -> {
-      packer.packLong(value.getMostSignificantBits());
-      packer.packLong(value.getLeastSignificantBits());
-    });
+    return packOrNil(
+        value,
+        (packer, ignored) -> {
+          packer.packLong(value.getMostSignificantBits());
+          packer.packLong(value.getLeastSignificantBits());
+        });
   }
 
   @Override
@@ -122,13 +126,15 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public <K, V> PacketPacker packMap(final Map<K, V> value) throws IOException {
-    return packOrNil(value, (packer, val) -> {
-      packer.packMapHeader(val.size());
-      for (final Map.Entry<K, V> entry : value.entrySet()) {
-        this.packAuto(entry.getKey());
-        this.packAuto(entry.getValue());
-      }
-    });
+    return packOrNil(
+        value,
+        (packer, val) -> {
+          packer.packMapHeader(val.size());
+          for (final Map.Entry<K, V> entry : value.entrySet()) {
+            this.packAuto(entry.getKey());
+            this.packAuto(entry.getValue());
+          }
+        });
   }
 
   @Override
@@ -143,23 +149,27 @@ class MessagePackPacketPacker implements PacketPacker {
 
   @Override
   public PacketPacker packEnum(Enum<?> value) throws IOException {
-    return packOrNil(value, (packer, val) -> {
-      packer.packString(val.getDeclaringClass().getName());
-      packer.packString(val.name());
-    });
+    return packOrNil(
+        value,
+        (packer, val) -> {
+          packer.packString(val.getDeclaringClass().getName());
+          packer.packString(val.name());
+        });
   }
 
   @Override
-  public @SuppressWarnings("unchecked") <T> PacketPacker packAuto(final T value) throws IOException {
-    return packOrNil(value, (packer, val) -> {
-      final Class<?> type = getBoxedType(val.getClass());
-      final ThrowingBiConsumer<PacketPacker, T, IOException> packerFunction =
-          (ThrowingBiConsumer<PacketPacker, T, IOException>) PACKET_PACKER_BY_BOXED_TYPE.get(
-              type
-          );
-      this.packString(type.getName());
-      packerFunction.accept(this, val);
-    });
+  public @SuppressWarnings("unchecked") <T> PacketPacker packAuto(final T value)
+      throws IOException {
+    return packOrNil(
+        value,
+        (packer, val) -> {
+          final Class<?> type = getBoxedType(val.getClass());
+          final ThrowingBiConsumer<PacketPacker, T, IOException> packerFunction =
+              (ThrowingBiConsumer<PacketPacker, T, IOException>)
+                  PACKET_PACKER_BY_BOXED_TYPE.get(type);
+          this.packString(type.getName());
+          packerFunction.accept(this, val);
+        });
   }
 
   @Override
@@ -184,8 +194,8 @@ class MessagePackPacketPacker implements PacketPacker {
     underlyingPacker.close();
   }
 
-  private <T> PacketPacker packOrNil(T value,
-      ThrowingBiConsumer<MessagePacker, T, IOException> packFunction) throws IOException {
+  private <T> PacketPacker packOrNil(
+      T value, ThrowingBiConsumer<MessagePacker, T, IOException> packFunction) throws IOException {
     if (value == null) {
       underlyingPacker.packNil();
       return this;

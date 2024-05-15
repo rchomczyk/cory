@@ -45,7 +45,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketPackerTests {
 
-  private final PacketPacker packetPacker = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker();
+  private final PacketPacker packetPacker = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker();
 
   @AfterEach
   void flushAndClosePacketPacker() throws IOException {
@@ -60,7 +60,7 @@ class MessagePackPacketPackerTests {
 
   @Test
   void closePacketUnpacker() {
-    assertThatCode(() -> MessagePackPacketPackerFactory.INSTANCE.producePacketPacker().close())
+    assertThatCode(() -> MessagePackPacketPackerFactory.INSTANCE.getPacketPacker().close())
         .doesNotThrowAnyException();
   }
 
@@ -150,9 +150,9 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packUUIDWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packUUID(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackUUID())
             .isNull();
@@ -209,9 +209,9 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packInstantWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packInstant(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackInstant())
             .isNull();
@@ -236,9 +236,9 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packDurationWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackDuration())
             .isNull();
@@ -260,9 +260,9 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packEnumWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat((GameState) unpacker.unpackEnum())
             .isNull();
@@ -272,13 +272,13 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packAutoTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packAuto(10);
       packer.packAuto("test_string");
       packer.packAuto(AWAITING);
       packer.packAuto(Map.of("key", "value", "key2", "value2"));
       packer.packAuto(new String[]{"value", "value1", "value2"});
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.unpackString())
             .isEqualTo(Integer.class.getName());
@@ -304,9 +304,9 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packAutoWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packAuto(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue())
             .isTrue();

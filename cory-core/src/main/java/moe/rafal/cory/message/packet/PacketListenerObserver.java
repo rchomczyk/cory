@@ -18,14 +18,27 @@
 package moe.rafal.cory.message.packet;
 
 import moe.rafal.cory.Packet;
+import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 public interface PacketListenerObserver {
+
+  static PacketListenerObserver getPacketListenerObserver(
+      LoggerFacade loggerFacade,
+      MessageBroker messageBroker,
+      PacketGateway packetGateway,
+      PacketPublisher packetPublisher,
+      PacketUnpackerFactory packetUnpackerFactory) {
+    return new PacketListenerObserverImpl(
+        loggerFacade, messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
+  }
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
   <T extends Packet> void observeWithProcessing(
       String channelName, PacketListenerDelegate<T> packetListener);
 
-  <T extends Packet> T processIncomingPacket(byte[] payload)
-      throws PacketProcessingException;
+  <T extends Packet> T processIncomingPacket(byte[] payload) throws PacketProcessingException;
 }

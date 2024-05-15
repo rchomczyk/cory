@@ -22,9 +22,10 @@ import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLogoutPacket;
 import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNatsConnectionUri;
+import static moe.rafal.cory.logger.impl.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
-import static moe.rafal.cory.message.packet.PacketListenerObserverFactory.producePacketListenerObserver;
-import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
+import static moe.rafal.cory.message.packet.PacketListenerObserver.getPacketListenerObserver;
+import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -36,6 +37,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
+import moe.rafal.cory.logger.impl.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
 import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
@@ -49,8 +51,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class PacketListenerObserverImplTests {
 
-  @InjectNatsServer
-  private EmbeddedNatsServer natsServer;
+  private final LoggerFacade loggerFacade = getNoopLogger();
+  @InjectNatsServer private EmbeddedNatsServer natsServer;
   private PacketGateway packetGateway;
   private PacketPublisher packetPublisher;
   private PacketListenerObserver packetListenerObserver;
@@ -58,25 +60,27 @@ class PacketListenerObserverImplTests {
   @BeforeEach
   void createMessageBrokerAndPacketPublisherWithPacketListenerObserver() {
     packetGateway = PacketGateway.INSTANCE;
-    MessageBroker messageBroker = produceNatsMessageBroker(Options.builder()
-        .server(getNatsConnectionUri(natsServer))
-        .build());
-    packetPublisher = producePacketPublisher(
-        messageBroker,
-        packetGateway,
-        MessagePackPacketPackerFactory.INSTANCE);
-    packetListenerObserver = producePacketListenerObserver(
-        messageBroker,
-        packetGateway,
-        packetPublisher,
-        MessagePackPacketUnpackerFactory.INSTANCE);
+    MessageBroker messageBroker =
+        produceNatsMessageBroker(
+            Options.builder().server(getNatsConnectionUri(natsServer)).build());
+    packetPublisher =
+        getPacketPublisher(
+            loggerFacade, messageBroker, packetGateway, MessagePackPacketPackerFactory.INSTANCE);
+    packetListenerObserver =
+        getPacketListenerObserver(
+            loggerFacade,
+            messageBroker,
+            packetGateway,
+            packetPublisher,
+            MessagePackPacketUnpackerFactory.INSTANCE);
   }
 
   @Test
   void observeAndPublishTest() {
     Packet packet = getLoginPacket();
     AtomicReference<LoginPacket> receivedPacket = new AtomicReference<>();
-    packetListenerObserver.observe(BROADCAST_CHANNEL_NAME,
+    packetListenerObserver.observe(
+        BROADCAST_CHANNEL_NAME,
         new PacketListenerDelegate<>(LoginPacket.class) {
           @Override
           public void receive(String channelName, String replyChannelName, LoginPacket packet) {
@@ -86,8 +90,7 @@ class PacketListenerObserverImplTests {
     packetPublisher.publish(BROADCAST_CHANNEL_NAME, packet);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilAsserted(() -> assertThat(receivedPacket.get())
-            .isEqualTo(packet));
+        .untilAsserted(() -> assertThat(receivedPacket.get()).isEqualTo(packet));
   }
 
   @Test
@@ -95,7 +98,8 @@ class PacketListenerObserverImplTests {
     Packet loginPacket = getLoginPacket();
     Packet logoutPacket = getLogoutPacket();
     AtomicReference<Packet> receivedPacket = new AtomicReference<>();
-    packetListenerObserver.observe(BROADCAST_CHANNEL_NAME,
+    packetListenerObserver.observe(
+        BROADCAST_CHANNEL_NAME,
         new PacketListenerDelegate<>(LoginPacket.class) {
           @Override
           public void receive(String channelName, String replyChannelName, LoginPacket packet) {
@@ -106,29 +110,27 @@ class PacketListenerObserverImplTests {
     packetPublisher.publish(BROADCAST_CHANNEL_NAME, loginPacket);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilAsserted(() -> {
-          assertThat(receivedPacket.get())
-              .isNotEqualTo(logoutPacket);
-          assertThat(receivedPacket.get())
-              .isEqualTo(loginPacket);
-        });
+        .untilAsserted(
+            () -> {
+              assertThat(receivedPacket.get()).isNotEqualTo(logoutPacket);
+              assertThat(receivedPacket.get()).isEqualTo(loginPacket);
+            });
   }
 
   @Test
   void processIncomingPacketTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       LoginPacket packet = getLoginPacket();
       packetGateway.writePacket(packet, packer);
-      LoginPacket processedPacket = packetListenerObserver.processIncomingPacket(
-          packer.toBinaryArray());
-      assertThat(processedPacket)
-          .isEqualTo(packet);
+      LoginPacket processedPacket =
+          packetListenerObserver.processIncomingPacket(packer.toBinaryArray());
+      assertThat(processedPacket).isEqualTo(packet);
     }
   }
 
   @Test
   void processIncomingPacketShouldThrowWhenMalformedTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();

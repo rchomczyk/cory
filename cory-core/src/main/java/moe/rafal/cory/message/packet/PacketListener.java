@@ -21,9 +21,7 @@ import moe.rafal.cory.Packet;
 
 public interface PacketListener<T extends Packet> {
 
-  default void receive(String channelName, String replyChannelName, T packet) {
-
-  }
+  default void receive(String channelName, String replyChannelName, T packet) {}
 
   default Object process(String channelName, String replyChannelName, T packet) {
     return null;

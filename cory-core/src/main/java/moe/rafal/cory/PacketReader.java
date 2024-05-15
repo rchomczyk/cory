@@ -29,6 +29,5 @@ interface PacketReader {
   <T extends Packet> Class<T> readPacketType(PacketUnpacker unpacker)
       throws IOException, MalformedPacketException;
 
-  UUID readPacketUniqueId(PacketUnpacker unpacker)
-      throws IOException;
+  UUID readPacketUniqueId(PacketUnpacker unpacker) throws IOException;
 }

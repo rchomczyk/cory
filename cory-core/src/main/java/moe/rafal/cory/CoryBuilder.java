@@ -17,11 +17,14 @@
 
 package moe.rafal.cory;
 
-import static moe.rafal.cory.message.packet.PacketListenerObserverFactory.producePacketListenerObserver;
-import static moe.rafal.cory.message.packet.PacketPublisherFactory.producePacketPublisher;
-import static moe.rafal.cory.message.packet.PacketRequesterFactory.producePacketRequester;
+import static moe.rafal.cory.logger.impl.LoggerFacade.getCoryLogger;
+import static moe.rafal.cory.message.packet.PacketListenerObserver.getPacketListenerObserver;
+import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
+import static moe.rafal.cory.message.packet.PacketRequester.getPacketRequester;
 
+import moe.rafal.cory.logger.impl.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.message.packet.PacketListenerObserver;
 import moe.rafal.cory.message.packet.PacketPublisher;
 import moe.rafal.cory.message.packet.PacketRequester;
 import moe.rafal.cory.serdes.PacketPackerFactory;
@@ -29,16 +32,20 @@ import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 public final class CoryBuilder {
 
+  private LoggerFacade loggerFacade = getCoryLogger(false);
   private MessageBroker messageBroker;
   private PacketPackerFactory packetPackerFactory;
   private PacketUnpackerFactory packetUnpackerFactory;
 
-  private CoryBuilder() {
-
-  }
+  private CoryBuilder() {}
 
   public static CoryBuilder newBuilder() {
     return new CoryBuilder();
+  }
+
+  public CoryBuilder withLoggerFacade(LoggerFacade loggerFacade) {
+    this.loggerFacade = loggerFacade;
+    return this;
   }
 
   public CoryBuilder withMessageBroker(MessageBroker messageBroker) {
@@ -73,15 +80,15 @@ public final class CoryBuilder {
     }
 
     PacketGateway packetGateway = PacketGateway.INSTANCE;
-    PacketPublisher packetPublisher = producePacketPublisher(
-        messageBroker, packetGateway, packetPackerFactory);
-    PacketRequester packetRequester = producePacketRequester(
-        messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
+    PacketPublisher packetPublisher =
+        getPacketPublisher(loggerFacade, messageBroker, packetGateway, packetPackerFactory);
+    PacketRequester packetRequester =
+        getPacketRequester(
+            loggerFacade, messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
+    PacketListenerObserver packetListenerObserver =
+        getPacketListenerObserver(
+            loggerFacade, messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
     return new CoryImpl(
-        messageBroker,
-        packetPublisher,
-        packetRequester,
-        producePacketListenerObserver(
-            messageBroker, packetGateway, packetPublisher, packetUnpackerFactory));
+        loggerFacade, messageBroker, packetPublisher, packetRequester, packetListenerObserver);
   }
 }

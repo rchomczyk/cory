@@ -20,5 +20,5 @@ package moe.rafal.cory.serdes;
 @FunctionalInterface
 public interface PacketUnpackerFactory {
 
-  PacketUnpacker producePacketUnpacker(byte[] content);
+  PacketUnpacker getPacketUnpacker(byte[] content);
 }

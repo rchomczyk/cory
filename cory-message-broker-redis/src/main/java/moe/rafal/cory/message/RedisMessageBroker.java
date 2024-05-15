@@ -64,8 +64,8 @@ class RedisMessageBroker implements MessageBroker {
   }
 
   private GenericObjectPool<StatefulRedisConnection<String, byte[]>> createRedisConnectionPool() {
-    return createGenericObjectPool(() -> redisClient.connect(DEFAULT_CODEC),
-        new GenericObjectPoolConfig<>());
+    return createGenericObjectPool(
+        () -> redisClient.connect(DEFAULT_CODEC), new GenericObjectPoolConfig<>());
   }
 
   @Override
@@ -75,7 +75,8 @@ class RedisMessageBroker implements MessageBroker {
 
   @Override
   public void observe(String channelName, MessageListener listener) {
-    subscribingConnection.addListener(new RedisMessageListener(packetUnpackerFactory, channelName, listener));
+    subscribingConnection.addListener(
+        new RedisMessageListener(packetUnpackerFactory, channelName, listener));
     if (whetherSubscriptionExists(channelName)) {
       return;
     }
@@ -92,11 +93,15 @@ class RedisMessageBroker implements MessageBroker {
   public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
     UUID payloadUniqueId = randomUUID();
 
-    CompletableFuture<byte[]> promisedResponse = new CompletableFuture<byte[]>()
-        .orTimeout(requestCleanupInterval.toNanos(), NANOSECONDS)
-        .exceptionally(exception -> handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
+    CompletableFuture<byte[]> promisedResponse =
+        new CompletableFuture<byte[]>()
+            .orTimeout(requestCleanupInterval.toNanos(), NANOSECONDS)
+            .exceptionally(
+                exception ->
+                    handleResponseProcessingFailure(exception, channelName, payloadUniqueId));
 
-    observe(payloadUniqueId.toString(),
+    observe(
+        payloadUniqueId.toString(),
         new RedisRequestMessageListener(payloadUniqueId.toString(), promisedResponse));
     publishWithHeader(channelName, payload, payloadUniqueId);
     return promisedResponse;
@@ -109,13 +114,12 @@ class RedisMessageBroker implements MessageBroker {
       cancelTopicObservation(payloadUniqueId.toString());
     }
     throw new MessageProcessingException(
-        "Could not process incoming response, because of unexpected exception.",
-        exceptionCause);
+        "Could not process incoming response, because of unexpected exception.", exceptionCause);
   }
 
   private void publishWithHeader(String channelName, byte[] payload, UUID requestUniqueId) {
     try (StatefulRedisConnection<String, byte[]> borrow = connectionPool.borrowObject();
-        PacketPacker packer = packetPackerFactory.producePacketPacker()) {
+        PacketPacker packer = packetPackerFactory.getPacketPacker()) {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(payload.length);
       packer.packPayload(payload);

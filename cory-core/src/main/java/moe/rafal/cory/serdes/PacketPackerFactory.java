@@ -20,5 +20,5 @@ package moe.rafal.cory.serdes;
 @FunctionalInterface
 public interface PacketPackerFactory {
 
-  PacketPacker producePacketPacker();
+  PacketPacker getPacketPacker();
 }

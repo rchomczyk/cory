@@ -38,9 +38,9 @@ class MessagePackPacketTests {
   @Test
   void writeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packet.write(packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
             INITIAL_USERNAME);
@@ -57,7 +57,7 @@ class MessagePackPacketTests {
       packer.packString(INCOMING_USERNAME);
       packer.packString(INCOMING_PASSWORD);
     }, DEFAULT_VALUE);
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
         content)) {
       packet.read(unpacker);
       assertThat(packet.getUsername())
@@ -70,9 +70,9 @@ class MessagePackPacketTests {
   @Test
   void writeAndReadTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.producePacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
       packet.write(packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.producePacketUnpacker(
+      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
           packer.toBinaryArray())) {
         LoginPacket clonePacket = new LoginPacket();
         clonePacket.read(unpacker);

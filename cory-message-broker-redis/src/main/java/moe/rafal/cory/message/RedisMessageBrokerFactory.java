@@ -28,11 +28,9 @@ public final class RedisMessageBrokerFactory {
 
   private static final Duration DEFAULT_REQUEST_CLEANUP_INTERVAL = ofSeconds(5);
 
-  private RedisMessageBrokerFactory() {
+  private RedisMessageBrokerFactory() {}
 
-  }
-
-  public static MessageBroker produceRedisMessageBroker(
+  public static MessageBroker getRedisMessageBroker(
       PacketPackerFactory packetPackerFactory,
       PacketUnpackerFactory packetUnpackerFactory,
       RedisURI redisUri,
@@ -41,11 +39,11 @@ public final class RedisMessageBrokerFactory {
         packetPackerFactory, packetUnpackerFactory, redisUri, requestCleanupInterval);
   }
 
-  public static MessageBroker produceRedisMessageBroker(
+  public static MessageBroker getRedisMessageBroker(
       PacketPackerFactory packetPackerFactory,
       PacketUnpackerFactory packetUnpackerFactory,
       RedisURI redisUri) {
-    return produceRedisMessageBroker(
+    return getRedisMessageBroker(
         packetPackerFactory, packetUnpackerFactory, redisUri, DEFAULT_REQUEST_CLEANUP_INTERVAL);
   }
 }

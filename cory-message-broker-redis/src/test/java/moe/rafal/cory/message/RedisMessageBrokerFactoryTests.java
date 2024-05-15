@@ -17,7 +17,7 @@
 
 package moe.rafal.cory.message;
 
-import static moe.rafal.cory.message.RedisMessageBrokerFactory.produceRedisMessageBroker;
+import static moe.rafal.cory.message.RedisMessageBrokerFactory.getRedisMessageBroker;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.lettuce.core.RedisConnectionException;
@@ -31,11 +31,13 @@ class RedisMessageBrokerFactoryTests {
   private static final String INVALID_CONNECTION_URI = "redis://127.0.0.1:11647";
 
   @Test
-  void produceRedisMessageBrokerThrowsWithoutServerTest() {
-    assertThatCode(() -> produceRedisMessageBroker(
-        MessagePackPacketPackerFactory.INSTANCE,
-        MessagePackPacketUnpackerFactory.INSTANCE,
-        RedisURI.create(INVALID_CONNECTION_URI)))
+  void getRedisMessageBrokerThrowsWithoutServerTest() {
+    assertThatCode(
+            () ->
+                getRedisMessageBroker(
+                    MessagePackPacketPackerFactory.INSTANCE,
+                    MessagePackPacketUnpackerFactory.INSTANCE,
+                    RedisURI.create(INVALID_CONNECTION_URI)))
         .isInstanceOf(RedisConnectionException.class)
         .hasMessageStartingWith("Unable to connect to ");
   }

@@ -23,9 +23,7 @@ import java.io.IOException;
 
 public final class NatsMessageBrokerFactory {
 
-  private NatsMessageBrokerFactory() {
-
-  }
+  private NatsMessageBrokerFactory() {}
 
   public static MessageBroker produceNatsMessageBroker(Options options)
       throws MessageBrokerInstantiationException {

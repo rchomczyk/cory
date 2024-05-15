@@ -17,25 +17,37 @@
 
 package moe.rafal.cory.message.packet;
 
+import static java.util.logging.Level.FINEST;
+
 import java.util.concurrent.CompletionStage;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.logger.impl.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 class PacketListenerObserverImpl implements PacketListenerObserver {
 
+  private static final String RECEIVED_PACKET =
+      "Received packet of type %s (%s) from %s channel with %s reply channel.";
+  private static final String RECEIVED_AND_FORWARDED_PACKET =
+      "Received packet of type %s (%s) from %s channel with %s reply channel and forwarded to %s listener.";
+  private static final String RECEIVED_AND_RESPONDED_PACKET =
+      "Received packet of type %s (%s) from %s channel with %s reply channel and responded with %s packet.";
+  private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
   private final PacketPublisher packetPublisher;
   private final PacketUnpackerFactory packetUnpackerFactory;
 
   PacketListenerObserverImpl(
+      LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
       PacketPublisher packetPublisher,
       PacketUnpackerFactory packetUnpackerFactory) {
+    this.loggerFacade = loggerFacade;
     this.messageBroker = messageBroker;
     this.packetGateway = packetGateway;
     this.packetPublisher = packetPublisher;
@@ -43,58 +55,109 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   }
 
   @Override
-  public <T extends Packet> void observe(String channelName,
-      PacketListenerDelegate<T> packetListener) {
-    messageBroker.observe(channelName, (ignored, replyChannelName, payload) -> {
-      Packet packet = processIncomingPacket(payload);
+  public <T extends Packet> void observe(
+      String channelName, PacketListenerDelegate<T> packetListener) {
+    messageBroker.observe(
+        channelName,
+        (ignored, replyChannelName, payload) -> {
+          Packet packet = processIncomingPacket(payload);
+          logReceivedPacket(packet, channelName, replyChannelName);
 
-      boolean whetherListensForPacket = packetListener.getPacketType()
-          .equals(packet.getClass());
-      if (whetherListensForPacket) {
-        // noinspection unchecked
-        packetListener.receive(channelName, replyChannelName, (T) packet);
-      }
-    });
+          boolean whetherListensForPacket =
+              packetListener.getPacketType().equals(packet.getClass());
+          if (whetherListensForPacket) {
+            // noinspection unchecked
+            packetListener.receive(channelName, replyChannelName, (T) packet);
+            logReceivedAndForwardedPacket(packet, channelName, replyChannelName, packetListener);
+          }
+        });
   }
 
   @Override
-  public <T extends Packet> void observeWithProcessing(String channelName,
-      PacketListenerDelegate<T> packetListener) {
-    messageBroker.observe(channelName, (ignored, replyChannelName, payload) -> {
-      Packet requestPacket = processIncomingPacket(payload);
+  public <T extends Packet> void observeWithProcessing(
+      String channelName, PacketListenerDelegate<T> packetListener) {
+    messageBroker.observe(
+        channelName,
+        (ignored, replyChannelName, payload) -> {
+          Packet requestPacket = processIncomingPacket(payload);
+          logReceivedPacket(requestPacket, channelName, replyChannelName);
 
-      boolean whetherListensForPacket = packetListener.getPacketType()
-          .equals(requestPacket.getClass());
-      if (whetherListensForPacket) {
-        String gotoChannelName =
-            packetListener.isPublishedOnReplyChannel() ? replyChannelName : channelName;
-        // noinspection unchecked
-        Object processingResult = packetListener.process(channelName, replyChannelName,
-            (T) requestPacket);
-        if (processingResult instanceof Packet) {
-          packetPublisher.publish(gotoChannelName, (Packet) processingResult);
-        } else if (processingResult instanceof CompletionStage) {
-          ((CompletionStage<?>) processingResult)
-              .thenAccept(packet -> packetPublisher.publish(gotoChannelName, (Packet) packet))
-              .exceptionally(exception -> {
-                throw new PacketPublicationException(
-                    "Could not publish processed packet, because of unexpected exception.",
-                    exception);
-              });
-        }
-      }
-    });
+          boolean whetherListensForPacket =
+              packetListener.getPacketType().equals(requestPacket.getClass());
+          if (whetherListensForPacket) {
+            String gotoChannelName =
+                packetListener.isPublishedOnReplyChannel() ? replyChannelName : channelName;
+            // noinspection unchecked
+            Object processingResult =
+                packetListener.process(channelName, replyChannelName, (T) requestPacket);
+            if (processingResult instanceof Packet) {
+              packetPublisher.publish(gotoChannelName, (Packet) processingResult);
+              logReceivedAndRespondedPacket(
+                  requestPacket, channelName, replyChannelName, (Packet) processingResult);
+            } else if (processingResult instanceof CompletionStage) {
+              ((CompletionStage<?>) processingResult)
+                  .thenAccept(
+                      packet -> {
+                        packetPublisher.publish(gotoChannelName, (Packet) packet);
+                        logReceivedAndRespondedPacket(
+                            requestPacket, channelName, replyChannelName, (Packet) packet);
+                      })
+                  .exceptionally(
+                      exception -> {
+                        throw new PacketPublicationException(
+                            "Could not publish processed packet, because of unexpected exception.",
+                            exception);
+                      });
+            }
+          }
+        });
   }
 
   @Override
   public <T extends Packet> T processIncomingPacket(byte[] payload)
       throws PacketProcessingException {
-    try (PacketUnpacker unpacker = packetUnpackerFactory.producePacketUnpacker(payload)) {
+    try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(payload)) {
       return packetGateway.readPacket(unpacker);
     } catch (Exception exception) {
       throw new PacketProcessingException(
-          "Could not process incoming packet, because of unexpected exception.",
-          exception);
+          "Could not process incoming packet, because of unexpected exception.", exception);
     }
+  }
+
+  private void logReceivedPacket(Packet packet, String channelName, String replyChannelName) {
+    loggerFacade.log(
+        FINEST,
+        RECEIVED_PACKET,
+        packet.getClass().getName(),
+        packet.getUniqueId(),
+        channelName,
+        replyChannelName);
+  }
+
+  private void logReceivedAndForwardedPacket(
+      Packet packet,
+      String channelName,
+      String replyChannelName,
+      PacketListener<?> packetListener) {
+    loggerFacade.log(
+        FINEST,
+        RECEIVED_AND_FORWARDED_PACKET,
+        packet.getClass().getName(),
+        packet.getUniqueId(),
+        channelName,
+        replyChannelName,
+        packetListener.getClass().getName());
+  }
+
+  private void logReceivedAndRespondedPacket(
+      Packet packet, String channelName, String replyChannelName, Packet responsePacket) {
+    loggerFacade.log(
+        FINEST,
+        RECEIVED_AND_RESPONDED_PACKET,
+        packet.getClass().getName(),
+        packet.getUniqueId(),
+        channelName,
+        replyChannelName,
+        responsePacket.getClass().getName());
   }
 }
