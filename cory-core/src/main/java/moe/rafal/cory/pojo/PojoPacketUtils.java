@@ -18,14 +18,12 @@
 package moe.rafal.cory.pojo;
 
 import static java.lang.String.format;
-import static java.lang.reflect.Modifier.isTransient;
-import static java.util.function.Predicate.not;
-import static java.util.stream.Collectors.toUnmodifiableList;
+import static moe.rafal.cory.pojo.ReflectionUtils.getDeclaredFields;
+import static moe.rafal.cory.pojo.ReflectionUtils.getFieldValue;
+import static moe.rafal.cory.pojo.ReflectionUtils.setFieldValue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
@@ -41,55 +39,35 @@ final class PojoPacketUtils {
     }
   }
 
-  static void writePojo(final PacketPacker packer, final Object value) throws IOException {
-    final Class<?> type = value.getClass();
-    try {
-      final List<Field> fields =
-          Arrays.stream(type.getDeclaredFields())
-              .filter(not(field -> isTransient(field.getModifiers())))
-              .collect(toUnmodifiableList());
-
-      packer.packInt(fields.size());
-      for (final Field field : fields) {
-        writeField(packer, field, value);
-      }
-    } catch (final IllegalAccessException exception) {
-      throw new PojoWritingException(
-          format("Could not write pojo with name %s", type.getName()), exception);
+  static void writePojo(final PacketPacker packer, final Object instance) throws IOException {
+    final Field[] fields = getDeclaredFields(instance.getClass());
+    packer.packInt(fields.length);
+    for (final Field field : fields) {
+      writeField(packer, field, instance);
     }
-  }
-
-  private static void writeField(final PacketPacker packer, final Field field, final Object value)
-      throws IllegalAccessException, IOException {
-    field.setAccessible(true);
-    packer.packString(field.getName());
-    packer.packAuto(field.get(value));
   }
 
   static void parsePojo(final PacketUnpacker unpacker, final Object value) throws IOException {
-    final Class<?> type = value.getClass();
-    try {
-      final int fieldCount = unpacker.unpackInt();
-      for (int index = 0; index < fieldCount; index++) {
-        parseField(unpacker, value);
-      }
-    } catch (final IllegalAccessException exception) {
-      throw new PojoParsingException(
-          format("Could not parse pojo with name %s", type.getName()), exception);
+    final int fieldCount = unpacker.unpackInt();
+    for (int index = 0; index < fieldCount; index++) {
+      parseField(unpacker, value);
     }
   }
 
-  private static void parseField(final PacketUnpacker unpacker, final Object value)
-      throws IllegalAccessException, IOException {
-    final Class<?> type = value.getClass();
+  private static void writeField(
+      final PacketPacker packer, final Field field, final Object instance) throws IOException {
+    field.setAccessible(true);
+    packer.packString(field.getName());
+    packer.packAuto(getFieldValue(field, instance));
+  }
 
+  private static void parseField(final PacketUnpacker unpacker, final Object instance)
+      throws IOException {
     final String fieldName = unpacker.unpackString();
-    final Field field = getDeclaredFieldByNameOrNull(fieldName, type);
+    final Field field = getDeclaredFieldByNameOrNull(fieldName, instance.getClass());
     if (field == null) {
       throw new PojoParsingException(format("Could not find field with name %s", fieldName));
     }
-
-    field.setAccessible(true);
-    field.set(value, unpacker.unpackAuto());
+    setFieldValue(field, instance, unpacker.unpackAuto());
   }
 }
