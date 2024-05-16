@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 class CoryLogger implements LoggerFacade {
 
+  private static final int FINER_LEVEL_VALUE = 400;
   private final boolean debug;
   private final Logger logger;
 
@@ -63,6 +64,6 @@ class CoryLogger implements LoggerFacade {
   }
 
   private boolean isTrace(final Level level) {
-    return level.intValue() <= 400;
+    return level.intValue() <= FINER_LEVEL_VALUE;
   }
 }

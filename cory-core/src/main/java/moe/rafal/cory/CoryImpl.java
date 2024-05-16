@@ -33,8 +33,8 @@ class CoryImpl implements Cory {
 
   private static final String CHANNEL_OBSERVED =
       "Channel %s is now being observed by %s listener for incoming packets.";
-  private static final String CHANNEL_OBSERVED_WITH_PROCESSING =
-      "Channel %s is now being observed by %s listener for incoming packets to process.";
+  private static final String CHANNEL_MUTUALLY_OBSERVED =
+      "Channel %s is now being mutually observed by %s listener for incoming packets to process.";
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketPublisher packetPublisher;
@@ -69,7 +69,7 @@ class CoryImpl implements Cory {
   @Override
   public <T extends Packet> void mutualObserve(
       String channelName, PacketListenerDelegate<T> packetListener) {
-    logChannelObservationWithProcessing(channelName, packetListener);
+    logChannelMutualObservation(channelName, packetListener);
     packetListenerObserver.observeWithProcessing(channelName, packetListener);
   }
 
@@ -88,9 +88,9 @@ class CoryImpl implements Cory {
     loggerFacade.log(FINER, CHANNEL_OBSERVED, channelName, packetListener.getClass().getName());
   }
 
-  private void logChannelObservationWithProcessing(
+  private void logChannelMutualObservation(
       String channelName, PacketListener<?> packetListener) {
     loggerFacade.log(
-        FINER, CHANNEL_OBSERVED_WITH_PROCESSING, channelName, packetListener.getClass().getName());
+        FINER, CHANNEL_MUTUALLY_OBSERVED, channelName, packetListener.getClass().getName());
   }
 }
