@@ -20,7 +20,7 @@ package moe.rafal.cory.message;
 import io.nats.client.Connection;
 import io.nats.client.Message;
 import java.util.concurrent.CompletableFuture;
-import pl.auroramc.commons.concurrent.CompletableFutureUtils;
+import moe.rafal.cory.concurrent.CompletableFutureUtils;
 
 class NatsMessageBroker implements MessageBroker {
 

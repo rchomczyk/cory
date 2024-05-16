@@ -31,13 +31,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import moe.rafal.cory.concurrent.CompletableFutureUtils;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jetbrains.annotations.VisibleForTesting;
-import pl.auroramc.commons.concurrent.CompletableFutureUtils;
 
 class RedisMessageBroker implements MessageBroker {
 
@@ -124,8 +124,10 @@ class RedisMessageBroker implements MessageBroker {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(payload.length);
       packer.packPayload(payload);
-      borrow.async().publish(channelName, packer.toBinaryArray()).exceptionally(
-          CompletableFutureUtils::delegateCaughtException);
+      borrow
+          .async()
+          .publish(channelName, packer.toBinaryArray())
+          .exceptionally(CompletableFutureUtils::delegateCaughtException);
     } catch (Exception exception) {
       throw new MessagePublicationException(
           "Could not publish message with attached request unique id as a header, because of unexpected exception.",

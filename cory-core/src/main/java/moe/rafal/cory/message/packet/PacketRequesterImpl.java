@@ -24,13 +24,13 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
+import moe.rafal.cory.concurrent.CompletableFutureUtils;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;
-import pl.auroramc.commons.concurrent.CompletableFutureUtils;
 
 class PacketRequesterImpl implements PacketRequester {
 
