@@ -20,6 +20,7 @@ package moe.rafal.cory.message;
 import io.nats.client.Connection;
 import io.nats.client.Message;
 import java.util.concurrent.CompletableFuture;
+import pl.auroramc.commons.concurrent.CompletableFutureUtils;
 
 class NatsMessageBroker implements MessageBroker {
 
@@ -44,7 +45,10 @@ class NatsMessageBroker implements MessageBroker {
 
   @Override
   public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-    return connection.request(channelName, payload).thenApply(Message::getData);
+    return connection
+        .request(channelName, payload)
+        .thenApply(Message::getData)
+        .exceptionally(CompletableFutureUtils::delegateCaughtException);
   }
 
   @Override

@@ -37,6 +37,7 @@ import moe.rafal.cory.serdes.PacketUnpackerFactory;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jetbrains.annotations.VisibleForTesting;
+import pl.auroramc.commons.concurrent.CompletableFutureUtils;
 
 class RedisMessageBroker implements MessageBroker {
 
@@ -123,7 +124,8 @@ class RedisMessageBroker implements MessageBroker {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(payload.length);
       packer.packPayload(payload);
-      borrow.sync().publish(channelName, packer.toBinaryArray());
+      borrow.async().publish(channelName, packer.toBinaryArray()).exceptionally(
+          CompletableFutureUtils::delegateCaughtException);
     } catch (Exception exception) {
       throw new MessagePublicationException(
           "Could not publish message with attached request unique id as a header, because of unexpected exception.",

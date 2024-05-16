@@ -30,16 +30,16 @@ import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import pl.auroramc.commons.concurrent.CompletableFutureUtils;
 
 class PacketRequesterImpl implements PacketRequester {
 
-  private static final String TEMPORARY_CHANNEL_NAME = "temporary";
   private static final String PACKET_REQUESTING_STARTING =
       "Requesting packet of type %s (%s) over the channel %s.";
   private static final String PACKET_REQUESTING_COMPLETED =
       "Request of packet of type %s (%s) has been completed over the %s channel with payload of %d bytes.";
   private static final String PACKET_REQUESTING_FULFILLED =
-      "Request of packet of type %s (%s) has been fulfilled over the %s channel with payload of %d bytes.";
+      "Request of packet of type %s (%s) has been fulfilled over the temporary channel with payload of %d bytes.";
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
@@ -67,7 +67,10 @@ class PacketRequesterImpl implements PacketRequester {
       packetGateway.writePacket(packet, packer);
       final byte[] payload = packer.toBinaryArray();
       logPacketRequestingCompletion(packet, channelName, payload);
-      return messageBroker.request(channelName, payload).thenCompose(this::processIncomingPacket);
+      return messageBroker
+          .request(channelName, payload)
+          .<R>thenCompose(this::processIncomingPacket)
+          .exceptionally(CompletableFutureUtils::delegateCaughtException);
     } catch (IOException exception) {
       throw new PacketPublicationException(
           "Could not request packet over the message broker, because of unexpected exception.",
@@ -82,7 +85,7 @@ class PacketRequesterImpl implements PacketRequester {
             () -> {
               try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(message)) {
                 final T receivedPacket = packetGateway.readPacket(unpacker);
-                logPacketRequestingFulfilled(receivedPacket, TEMPORARY_CHANNEL_NAME, message);
+                logPacketRequestingFulfilled(receivedPacket, message);
                 return receivedPacket;
               } catch (Exception exception) {
                 throw new PacketProcessingException(
@@ -117,13 +120,12 @@ class PacketRequesterImpl implements PacketRequester {
         payload.length);
   }
 
-  private void logPacketRequestingFulfilled(Packet packet, String channelName, byte[] payload) {
+  private void logPacketRequestingFulfilled(Packet packet, byte[] payload) {
     loggerFacade.log(
         FINEST,
         PACKET_REQUESTING_FULFILLED,
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
-        channelName,
         payload.length);
   }
 }

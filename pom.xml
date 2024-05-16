@@ -21,6 +21,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>pl.auroramc</groupId>
+      <artifactId>auroramc-commons-core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jetbrains</groupId>
       <artifactId>annotations</artifactId>
       <version>24.1.0</version>
