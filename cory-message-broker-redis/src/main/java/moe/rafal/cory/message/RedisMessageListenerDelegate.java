@@ -22,18 +22,14 @@ import io.lettuce.core.pubsub.RedisPubSubListener;
 abstract class RedisMessageListenerDelegate<K, V> implements RedisPubSubListener<K, V> {
 
   @Override
-  public void subscribed(K channel, long count) {
-  }
+  public void subscribed(K channel, long count) {}
 
   @Override
-  public void psubscribed(K pattern, long count) {
-  }
+  public void psubscribed(K pattern, long count) {}
 
   @Override
-  public void unsubscribed(K channel, long count) {
-  }
+  public void unsubscribed(K channel, long count) {}
 
   @Override
-  public void punsubscribed(K pattern, long count) {
-  }
+  public void punsubscribed(K pattern, long count) {}
 }

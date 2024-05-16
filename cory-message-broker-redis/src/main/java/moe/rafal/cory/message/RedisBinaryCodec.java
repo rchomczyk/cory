@@ -17,9 +17,10 @@
 
 package moe.rafal.cory.message;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import io.lettuce.core.codec.RedisCodec;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 class RedisBinaryCodec implements RedisCodec<String, byte[]> {
 
@@ -27,7 +28,7 @@ class RedisBinaryCodec implements RedisCodec<String, byte[]> {
 
   @Override
   public String decodeKey(ByteBuffer buffer) {
-    return StandardCharsets.UTF_8.decode(buffer).toString();
+    return UTF_8.decode(buffer).toString();
   }
 
   @Override
@@ -39,7 +40,7 @@ class RedisBinaryCodec implements RedisCodec<String, byte[]> {
 
   @Override
   public ByteBuffer encodeKey(String value) {
-    return ByteBuffer.wrap(value.getBytes(StandardCharsets.UTF_8));
+    return ByteBuffer.wrap(value.getBytes(UTF_8));
   }
 
   @Override

@@ -27,8 +27,8 @@ public class LoginPacketListener extends PacketListenerDelegate<LoginPacket> {
 
   @Override
   public void receive(String channelName, String replyChannelName, LoginPacket packet) {
-    System.out.printf("User %s attempted to login with password %s%n",
-        packet.getUsername(),
-        packet.getPassword());
+    System.out.printf(
+        "User %s attempted to login with password %s%n",
+        packet.getUsername(), packet.getPassword());
   }
 }

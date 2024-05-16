@@ -26,8 +26,7 @@ import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -38,14 +37,14 @@ class MessagePackPacketTests {
   @Test
   void writeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packet.write(packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
-            INITIAL_USERNAME);
-        MessagePackAssertions.assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
-            INITIAL_PASSWORD);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        MessagePackAssertions.assertThatUnpackerContains(
+            unpacker, PacketUnpacker::unpackString, INITIAL_USERNAME);
+        MessagePackAssertions.assertThatUnpackerContains(
+            unpacker, PacketUnpacker::unpackString, INITIAL_PASSWORD);
       }
     }
   }
@@ -53,33 +52,32 @@ class MessagePackPacketTests {
   @Test
   void readTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    byte[] content = MessagePackAssertions.getBinaryArrayOf((packer, expectedValue) -> {
-      packer.packString(INCOMING_USERNAME);
-      packer.packString(INCOMING_PASSWORD);
-    }, DEFAULT_VALUE);
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        content)) {
+    byte[] content =
+        MessagePackAssertions.getBinaryArrayOf(
+            (packer, expectedValue) -> {
+              packer.packString(INCOMING_USERNAME);
+              packer.packString(INCOMING_PASSWORD);
+            },
+            DEFAULT_VALUE);
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(content)) {
       packet.read(unpacker);
-      assertThat(packet.getUsername())
-          .isEqualTo(INCOMING_USERNAME);
-      assertThat(packet.getPassword())
-          .isEqualTo(INCOMING_PASSWORD);
+      assertThat(packet.getUsername()).isEqualTo(INCOMING_USERNAME);
+      assertThat(packet.getPassword()).isEqualTo(INCOMING_PASSWORD);
     }
   }
 
   @Test
   void writeAndReadTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packet.write(packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
         LoginPacket clonePacket = new LoginPacket();
         clonePacket.read(unpacker);
-        assertThat(clonePacket.getUsername())
-            .isEqualTo(INITIAL_USERNAME);
-        assertThat(clonePacket.getPassword())
-            .isEqualTo(INITIAL_PASSWORD);
+        assertThat(clonePacket.getUsername()).isEqualTo(INITIAL_USERNAME);
+        assertThat(clonePacket.getPassword()).isEqualTo(INITIAL_PASSWORD);
       }
     }
   }
@@ -87,7 +85,6 @@ class MessagePackPacketTests {
   @Test
   void getUniqueIdTest() {
     LoginPacket packet = getLoginPacket();
-    assertThat(packet.getUniqueId())
-        .isNotNull();
+    assertThat(packet.getUniqueId()).isNotNull();
   }
 }

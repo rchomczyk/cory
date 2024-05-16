@@ -28,63 +28,36 @@ class CoryBuilderTests {
 
   @Test
   void buildShouldThrowWithoutSpecifyingMessageBrokerTest() {
-    assertThatCode(() -> CoryBuilder.newBuilder()
-        .build())
+    assertThatCode(() -> CoryBuilder.newBuilder().build())
         .isInstanceOf(CoryBuildException.class)
-        .hasMessage("Cory could not be built, because of missing message broker, which is required for proper functioning.");
+        .hasMessage(
+            "Cory could not be built, because of missing message broker, which is required for proper functioning.");
   }
 
   @Test
-  void buildShouldThrowWithoutSpecifyingPacketPackerFactory() {
-    assertThatCode(() -> CoryBuilder.newBuilder()
-        .withMessageBroker(new MessageBroker() {
-          @Override
-          public void publish(String channelName, byte[] payload) {
-          }
+  void buildShouldThrowWithoutSpecifyingPacketSerdesContextFactory() {
+    assertThatCode(
+            () ->
+                CoryBuilder.newBuilder()
+                    .withMessageBroker(
+                        new MessageBroker() {
+                          @Override
+                          public void publish(String channelName, byte[] payload) {}
 
-          @Override
-          public void observe(String channelName, MessageListener listener) {
-          }
+                          @Override
+                          public void observe(String channelName, MessageListener listener) {}
 
-          @Override
-          public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-            return null;
-          }
+                          @Override
+                          public CompletableFuture<byte[]> request(
+                              String channelName, byte[] payload) {
+                            return null;
+                          }
 
-          @Override
-          public void close() {
-          }
-        })
-        .withPacketUnpackerFactory(content -> null)
-        .build())
+                          @Override
+                          public void close() {}
+                        })
+                    .build())
         .isInstanceOf(CoryBuildException.class)
-        .hasMessage("Cory could not be built, because of missing packet packer factory.");
-  }
-
-  @Test
-  void buildShouldThrowWithoutSpecifyingPacketUnpackerFactory() {
-    assertThatCode(() -> CoryBuilder.newBuilder()
-        .withMessageBroker(new MessageBroker() {
-          @Override
-          public void publish(String channelName, byte[] payload) {
-          }
-
-          @Override
-          public void observe(String channelName, MessageListener listener) {
-          }
-
-          @Override
-          public CompletableFuture<byte[]> request(String channelName, byte[] payload) {
-            return null;
-          }
-
-          @Override
-          public void close() {
-          }
-        })
-        .withPacketPackerFactory(() -> null)
-        .build())
-        .isInstanceOf(CoryBuildException.class)
-        .hasMessage("Cory could not be built, because of missing packet unpacker factory.");
+        .hasMessage("Cory could not be built, because of missing packet serdes context.");
   }
 }

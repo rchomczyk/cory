@@ -21,7 +21,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 @FunctionalInterface
 public interface PacketPublisher {
@@ -30,8 +30,8 @@ public interface PacketPublisher {
       LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
-      PacketPackerFactory packetPackerFactory) {
-    return new PacketPublisherImpl(loggerFacade, messageBroker, packetGateway, packetPackerFactory);
+      PacketSerdesContext serdesContext) {
+    return new PacketPublisherImpl(loggerFacade, messageBroker, packetGateway, serdesContext);
   }
 
   <T extends Packet> void publish(String channelName, T packet) throws PacketPublicationException;

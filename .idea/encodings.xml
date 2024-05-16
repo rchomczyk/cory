@@ -3,6 +3,14 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/cory-core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/cory-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-client/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-client/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-proto/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-proto/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/ping-pong-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/cory-examples/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/cory-message-broker-nats/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/cory-message-broker-nats/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/cory-message-broker-redis/src/main/java" charset="UTF-8" />

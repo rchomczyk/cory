@@ -41,42 +41,40 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(EmbeddedNatsServerExtension.class)
 class NatsMessageBrokerTests {
 
-  @InjectNatsServer
-  private EmbeddedNatsServer natsServer;
+  @InjectNatsServer private EmbeddedNatsServer natsServer;
   private MessageBroker messageBroker;
 
   @BeforeEach
   void createMessageBroker() {
-    messageBroker = produceNatsMessageBroker(Options.builder()
-        .server(getNatsConnectionUri(natsServer))
-        .build());
+    messageBroker =
+        produceNatsMessageBroker(
+            Options.builder().server(getNatsConnectionUri(natsServer)).build());
   }
 
   @Test
   void publishAndObserveTest() {
     AtomicBoolean receivedPayload = new AtomicBoolean();
-    messageBroker.observe(BROADCAST_CHANNEL_NAME,
+    messageBroker.observe(
+        BROADCAST_CHANNEL_NAME,
         (channelName, payload, replyChannelName) -> receivedPayload.set(true));
-    messageBroker.publish(
-        BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
-    await()
-        .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilTrue(receivedPayload);
+    messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD);
+    await().atMost(MAXIMUM_RESPONSE_PERIOD).untilTrue(receivedPayload);
   }
 
   @Test
   void requestTest() {
     AtomicReference<byte[]> receivedPayload = new AtomicReference<>();
-    messageBroker.observe(BROADCAST_CHANNEL_NAME,
-        (channelName, replyChannelName, payload) -> messageBroker.publish(replyChannelName,
-            BROADCAST_REQUEST_TEST_PAYLOAD));
-    messageBroker.request(
-        BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD).thenAccept(
-        receivedPayload::set);
+    messageBroker.observe(
+        BROADCAST_CHANNEL_NAME,
+        (channelName, replyChannelName, payload) ->
+            messageBroker.publish(replyChannelName, BROADCAST_REQUEST_TEST_PAYLOAD));
+    messageBroker
+        .request(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD)
+        .thenAccept(receivedPayload::set);
     await()
         .atMost(MAXIMUM_RESPONSE_PERIOD)
-        .untilAsserted(() -> assertThat(receivedPayload.get())
-            .isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
+        .untilAsserted(
+            () -> assertThat(receivedPayload.get()).isEqualTo(BROADCAST_REQUEST_TEST_PAYLOAD));
   }
 
   @Test

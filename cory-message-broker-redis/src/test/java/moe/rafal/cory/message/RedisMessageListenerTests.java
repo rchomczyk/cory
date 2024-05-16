@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import org.junit.jupiter.api.Test;
 
 class RedisMessageListenerTests {
@@ -60,7 +60,7 @@ class RedisMessageListenerTests {
         .receive(any(), any(), any());
     RedisMessageListener redisMessageListener =
         new RedisMessageListener(
-            MessagePackPacketUnpackerFactory.INSTANCE, BROADCAST_CHANNEL_NAME, messageListenerMock);
+            MessagePackPacketSerdesContext.INSTANCE, BROADCAST_CHANNEL_NAME, messageListenerMock);
     assertThatCode(
             () ->
                 redisMessageListener.processIncomingMessage(

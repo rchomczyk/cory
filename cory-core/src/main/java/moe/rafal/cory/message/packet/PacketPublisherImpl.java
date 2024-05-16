@@ -25,7 +25,7 @@ import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 class PacketPublisherImpl implements PacketPublisher {
 
@@ -36,23 +36,23 @@ class PacketPublisherImpl implements PacketPublisher {
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
-  private final PacketPackerFactory packetPackerFactory;
+  private final PacketSerdesContext serdesContext;
 
   PacketPublisherImpl(
       LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
-      PacketPackerFactory packetPackerFactory) {
+      PacketSerdesContext serdesContext) {
     this.loggerFacade = loggerFacade;
     this.messageBroker = messageBroker;
     this.packetGateway = packetGateway;
-    this.packetPackerFactory = packetPackerFactory;
+    this.serdesContext = serdesContext;
   }
 
   @Override
   public <T extends Packet> void publish(String channelName, T packet) {
     logPacketPublicationStart(packet, channelName);
-    try (PacketPacker packer = packetPackerFactory.getPacketPacker()) {
+    try (PacketPacker packer = serdesContext.newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
       final byte[] payload = packer.toBinaryArray();
       messageBroker.publish(channelName, payload);

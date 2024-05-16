@@ -38,8 +38,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginRequestPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -62,8 +61,7 @@ class CoryImplTests {
             .withMessageBroker(
                 produceNatsMessageBroker(
                     Options.builder().server(getNatsConnectionUri(natsServer)).build()))
-            .withPacketPackerFactory(MessagePackPacketPackerFactory.INSTANCE)
-            .withPacketUnpackerFactory(MessagePackPacketUnpackerFactory.INSTANCE)
+            .withSerdesContext(MessagePackPacketSerdesContext.INSTANCE)
             .build();
   }
 

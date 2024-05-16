@@ -21,8 +21,7 @@ import static java.time.Duration.ofSeconds;
 
 import io.lettuce.core.RedisURI;
 import java.time.Duration;
-import moe.rafal.cory.serdes.PacketPackerFactory;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 public final class RedisMessageBrokerFactory {
 
@@ -31,19 +30,12 @@ public final class RedisMessageBrokerFactory {
   private RedisMessageBrokerFactory() {}
 
   public static MessageBroker getRedisMessageBroker(
-      PacketPackerFactory packetPackerFactory,
-      PacketUnpackerFactory packetUnpackerFactory,
-      RedisURI redisUri,
-      Duration requestCleanupInterval) {
-    return new RedisMessageBroker(
-        packetPackerFactory, packetUnpackerFactory, redisUri, requestCleanupInterval);
+      PacketSerdesContext serdesContext, RedisURI redisUri, Duration requestCleanupInterval) {
+    return new RedisMessageBroker(serdesContext, redisUri, requestCleanupInterval);
   }
 
   public static MessageBroker getRedisMessageBroker(
-      PacketPackerFactory packetPackerFactory,
-      PacketUnpackerFactory packetUnpackerFactory,
-      RedisURI redisUri) {
-    return getRedisMessageBroker(
-        packetPackerFactory, packetUnpackerFactory, redisUri, DEFAULT_REQUEST_CLEANUP_INTERVAL);
+      PacketSerdesContext serdesContext, RedisURI redisUri) {
+    return getRedisMessageBroker(serdesContext, redisUri, DEFAULT_REQUEST_CLEANUP_INTERVAL);
   }
 }

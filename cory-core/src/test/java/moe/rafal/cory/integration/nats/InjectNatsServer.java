@@ -26,6 +26,4 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(EmbeddedNatsServerExtension.class)
-public @interface InjectNatsServer {
-
-}
+public @interface InjectNatsServer {}

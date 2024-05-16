@@ -24,8 +24,8 @@ class RedisRequestMessageListener implements MessageListener {
   private final String destinedChannelName;
   private final CompletableFuture<byte[]> responseFuture;
 
-  public RedisRequestMessageListener(String destinedChannelName,
-      CompletableFuture<byte[]> responseFuture) {
+  public RedisRequestMessageListener(
+      String destinedChannelName, CompletableFuture<byte[]> responseFuture) {
     this.destinedChannelName = destinedChannelName;
     this.responseFuture = responseFuture;
   }

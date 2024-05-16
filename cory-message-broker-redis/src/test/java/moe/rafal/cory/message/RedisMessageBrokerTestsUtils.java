@@ -22,7 +22,7 @@ import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 
 import java.io.IOException;
 import java.util.UUID;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 
 final class RedisMessageBrokerTestsUtils {
@@ -30,7 +30,7 @@ final class RedisMessageBrokerTestsUtils {
   private RedisMessageBrokerTestsUtils() {}
 
   static byte[] getPayloadWithRequestUniqueId(UUID requestUniqueId) throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(BROADCAST_TEST_PAYLOAD.length);
       packer.packPayload(BROADCAST_TEST_PAYLOAD);

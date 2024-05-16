@@ -26,6 +26,4 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(EmbeddedRedisServerExtension.class)
-public @interface InjectRedisServer {
-
-}
+public @interface InjectRedisServer {}

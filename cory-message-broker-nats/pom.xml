@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>moe.rafal</groupId>
-    <artifactId>cory</artifactId>
-    <version>2.2-SNAPSHOT</version>
-  </parent>
-
   <artifactId>cory-message-broker-nats</artifactId>
+  <dependencies>
+    <dependency>
+      <artifactId>jnats</artifactId>
+      <groupId>io.nats</groupId>
+      <scope>compile</scope>
+      <version>2.18.0</version>
+    </dependency>
+    <dependency>
+      <artifactId>cory-core</artifactId>
+      <groupId>moe.rafal</groupId>
+      <scope>compile</scope>
+      <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>cory-core</artifactId>
+      <groupId>moe.rafal</groupId>
+      <scope>test</scope>
+      <type>test-jar</type>
+      <version>${project.parent.version}</version>
+    </dependency>
+    <dependency>
+      <artifactId>cory-serdes-msgpack</artifactId>
+      <groupId>moe.rafal</groupId>
+      <scope>test</scope>
+      <type>test-jar</type>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <artifactId>cory-serdes-msgpack</artifactId>
+      <groupId>moe.rafal</groupId>
+      <scope>test</scope>
+      <version>3.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>cory</artifactId>
+    <groupId>moe.rafal</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.nats</groupId>
-      <artifactId>jnats</artifactId>
-      <version>2.18.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>moe.rafal</groupId>
-      <artifactId>cory-core</artifactId>
-      <version>${project.parent.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>moe.rafal</groupId>
-      <artifactId>cory-core</artifactId>
-      <version>${project.parent.version}</version>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
-    <dependency>
-      <groupId>moe.rafal</groupId>
-      <artifactId>cory-serdes-msgpack</artifactId>
-      <version>2.2-SNAPSHOT</version>
-      <scope>test</scope>
-      <type>test-jar</type>
-    </dependency>
-    <dependency>
-      <groupId>moe.rafal</groupId>
-      <artifactId>cory-serdes-msgpack</artifactId>
-      <version>2.2-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 
 </project>

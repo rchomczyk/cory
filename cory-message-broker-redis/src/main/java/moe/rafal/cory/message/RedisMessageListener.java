@@ -20,21 +20,19 @@ package moe.rafal.cory.message;
 import static java.lang.String.format;
 
 import java.io.IOException;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 import moe.rafal.cory.serdes.PacketUnpacker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
 import org.jetbrains.annotations.VisibleForTesting;
 
 class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> {
 
-  private final PacketUnpackerFactory packetUnpackerFactory;
+  private final PacketSerdesContext serdesContext;
   private final String subscribedTopic;
   private final MessageListener listener;
 
   RedisMessageListener(
-      PacketUnpackerFactory packetUnpackerFactory,
-      String subscribedTopic,
-      MessageListener listener) {
-    this.packetUnpackerFactory = packetUnpackerFactory;
+      PacketSerdesContext serdesContext, String subscribedTopic, MessageListener listener) {
+    this.serdesContext = serdesContext;
     this.subscribedTopic = subscribedTopic;
     this.listener = listener;
   }
@@ -49,7 +47,7 @@ class RedisMessageListener extends RedisMessageListenerDelegate<String, byte[]> 
 
   @VisibleForTesting
   void processIncomingMessage(String channelName, byte[] message) {
-    try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(message)) {
+    try (PacketUnpacker unpacker = serdesContext.newPacketUnpacker(message)) {
       listener.receive(channelName, unpacker.unpackUUID().toString(), unpacker.unpackPayload());
     } catch (IOException exception) {
       throw new MessageProcessingException(

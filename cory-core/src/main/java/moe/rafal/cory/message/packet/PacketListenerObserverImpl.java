@@ -24,8 +24,8 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 import moe.rafal.cory.serdes.PacketUnpacker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 class PacketListenerObserverImpl implements PacketListenerObserver {
 
@@ -39,19 +39,19 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
   private final PacketPublisher packetPublisher;
-  private final PacketUnpackerFactory packetUnpackerFactory;
+  private final PacketSerdesContext serdesContext;
 
   PacketListenerObserverImpl(
       LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
       PacketPublisher packetPublisher,
-      PacketUnpackerFactory packetUnpackerFactory) {
+      PacketSerdesContext serdesContext) {
     this.loggerFacade = loggerFacade;
     this.messageBroker = messageBroker;
     this.packetGateway = packetGateway;
     this.packetPublisher = packetPublisher;
-    this.packetUnpackerFactory = packetUnpackerFactory;
+    this.serdesContext = serdesContext;
   }
 
   @Override
@@ -116,7 +116,7 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
   @Override
   public <T extends Packet> T processIncomingPacket(byte[] payload)
       throws PacketProcessingException {
-    try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(payload)) {
+    try (PacketUnpacker unpacker = serdesContext.newPacketUnpacker(payload)) {
       return packetGateway.readPacket(unpacker);
     } catch (Exception exception) {
       throw new PacketProcessingException(

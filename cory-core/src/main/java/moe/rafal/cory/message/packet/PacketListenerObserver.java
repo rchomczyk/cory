@@ -21,7 +21,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 public interface PacketListenerObserver {
 
@@ -30,9 +30,9 @@ public interface PacketListenerObserver {
       MessageBroker messageBroker,
       PacketGateway packetGateway,
       PacketPublisher packetPublisher,
-      PacketUnpackerFactory packetUnpackerFactory) {
+      PacketSerdesContext serdesContext) {
     return new PacketListenerObserverImpl(
-        loggerFacade, messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
+        loggerFacade, messageBroker, packetGateway, packetPublisher, serdesContext);
   }
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);

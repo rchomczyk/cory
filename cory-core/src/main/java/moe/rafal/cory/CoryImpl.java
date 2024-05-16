@@ -67,7 +67,7 @@ class CoryImpl implements Cory {
   }
 
   @Override
-  public <T extends Packet> void observeWithProcessing(
+  public <T extends Packet> void mutualObserve(
       String channelName, PacketListenerDelegate<T> packetListener) {
     logChannelObservationWithProcessing(channelName, packetListener);
     packetListenerObserver.observeWithProcessing(channelName, packetListener);

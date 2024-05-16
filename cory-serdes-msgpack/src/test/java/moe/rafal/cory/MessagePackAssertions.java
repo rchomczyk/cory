@@ -22,40 +22,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.pivovarit.function.ThrowingBiConsumer;
 import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
 public final class MessagePackAssertions {
 
-  private MessagePackAssertions() {
+  private MessagePackAssertions() {}
 
-  }
-
-  public static <T> void assertThatPackerContains(PacketPacker packer,
+  public static <T> void assertThatPackerContains(
+      PacketPacker packer,
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
       T expectedValue)
       throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        packer.toBinaryArray())) {
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
       assertThatUnpackerContains(unpacker, valueResolver, expectedValue);
     }
   }
 
-  public static <T> void assertThatUnpackerContains(PacketUnpacker unpacker,
+  public static <T> void assertThatUnpackerContains(
+      PacketUnpacker unpacker,
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
       T expectedValue)
       throws IOException {
-    assertThat(valueResolver.apply(unpacker))
-        .isEqualTo(expectedValue);
+    assertThat(valueResolver.apply(unpacker)).isEqualTo(expectedValue);
   }
 
   public static <T> void packValueAndAssertThatContains(
       PacketPacker packer,
       ThrowingBiConsumer<PacketPacker, T, IOException> packFunction,
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
-      T value) throws IOException {
+      T value)
+      throws IOException {
     packFunction.accept(packer, value);
     assertThatPackerContains(packer, valueResolver, value);
   }
@@ -63,19 +62,19 @@ public final class MessagePackAssertions {
   public static <T> void unpackValueAndAssertThatEqualTo(
       ThrowingBiConsumer<PacketPacker, T, IOException> packerInitializer,
       ThrowingFunction<PacketUnpacker, T, IOException> valueResolver,
-      T expectedValue) throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        getBinaryArrayOf(packerInitializer, expectedValue))) {
-      assertThat(valueResolver.apply(unpacker))
-          .isEqualTo(expectedValue);
+      T expectedValue)
+      throws IOException {
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
+            getBinaryArrayOf(packerInitializer, expectedValue))) {
+      assertThat(valueResolver.apply(unpacker)).isEqualTo(expectedValue);
     }
   }
 
   public static <T> byte[] getBinaryArrayOf(
-      ThrowingBiConsumer<PacketPacker, T, IOException> packetInitializer,
-      T expectedValue)
+      ThrowingBiConsumer<PacketPacker, T, IOException> packetInitializer, T expectedValue)
       throws IOException {
-    PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker();
+    PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker();
     packetInitializer.accept(packer, expectedValue);
     return packer.toBinaryArray();
   }

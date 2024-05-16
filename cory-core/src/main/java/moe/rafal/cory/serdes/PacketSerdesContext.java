@@ -17,16 +17,9 @@
 
 package moe.rafal.cory.serdes;
 
-import static org.msgpack.core.MessagePack.newDefaultUnpacker;
+public interface PacketSerdesContext {
 
-public class MessagePackPacketUnpackerFactory implements PacketUnpackerFactory {
+  PacketPacker newPacketPacker();
 
-  public static final PacketUnpackerFactory INSTANCE = new MessagePackPacketUnpackerFactory();
-
-  private MessagePackPacketUnpackerFactory() {}
-
-  @Override
-  public PacketUnpacker getPacketUnpacker(byte[] content) {
-    return new MessagePackPacketUnpacker(newDefaultUnpacker(content));
-  }
+  PacketUnpacker newPacketUnpacker(final byte[] content);
 }

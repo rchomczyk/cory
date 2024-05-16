@@ -22,8 +22,7 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 public interface PacketRequester {
 
@@ -31,10 +30,8 @@ public interface PacketRequester {
       LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
-      PacketPackerFactory packetPackerFactory,
-      PacketUnpackerFactory packetUnpackerFactory) {
-    return new PacketRequesterImpl(
-        loggerFacade, messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
+      PacketSerdesContext serdesContext) {
+    return new PacketRequesterImpl(loggerFacade, messageBroker, packetGateway, serdesContext);
   }
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);

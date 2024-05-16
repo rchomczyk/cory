@@ -31,10 +31,13 @@ class NatsMessageBrokerFactoryTests {
 
   @Test
   void produceNatsMessageBrokerThrowsWithoutServerTest() {
-    assertThatCode(() -> produceNatsMessageBroker(Options.builder()
-        .server(INVALID_CONNECTION_URI)
-        .userInfo(INVALID_USERNAME, INVALID_PASSWORD)
-        .build()))
+    assertThatCode(
+            () ->
+                produceNatsMessageBroker(
+                    Options.builder()
+                        .server(INVALID_CONNECTION_URI)
+                        .userInfo(INVALID_USERNAME, INVALID_PASSWORD)
+                        .build()))
         .isInstanceOf(MessageBrokerInstantiationException.class);
   }
 }

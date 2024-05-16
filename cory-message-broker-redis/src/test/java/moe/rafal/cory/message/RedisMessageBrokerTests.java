@@ -44,8 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.redis.EmbeddedRedisServerExtension;
 import moe.rafal.cory.integration.redis.InjectRedisServer;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,14 +61,12 @@ class RedisMessageBrokerTests {
     messageBroker =
         (RedisMessageBroker)
             getRedisMessageBroker(
-                MessagePackPacketPackerFactory.INSTANCE,
-                MessagePackPacketUnpackerFactory.INSTANCE,
+                MessagePackPacketSerdesContext.INSTANCE,
                 RedisURI.create(getRedisConnectionUri(redisServer)));
     messageBrokerWhichIsFailing =
         (RedisMessageBroker)
             RedisMessageBrokerFactory.getRedisMessageBroker(
-                MessagePackPacketPackerFactory.INSTANCE,
-                MessagePackPacketUnpackerFactory.INSTANCE,
+                MessagePackPacketSerdesContext.INSTANCE,
                 RedisURI.create(getRedisConnectionUri(redisServer)),
                 ZERO);
   }
@@ -184,7 +181,7 @@ class RedisMessageBrokerTests {
   }
 
   @Test
-  void closeTest() throws IOException {
+  void closeTest() {
     messageBroker.close();
     assertThatCode(() -> messageBroker.publish(BROADCAST_CHANNEL_NAME, BROADCAST_TEST_PAYLOAD))
         .isInstanceOf(RuntimeException.class);

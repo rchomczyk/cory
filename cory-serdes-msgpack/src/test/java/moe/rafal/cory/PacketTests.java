@@ -33,8 +33,7 @@ import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
 import java.util.UUID;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -48,48 +47,42 @@ class PacketTests {
     try (MockedStatic<UUID> uuidMock = mockStatic(UUID.class)) {
       uuidMock.when(UUID::randomUUID).thenReturn(NIL_UNIQUE_ID);
 
-      Packet subject = new Packet() {
-        @Override
-        public void write(PacketPacker packer) {
-        }
+      Packet subject =
+          new Packet() {
+            @Override
+            public void write(PacketPacker packer) {}
 
-        @Override
-        public void read(PacketUnpacker unpacker) {
-        }
-      };
+            @Override
+            public void read(PacketUnpacker unpacker) {}
+          };
 
-      assertThat(subject.getUniqueId())
-          .isEqualTo(NIL_UNIQUE_ID);
+      assertThat(subject.getUniqueId()).isEqualTo(NIL_UNIQUE_ID);
     }
   }
 
   @Test
   void createPacketTestWithSpecifiedUniqueId() {
-    Packet subject = new Packet(NIL_UNIQUE_ID) {
-      @Override
-      public void write(PacketPacker packer) {
-      }
+    Packet subject =
+        new Packet(NIL_UNIQUE_ID) {
+          @Override
+          public void write(PacketPacker packer) {}
 
-      @Override
-      public void read(PacketUnpacker unpacker) {
-      }
-    };
+          @Override
+          public void read(PacketUnpacker unpacker) {}
+        };
 
-    assertThat(subject.getUniqueId())
-        .isEqualTo(NIL_UNIQUE_ID);
+    assertThat(subject.getUniqueId()).isEqualTo(NIL_UNIQUE_ID);
   }
 
   @Test
   void writeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packet.write(packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
-            INITIAL_USERNAME);
-        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString,
-            INITIAL_PASSWORD);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_USERNAME);
+        assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_PASSWORD);
       }
     }
   }
@@ -97,69 +90,61 @@ class PacketTests {
   @Test
   void readTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    byte[] content = getBinaryArrayOf((packer, expectedValue) -> {
-      packer.packString(INCOMING_USERNAME);
-      packer.packString(INCOMING_PASSWORD);
-    }, DEFAULT_VALUE);
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        content)) {
+    byte[] content =
+        getBinaryArrayOf(
+            (packer, expectedValue) -> {
+              packer.packString(INCOMING_USERNAME);
+              packer.packString(INCOMING_PASSWORD);
+            },
+            DEFAULT_VALUE);
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(content)) {
       packet.read(unpacker);
-      assertThat(packet.getUsername())
-          .isEqualTo(INCOMING_USERNAME);
-      assertThat(packet.getPassword())
-          .isEqualTo(INCOMING_PASSWORD);
+      assertThat(packet.getUsername()).isEqualTo(INCOMING_USERNAME);
+      assertThat(packet.getPassword()).isEqualTo(INCOMING_PASSWORD);
     }
   }
 
   @Test
   void getUniqueIdTest() {
     LoginPacket packet = getLoginPacket();
-    assertThat(packet.getUniqueId())
-        .isNotNull();
+    assertThat(packet.getUniqueId()).isNotNull();
   }
 
   @Test
   void setUniqueIdTest() {
     LoginPacket loginPacket = getEmptyLoginPacket();
-    assertThat(loginPacket)
-        .isNotNull();
+    assertThat(loginPacket).isNotNull();
     loginPacket.setUniqueId(NIL_UNIQUE_ID);
-    assertThat(loginPacket.getUniqueId())
-        .isEqualTo(NIL_UNIQUE_ID);
+    assertThat(loginPacket.getUniqueId()).isEqualTo(NIL_UNIQUE_ID);
   }
 
   @Test
   void verifyEqualityWithSameReferenceTest() {
     LoginPacket packet = getLoginPacket();
-    assertThat(packet.equals(packet))
-        .isTrue();
+    assertThat(packet.equals(packet)).isTrue();
   }
 
   @Test
   void verifyEqualityWithNullReferenceTest() {
     LoginPacket packet = getLoginPacket();
-    assertThat(packet.equals(null))
-        .isFalse();
+    assertThat(packet.equals(null)).isFalse();
   }
 
   @Test
   void verifyEqualityWithDifferentUniqueIdsTest() {
     Packet packet1 = getEmptyLoginPacket();
     Packet packet2 = getEmptyLoginPacket();
-    assertThat(packet1.equals(packet2))
-        .isFalse();
-    assertThat(packet2.equals(packet1))
-        .isFalse();
+    assertThat(packet1.equals(packet2)).isFalse();
+    assertThat(packet2.equals(packet1)).isFalse();
   }
 
   @Test
   void verifyEqualityWithSameUniqueIdsButDifferentPacketTypeTest() {
     Packet packet1 = getEmptyLoginPacket();
     Packet packet2 = getMalformedPacket();
-    assertThat(packet1.equals(packet2))
-        .isFalse();
-    assertThat(packet2.equals(packet1))
-        .isFalse();
+    assertThat(packet1.equals(packet2)).isFalse();
+    assertThat(packet2.equals(packet1)).isFalse();
   }
 
   @Test
@@ -168,10 +153,8 @@ class PacketTests {
     Packet packet2 = getEmptyLoginPacket();
     packet1.setUniqueId(NIL_UNIQUE_ID);
     packet2.setUniqueId(NIL_UNIQUE_ID);
-    assertThat(packet1.equals(packet2))
-        .isTrue();
-    assertThat(packet2.equals(packet1))
-        .isTrue();
+    assertThat(packet1.equals(packet2)).isTrue();
+    assertThat(packet2.equals(packet1)).isTrue();
   }
 
   @Test
@@ -180,7 +163,6 @@ class PacketTests {
     Packet packet2 = getEmptyLoginPacket();
     packet1.setUniqueId(NIL_UNIQUE_ID);
     packet2.setUniqueId(NIL_UNIQUE_ID);
-    assertThat(packet1.hashCode())
-        .isEqualTo(packet2.hashCode());
+    assertThat(packet1.hashCode()).isEqualTo(packet2.hashCode());
   }
 }

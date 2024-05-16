@@ -34,8 +34,8 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.support.ModifierSupport;
 
-public class EmbeddedRedisServerExtension implements
-    BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor, ParameterResolver {
+public class EmbeddedRedisServerExtension
+    implements BeforeAllCallback, AfterAllCallback, TestInstancePostProcessor, ParameterResolver {
 
   private final RedisServer underlyingServer;
 
@@ -44,9 +44,8 @@ public class EmbeddedRedisServerExtension implements
   }
 
   public static String getRedisConnectionUri(RedisServer embeddedRedisServer) {
-    return format("redis://%s:%d",
-        embeddedRedisServer.getHost(),
-        embeddedRedisServer.getBindPort());
+    return format(
+        "redis://%s:%d", embeddedRedisServer.getHost(), embeddedRedisServer.getBindPort());
   }
 
   @Override
@@ -60,36 +59,39 @@ public class EmbeddedRedisServerExtension implements
   }
 
   @Override
-  public boolean supportsParameter(ParameterContext parameterContext,
-      ExtensionContext extensionContext) throws ParameterResolutionException {
+  public boolean supportsParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
+      throws ParameterResolutionException {
     return parameterContext.isAnnotated(InjectRedisServer.class);
   }
 
   @Override
-  public Object resolveParameter(ParameterContext parameterContext,
-      ExtensionContext extensionContext) throws ParameterResolutionException {
+  public Object resolveParameter(
+      ParameterContext parameterContext, ExtensionContext extensionContext)
+      throws ParameterResolutionException {
     return underlyingServer;
   }
 
   @Override
   public void postProcessTestInstance(Object testInstance, ExtensionContext extensionContext) {
-    injectFields(extensionContext.getRequiredTestClass(), testInstance,
-        ModifierSupport::isNotStatic);
+    injectFields(
+        extensionContext.getRequiredTestClass(), testInstance, ModifierSupport::isNotStatic);
   }
 
   private void injectFields(Class<?> testClass, Object testInstance, Predicate<Field> predicate) {
     findAnnotatedFields(testClass, InjectRedisServer.class, predicate)
-        .forEach(field -> {
-          try {
-            field.setAccessible(true);
-            field.set(testInstance, underlyingServer);
-          } catch (Exception exception) {
-            throw new FieldInjectionException(
-                format("Could not inject %s into %s test class.",
-                    underlyingServer.getClass().getName(),
-                    testClass.getSimpleName()),
-                exception);
-          }
-        });
+        .forEach(
+            field -> {
+              try {
+                field.setAccessible(true);
+                field.set(testInstance, underlyingServer);
+              } catch (Exception exception) {
+                throw new FieldInjectionException(
+                    format(
+                        "Could not inject %s into %s test class.",
+                        underlyingServer.getClass().getName(), testClass.getSimpleName()),
+                    exception);
+              }
+            });
   }
 }

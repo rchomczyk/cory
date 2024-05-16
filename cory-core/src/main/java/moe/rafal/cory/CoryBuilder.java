@@ -27,15 +27,13 @@ import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.packet.PacketListenerObserver;
 import moe.rafal.cory.message.packet.PacketPublisher;
 import moe.rafal.cory.message.packet.PacketRequester;
-import moe.rafal.cory.serdes.PacketPackerFactory;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 public final class CoryBuilder {
 
   private LoggerFacade loggerFacade = getCoryLogger(false);
   private MessageBroker messageBroker;
-  private PacketPackerFactory packetPackerFactory;
-  private PacketUnpackerFactory packetUnpackerFactory;
+  private PacketSerdesContext serdesContext;
 
   private CoryBuilder() {}
 
@@ -53,13 +51,8 @@ public final class CoryBuilder {
     return this;
   }
 
-  public CoryBuilder withPacketPackerFactory(PacketPackerFactory packetPackerFactory) {
-    this.packetPackerFactory = packetPackerFactory;
-    return this;
-  }
-
-  public CoryBuilder withPacketUnpackerFactory(PacketUnpackerFactory packetUnpackerFactory) {
-    this.packetUnpackerFactory = packetUnpackerFactory;
+  public CoryBuilder withSerdesContext(PacketSerdesContext serdesContext) {
+    this.serdesContext = serdesContext;
     return this;
   }
 
@@ -69,25 +62,19 @@ public final class CoryBuilder {
           "Cory could not be built, because of missing message broker, which is required for proper functioning.");
     }
 
-    if (packetPackerFactory == null) {
+    if (serdesContext == null) {
       throw new CoryBuildException(
-          "Cory could not be built, because of missing packet packer factory.");
-    }
-
-    if (packetUnpackerFactory == null) {
-      throw new CoryBuildException(
-          "Cory could not be built, because of missing packet unpacker factory.");
+          "Cory could not be built, because of missing packet serdes context.");
     }
 
     PacketGateway packetGateway = PacketGateway.INSTANCE;
     PacketPublisher packetPublisher =
-        getPacketPublisher(loggerFacade, messageBroker, packetGateway, packetPackerFactory);
+        getPacketPublisher(loggerFacade, messageBroker, packetGateway, serdesContext);
     PacketRequester packetRequester =
-        getPacketRequester(
-            loggerFacade, messageBroker, packetGateway, packetPackerFactory, packetUnpackerFactory);
+        getPacketRequester(loggerFacade, messageBroker, packetGateway, serdesContext);
     PacketListenerObserver packetListenerObserver =
         getPacketListenerObserver(
-            loggerFacade, messageBroker, packetGateway, packetPublisher, packetUnpackerFactory);
+            loggerFacade, messageBroker, packetGateway, packetPublisher, serdesContext);
     return new CoryImpl(
         loggerFacade, messageBroker, packetPublisher, packetRequester, packetListenerObserver);
   }

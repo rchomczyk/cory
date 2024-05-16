@@ -23,8 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -38,12 +37,11 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat((LoginPacket) packetGateway.readPacket(unpacker))
-            .isEqualTo(packet);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat((LoginPacket) packetGateway.readPacket(unpacker)).isEqualTo(packet);
       }
     }
   }
@@ -51,10 +49,10 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketShouldThrowWithMissingConstructorTest() throws IOException {
     MalformedPacket packet = getMalformedPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
         assertThatCode(() -> packetGateway.readPacket(unpacker))
             .isInstanceOf(MalformedPacketException.class)
             .hasMessage(
@@ -66,22 +64,21 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketTypeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packetGateway.writePacketType(packet, packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(packetGateway.readPacketType(unpacker))
-            .isEqualTo(packet.getClass());
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(packetGateway.readPacketType(unpacker)).isEqualTo(packet.getClass());
       }
     }
   }
 
   @Test
   void writeAndReadPacketTypeShouldThrowWithMissingTypeTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packString("moe.rafal.cory.packet.subject.MissingPacket");
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
         assertThatCode(() -> packetGateway.readPacketType(unpacker))
             .isInstanceOf(MalformedPacketException.class)
             .hasMessage(
@@ -93,12 +90,11 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketUniqueIdTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packetGateway.writePacketUniqueId(packet, packer);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(packetGateway.readPacketUniqueId(unpacker))
-            .isEqualTo(packet.getUniqueId());
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(packetGateway.readPacketUniqueId(unpacker)).isEqualTo(packet.getUniqueId());
       }
     }
   }

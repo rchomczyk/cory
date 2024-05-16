@@ -28,9 +28,8 @@ import moe.rafal.cory.concurrent.CompletableFutureUtils;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 import moe.rafal.cory.serdes.PacketUnpacker;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
 
 class PacketRequesterImpl implements PacketRequester {
 
@@ -43,27 +42,24 @@ class PacketRequesterImpl implements PacketRequester {
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
-  private final PacketPackerFactory packetPackerFactory;
-  private final PacketUnpackerFactory packetUnpackerFactory;
+  private final PacketSerdesContext serdesContext;
 
   PacketRequesterImpl(
       LoggerFacade loggerFacade,
       MessageBroker messageBroker,
       PacketGateway packetGateway,
-      PacketPackerFactory packetPackerFactory,
-      PacketUnpackerFactory packetUnpackerFactory) {
+      PacketSerdesContext serdesContext) {
     this.loggerFacade = loggerFacade;
     this.messageBroker = messageBroker;
     this.packetGateway = packetGateway;
-    this.packetPackerFactory = packetPackerFactory;
-    this.packetUnpackerFactory = packetUnpackerFactory;
+    this.serdesContext = serdesContext;
   }
 
   @Override
   public <T extends Packet, R extends Packet> CompletableFuture<R> request(
       String channelName, T packet) {
     logPacketRequestingStart(packet, channelName);
-    try (PacketPacker packer = packetPackerFactory.getPacketPacker()) {
+    try (PacketPacker packer = serdesContext.newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
       final byte[] payload = packer.toBinaryArray();
       logPacketRequestingCompletion(packet, channelName, payload);
@@ -83,7 +79,7 @@ class PacketRequesterImpl implements PacketRequester {
       throws PacketProcessingException {
     return supplyAsync(
             () -> {
-              try (PacketUnpacker unpacker = packetUnpackerFactory.getPacketUnpacker(message)) {
+              try (PacketUnpacker unpacker = serdesContext.newPacketUnpacker(message)) {
                 final T receivedPacket = packetGateway.readPacket(unpacker);
                 logPacketRequestingFulfilled(receivedPacket, message);
                 return receivedPacket;

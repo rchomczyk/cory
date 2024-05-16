@@ -22,8 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import io.lettuce.core.RedisConnectionException;
 import io.lettuce.core.RedisURI;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import org.junit.jupiter.api.Test;
 
 class RedisMessageBrokerFactoryTests {
@@ -35,8 +34,7 @@ class RedisMessageBrokerFactoryTests {
     assertThatCode(
             () ->
                 getRedisMessageBroker(
-                    MessagePackPacketPackerFactory.INSTANCE,
-                    MessagePackPacketUnpackerFactory.INSTANCE,
+                    MessagePackPacketSerdesContext.INSTANCE,
                     RedisURI.create(INVALID_CONNECTION_URI)))
         .isInstanceOf(RedisConnectionException.class)
         .hasMessageStartingWith("Unable to connect to ");

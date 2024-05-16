@@ -27,7 +27,7 @@ public interface Cory {
 
   <T extends Packet> void observe(String channelName, PacketListenerDelegate<T> packetListener);
 
-  <T extends Packet> void observeWithProcessing(
+  <T extends Packet> void mutualObserve(
       String channelName, PacketListenerDelegate<T> packetListener);
 
   <T extends Packet, R extends Packet> CompletableFuture<R> request(String channelName, T packet);

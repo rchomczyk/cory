@@ -33,8 +33,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.concurrent.CompletableFutureUtils;
 import moe.rafal.cory.serdes.PacketPacker;
-import moe.rafal.cory.serdes.PacketPackerFactory;
-import moe.rafal.cory.serdes.PacketUnpackerFactory;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -42,8 +41,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 class RedisMessageBroker implements MessageBroker {
 
   private static final RedisCodec<String, byte[]> DEFAULT_CODEC = new RedisBinaryCodec();
-  private final PacketPackerFactory packetPackerFactory;
-  private final PacketUnpackerFactory packetUnpackerFactory;
+  private final PacketSerdesContext serdesContext;
   private final Duration requestCleanupInterval;
   private final RedisClient redisClient;
   private final GenericObjectPool<StatefulRedisConnection<String, byte[]>> connectionPool;
@@ -51,12 +49,8 @@ class RedisMessageBroker implements MessageBroker {
   private final Set<String> subscribedTopics;
 
   RedisMessageBroker(
-      PacketPackerFactory packetPackerFactory,
-      PacketUnpackerFactory packetUnpackerFactory,
-      RedisURI redisUri,
-      Duration requestCleanupInterval) {
-    this.packetPackerFactory = packetPackerFactory;
-    this.packetUnpackerFactory = packetUnpackerFactory;
+      PacketSerdesContext serdesContext, RedisURI redisUri, Duration requestCleanupInterval) {
+    this.serdesContext = serdesContext;
     this.redisClient = RedisClient.create(redisUri);
     this.requestCleanupInterval = requestCleanupInterval;
     this.connectionPool = createRedisConnectionPool();
@@ -77,7 +71,7 @@ class RedisMessageBroker implements MessageBroker {
   @Override
   public void observe(String channelName, MessageListener listener) {
     subscribingConnection.addListener(
-        new RedisMessageListener(packetUnpackerFactory, channelName, listener));
+        new RedisMessageListener(serdesContext, channelName, listener));
     if (whetherSubscriptionExists(channelName)) {
       return;
     }
@@ -120,7 +114,7 @@ class RedisMessageBroker implements MessageBroker {
 
   private void publishWithHeader(String channelName, byte[] payload, UUID requestUniqueId) {
     try (StatefulRedisConnection<String, byte[]> borrow = connectionPool.borrowObject();
-        PacketPacker packer = packetPackerFactory.getPacketPacker()) {
+        PacketPacker packer = serdesContext.newPacketPacker()) {
       packer.packUUID(requestUniqueId);
       packer.packBinaryHeader(payload.length);
       packer.packPayload(payload);

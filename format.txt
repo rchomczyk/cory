@@ -1,0 +1,9 @@
+--- Headers for cory-message-broker-redis
+request unique id
+
+--- Headers for cory-core
+type of packet
+uuid of a packet
+
+--- Output of packet serialization
+payload

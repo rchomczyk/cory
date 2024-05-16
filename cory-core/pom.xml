@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>moe.rafal</groupId>
-    <artifactId>cory</artifactId>
-    <version>2.2-SNAPSHOT</version>
-  </parent>
-
   <artifactId>cory-core</artifactId>
+  <dependencies>
+    <dependency>
+      <artifactId>throwing-function</artifactId>
+      <groupId>com.pivovarit</groupId>
+      <scope>compile</scope>
+      <version>1.5.1</version>
+    </dependency>
+  </dependencies>
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <artifactId>cory</artifactId>
+    <groupId>moe.rafal</groupId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>com.pivovarit</groupId>
-      <artifactId>throwing-function</artifactId>
-      <version>1.5.1</version>
-      <scope>compile</scope>
-    </dependency>
-  </dependencies>
 
 </project>

@@ -18,15 +18,22 @@
 package moe.rafal.cory.serdes;
 
 import static org.msgpack.core.MessagePack.newDefaultBufferPacker;
+import static org.msgpack.core.MessagePack.newDefaultUnpacker;
 
-public final class MessagePackPacketPackerFactory implements PacketPackerFactory {
+public class MessagePackPacketSerdesContext implements PacketSerdesContext {
 
-  public static final PacketPackerFactory INSTANCE = new MessagePackPacketPackerFactory();
+  public static final MessagePackPacketSerdesContext INSTANCE =
+      new MessagePackPacketSerdesContext();
 
-  private MessagePackPacketPackerFactory() {}
+  private MessagePackPacketSerdesContext() {}
 
   @Override
-  public PacketPacker getPacketPacker() {
+  public PacketPacker newPacketPacker() {
     return new MessagePackPacketPacker(newDefaultBufferPacker());
+  }
+
+  @Override
+  public PacketUnpacker newPacketUnpacker(final byte[] content) {
+    return new MessagePackPacketUnpacker(newDefaultUnpacker(content));
   }
 }

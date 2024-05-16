@@ -43,9 +43,8 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
-import moe.rafal.cory.serdes.PacketPackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -59,7 +58,7 @@ class PackerPublisherImplTests {
   private final LoggerFacade loggerFacade = getNoopLogger();
   @InjectNatsServer private EmbeddedNatsServer natsServer;
   private MessageBroker messageBroker;
-  private PacketPackerFactory packetPackerFactory;
+  private PacketSerdesContext serdesContext;
   private PacketPublisher packetPublisher;
 
   @BeforeEach
@@ -72,7 +71,7 @@ class PackerPublisherImplTests {
             loggerFacade,
             messageBroker,
             PacketGateway.INSTANCE,
-            MessagePackPacketPackerFactory.INSTANCE);
+            MessagePackPacketSerdesContext.INSTANCE);
   }
 
   @Test
@@ -89,7 +88,7 @@ class PackerPublisherImplTests {
             () -> {
               assertThat(receivedPayload).isNotNull();
               try (PacketUnpacker unpacker =
-                  MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
+                  MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
                       receivedPayload.get())) {
                 assertThatUnpackerContains(
                     unpacker, PacketUnpacker::unpackString, packet.getClass().getName());

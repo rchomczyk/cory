@@ -39,8 +39,7 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -65,14 +64,14 @@ class PacketListenerObserverImplTests {
             Options.builder().server(getNatsConnectionUri(natsServer)).build());
     packetPublisher =
         getPacketPublisher(
-            loggerFacade, messageBroker, packetGateway, MessagePackPacketPackerFactory.INSTANCE);
+            loggerFacade, messageBroker, packetGateway, MessagePackPacketSerdesContext.INSTANCE);
     packetListenerObserver =
         getPacketListenerObserver(
             loggerFacade,
             messageBroker,
             packetGateway,
             packetPublisher,
-            MessagePackPacketUnpackerFactory.INSTANCE);
+            MessagePackPacketSerdesContext.INSTANCE);
   }
 
   @Test
@@ -119,7 +118,7 @@ class PacketListenerObserverImplTests {
 
   @Test
   void processIncomingPacketTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       LoginPacket packet = getLoginPacket();
       packetGateway.writePacket(packet, packer);
       LoginPacket processedPacket =
@@ -130,7 +129,7 @@ class PacketListenerObserverImplTests {
 
   @Test
   void processIncomingPacketShouldThrowWhenMalformedTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();

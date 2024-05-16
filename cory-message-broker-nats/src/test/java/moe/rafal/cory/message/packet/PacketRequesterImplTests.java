@@ -37,8 +37,7 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketPackerFactory;
-import moe.rafal.cory.serdes.MessagePackPacketUnpackerFactory;
+import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,8 +62,7 @@ class PacketRequesterImplTests {
             loggerFacade,
             messageBroker,
             PacketGateway.INSTANCE,
-            MessagePackPacketPackerFactory.INSTANCE,
-            MessagePackPacketUnpackerFactory.INSTANCE);
+            MessagePackPacketSerdesContext.INSTANCE);
   }
 
   @Test
@@ -86,9 +84,8 @@ class PacketRequesterImplTests {
             loggerFacade,
             messageBroker,
             packetGatewayMock,
-            MessagePackPacketPackerFactory.INSTANCE,
-            MessagePackPacketUnpackerFactory.INSTANCE);
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+            MessagePackPacketSerdesContext.INSTANCE);
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();

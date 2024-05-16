@@ -49,172 +49,11 @@ class MessagePackPacketUnpackerTests {
 
   private static final int DEFAULT_VALUE = 0;
 
-  @AfterEach
-  void closePacketUnpacker() {
-    assertThatCode(() -> MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        new byte[0]).close())
-        .doesNotThrowAnyException();
-  }
-
-  @Test
-  void skipValueTest() throws IOException {
-    byte[] content = getBinaryArrayOf((packer, expectedValue) -> {
-      packer.packString("test_string_1");
-      packer.packString("test_string_2");
-      packer.packString("test_string_3");
-    }, DEFAULT_VALUE);
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        content)) {
-      assertThat(unpacker.unpackString())
-          .isEqualTo("test_string_1");
-      unpacker.skipValue();
-      assertThat(unpacker.unpackString())
-          .isEqualTo("test_string_3");
-    }
-  }
-
-  @ValueSource(ints = {10, 20, 30})
-  @ParameterizedTest
-  void unpackArrayHeaderTest(int value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packArrayHeader,
-        PacketUnpacker::unpackArrayHeader, value);
-  }
-
-  @Test
-  void unpackArrayTest() throws IOException {
-    final String[] value = new String[] {"test_string_1", "test_string_2", "test_string_3"};
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packArray,
-        PacketUnpacker::unpackArray,
-        value
-    );
-  }
-
-  @ValueSource(ints = {40, 50, 60})
-  @ParameterizedTest
-  void unpackBinaryHeaderTest(int value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packBinaryHeader,
-        PacketUnpacker::unpackBinaryHeader, value);
-  }
-
-  @ValueSource(strings = {"test_string_1", "test_string_2", "test_string_3"})
-  @ParameterizedTest
-  void unpackStringTest(String value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packString,
-        PacketUnpacker::unpackString, value);
-  }
-
-  @ValueSource(booleans = {true, false})
-  @ParameterizedTest
-  void unpackBooleanTest(boolean value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packBoolean,
-        PacketUnpacker::unpackBoolean, value);
-  }
-
-  @ValueSource(ints = {600, 700, 800})
-  @ParameterizedTest
-  void unpackIntTest(int value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packInt,
-        PacketUnpacker::unpackInt, value);
-  }
-
-  @ValueSource(bytes = {0, 1})
-  @ParameterizedTest
-  void unpackByteTest(byte value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packByte,
-        PacketUnpacker::unpackByte, value);
-  }
-
-  @ValueSource(longs = {100000L, 200000000L, 300000000000L})
-  @ParameterizedTest
-  void unpackLongTest(long value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packLong,
-        PacketUnpacker::unpackLong, value);
-  }
-
-  @MethodSource("getUuidSubjects")
-  @ParameterizedTest
-  void unpackUUIDTest(UUID value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packUUID,
-        PacketUnpacker::unpackUUID, value);
-  }
-
   private static Set<UUID> getUuidSubjects() {
     return Set.of(
         UUID.nameUUIDFromBytes("test_subject_1".getBytes(StandardCharsets.UTF_8)),
         UUID.nameUUIDFromBytes("test_subject_2".getBytes(StandardCharsets.UTF_8)),
         UUID.nameUUIDFromBytes("test_subject_3".getBytes(StandardCharsets.UTF_8)));
-  }
-
-  @ValueSource(shorts = {10, 30, 4})
-  @ParameterizedTest
-  void unpackShortTest(short value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packShort,
-        PacketUnpacker::unpackShort, value);
-  }
-
-  @ValueSource(floats = {1.3F, 2.3F, 5.0F})
-  @ParameterizedTest
-  void unpackFloatTest(float value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packFloat,
-        PacketUnpacker::unpackFloat, value);
-  }
-
-  @ValueSource(doubles = {100.50, 30000.3131, 50000.00})
-  @ParameterizedTest
-  void unpackDoubleTest(double value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packDouble,
-        PacketUnpacker::unpackDouble, value);
-  }
-
-  @ValueSource(ints = {1, 2, 3})
-  @ParameterizedTest
-  void unpackMapHeaderTest(int value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packInt,
-        PacketUnpacker::unpackInt, value);
-  }
-
-  @Test
-  void unpackMapTest() throws IOException {
-    final Map<String, String> value = Map.of("test_key_1", "test_value_1", "test_key_2",
-        "test_value_2", "test_key_3", "test_value_3");
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packMap,
-        PacketUnpacker::unpackMap,
-        value
-    );
-  }
-
-  @MethodSource("getInstantSubjects")
-  @ParameterizedTest
-  void unpackInstantTest(Instant value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packInstant,
-        PacketUnpacker::unpackInstant, value);
-  }
-
-  @Test
-  void unpackInstantWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
-      packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(unpacker.unpackInstant())
-            .isNull();
-      }
-    }
   }
 
   private static Set<Instant> getInstantSubjects() {
@@ -224,92 +63,221 @@ class MessagePackPacketUnpackerTests {
         Instant.parse("2023-08-03T12:00:00.00Z"));
   }
 
-  @MethodSource("getDurationSubjects")
-  @ParameterizedTest
-  void unpackDurationTest(Duration value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packDuration,
-        PacketUnpacker::unpackDuration, value);
-  }
-
-  @Test
-  void unpackDurationWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
-      packer.packDuration(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(unpacker.unpackDuration())
-            .isNull();
-      }
-    }
-  }
-
   private static Set<Duration> getDurationSubjects() {
     return Set.of(ofSeconds(30), ofHours(2), ofDays(1));
-  }
-
-  @MethodSource("getEnumSubjects")
-  @ParameterizedTest
-  void unpackEnumTest(GameState value) throws IOException {
-    unpackValueAndAssertThatEqualTo(
-        PacketPacker::packEnum,
-        PacketUnpacker::unpackEnum, value);
-  }
-
-  @Test
-  void unpackEnumWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
-      packer.packEnum(null);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat((GameState) unpacker.unpackEnum())
-            .isNull();
-      }
-    }
   }
 
   private static Set<GameState> getEnumSubjects() {
     return Set.of(AWAITING, COUNTING, RUNNING);
   }
 
+  @AfterEach
+  void closePacketUnpacker() {
+    assertThatCode(
+            () -> MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(new byte[0]).close())
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void skipValueTest() throws IOException {
+    byte[] content =
+        getBinaryArrayOf(
+            (packer, expectedValue) -> {
+              packer.packString("test_string_1");
+              packer.packString("test_string_2");
+              packer.packString("test_string_3");
+            },
+            DEFAULT_VALUE);
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(content)) {
+      assertThat(unpacker.unpackString()).isEqualTo("test_string_1");
+      unpacker.skipValue();
+      assertThat(unpacker.unpackString()).isEqualTo("test_string_3");
+    }
+  }
+
+  @ValueSource(ints = {10, 20, 30})
+  @ParameterizedTest
+  void unpackArrayHeaderTest(int value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packArrayHeader, PacketUnpacker::unpackArrayHeader, value);
+  }
+
+  @Test
+  void unpackArrayTest() throws IOException {
+    final String[] value = new String[] {"test_string_1", "test_string_2", "test_string_3"};
+    unpackValueAndAssertThatEqualTo(PacketPacker::packArray, PacketUnpacker::unpackArray, value);
+  }
+
+  @ValueSource(ints = {40, 50, 60})
+  @ParameterizedTest
+  void unpackBinaryHeaderTest(int value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packBinaryHeader, PacketUnpacker::unpackBinaryHeader, value);
+  }
+
+  @ValueSource(strings = {"test_string_1", "test_string_2", "test_string_3"})
+  @ParameterizedTest
+  void unpackStringTest(String value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packString, PacketUnpacker::unpackString, value);
+  }
+
+  @ValueSource(booleans = {true, false})
+  @ParameterizedTest
+  void unpackBooleanTest(boolean value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packBoolean, PacketUnpacker::unpackBoolean, value);
+  }
+
+  @ValueSource(ints = {600, 700, 800})
+  @ParameterizedTest
+  void unpackIntTest(int value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packInt, PacketUnpacker::unpackInt, value);
+  }
+
+  @ValueSource(bytes = {0, 1})
+  @ParameterizedTest
+  void unpackByteTest(byte value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packByte, PacketUnpacker::unpackByte, value);
+  }
+
+  @ValueSource(longs = {100000L, 200000000L, 300000000000L})
+  @ParameterizedTest
+  void unpackLongTest(long value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packLong, PacketUnpacker::unpackLong, value);
+  }
+
+  @MethodSource("getUuidSubjects")
+  @ParameterizedTest
+  void unpackUUIDTest(UUID value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packUUID, PacketUnpacker::unpackUUID, value);
+  }
+
+  @ValueSource(shorts = {10, 30, 4})
+  @ParameterizedTest
+  void unpackShortTest(short value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packShort, PacketUnpacker::unpackShort, value);
+  }
+
+  @ValueSource(floats = {1.3F, 2.3F, 5.0F})
+  @ParameterizedTest
+  void unpackFloatTest(float value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packFloat, PacketUnpacker::unpackFloat, value);
+  }
+
+  @ValueSource(doubles = {100.50, 30000.3131, 50000.00})
+  @ParameterizedTest
+  void unpackDoubleTest(double value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packDouble, PacketUnpacker::unpackDouble, value);
+  }
+
+  @ValueSource(ints = {1, 2, 3})
+  @ParameterizedTest
+  void unpackMapHeaderTest(int value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packInt, PacketUnpacker::unpackInt, value);
+  }
+
+  @Test
+  void unpackMapTest() throws IOException {
+    final Map<String, String> value =
+        Map.of(
+            "test_key_1",
+            "test_value_1",
+            "test_key_2",
+            "test_value_2",
+            "test_key_3",
+            "test_value_3");
+    unpackValueAndAssertThatEqualTo(PacketPacker::packMap, PacketUnpacker::unpackMap, value);
+  }
+
+  @MethodSource("getInstantSubjects")
+  @ParameterizedTest
+  void unpackInstantTest(Instant value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packInstant, PacketUnpacker::unpackInstant, value);
+  }
+
+  @Test
+  void unpackInstantWithNullValueTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackInstant()).isNull();
+      }
+    }
+  }
+
+  @MethodSource("getDurationSubjects")
+  @ParameterizedTest
+  void unpackDurationTest(Duration value) throws IOException {
+    unpackValueAndAssertThatEqualTo(
+        PacketPacker::packDuration, PacketUnpacker::unpackDuration, value);
+  }
+
+  @Test
+  void unpackDurationWithNullValueTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+      packer.packDuration(null);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.unpackDuration()).isNull();
+      }
+    }
+  }
+
+  @MethodSource("getEnumSubjects")
+  @ParameterizedTest
+  void unpackEnumTest(GameState value) throws IOException {
+    unpackValueAndAssertThatEqualTo(PacketPacker::packEnum, PacketUnpacker::unpackEnum, value);
+  }
+
+  @Test
+  void unpackEnumWithNullValueTest() throws IOException {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+      packer.packEnum(null);
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat((GameState) unpacker.unpackEnum()).isNull();
+      }
+    }
+  }
+
   @Test
   void hasNextOnEmptyUnpackerTest() throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        new byte[0])) {
-      assertThat(unpacker.hasNext())
-          .isFalse();
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(new byte[0])) {
+      assertThat(unpacker.hasNext()).isFalse();
     }
   }
 
   @Test
   void hasNextOnExhaustedUnpackerTest() throws IOException {
-    try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-        getBinaryArrayOf(PacketPacker::packInt, 1))) {
-      assertThat(unpacker.hasNext())
-          .isTrue();
+    try (PacketUnpacker unpacker =
+        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
+            getBinaryArrayOf(PacketPacker::packInt, 1))) {
+      assertThat(unpacker.hasNext()).isTrue();
     }
   }
 
   @Test
   void hasNextNilValueOnNilElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packNil();
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(unpacker.hasNextNilValue())
-            .isTrue();
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.hasNextNilValue()).isTrue();
       }
     }
   }
 
   @Test
   void hasNextNilValueOnAnyElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketPackerFactory.INSTANCE.getPacketPacker()) {
+    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
       packer.packDuration(ZERO);
-      try (PacketUnpacker unpacker = MessagePackPacketUnpackerFactory.INSTANCE.getPacketUnpacker(
-          packer.toBinaryArray())) {
-        assertThat(unpacker.hasNextNilValue())
-            .isFalse();
+      try (PacketUnpacker unpacker =
+          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        assertThat(unpacker.hasNextNilValue()).isFalse();
       }
     }
   }
@@ -317,11 +285,8 @@ class MessagePackPacketUnpackerTests {
   @Test
   void hasNextNilValueOnExhaustedUnpackerTest() throws IOException {
     PacketUnpacker unpackerMock = mock(MessagePackPacketUnpacker.class);
-    when(unpackerMock.hasNext())
-        .thenReturn(false);
-    when(unpackerMock.hasNextNilValue())
-        .thenCallRealMethod();
-    assertThat(unpackerMock.hasNextNilValue())
-        .isFalse();
+    when(unpackerMock.hasNext()).thenReturn(false);
+    when(unpackerMock.hasNextNilValue()).thenCallRealMethod();
+    assertThat(unpackerMock.hasNextNilValue()).isFalse();
   }
 }
