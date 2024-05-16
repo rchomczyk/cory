@@ -17,12 +17,12 @@
 
 package moe.rafal.cory;
 
-import static moe.rafal.cory.logger.impl.LoggerFacade.getCoryLogger;
+import static moe.rafal.cory.logger.LoggerFacade.getCoryLogger;
 import static moe.rafal.cory.message.packet.PacketListenerObserver.getPacketListenerObserver;
 import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
 import static moe.rafal.cory.message.packet.PacketRequester.getPacketRequester;
 
-import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.packet.PacketListenerObserver;
 import moe.rafal.cory.message.packet.PacketPublisher;

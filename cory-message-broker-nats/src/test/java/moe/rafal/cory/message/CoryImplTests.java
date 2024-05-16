@@ -22,7 +22,7 @@ import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNatsConnectionUri;
-import static moe.rafal.cory.logger.impl.LoggerFacade.getNoopLogger;
+import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;

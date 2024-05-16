@@ -21,7 +21,7 @@ import static java.util.logging.Level.FINER;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
-import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.message.packet.PacketListener;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;

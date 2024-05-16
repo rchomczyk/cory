@@ -20,7 +20,7 @@ package moe.rafal.cory.message.packet;
 import java.util.concurrent.CompletableFuture;
 import moe.rafal.cory.Packet;
 import moe.rafal.cory.PacketGateway;
-import moe.rafal.cory.logger.impl.LoggerFacade;
+import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
 import moe.rafal.cory.serdes.PacketPackerFactory;
 import moe.rafal.cory.serdes.PacketUnpackerFactory;

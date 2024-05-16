@@ -15,7 +15,7 @@
  *
  */
 
-package moe.rafal.cory.logger.impl;
+package moe.rafal.cory.logger;
 
 import java.util.logging.Level;
 

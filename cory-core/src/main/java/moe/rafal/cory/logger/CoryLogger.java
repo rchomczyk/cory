@@ -15,7 +15,7 @@
  *
  */
 
-package moe.rafal.cory.logger.impl;
+package moe.rafal.cory.logger;
 
 import static java.lang.String.format;
 import static java.util.logging.Level.ALL;
