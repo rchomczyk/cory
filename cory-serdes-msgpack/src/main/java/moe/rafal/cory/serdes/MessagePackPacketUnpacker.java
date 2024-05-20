@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.msgpack.core.MessageFormat;
 import org.msgpack.core.MessageUnpacker;
 
 class MessagePackPacketUnpacker implements PacketUnpacker {
@@ -172,6 +173,29 @@ class MessagePackPacketUnpacker implements PacketUnpacker {
     }
 
     return null;
+  }
+
+  @Override
+  public Object unpackObject() throws IOException {
+    final MessageFormat nextFormat = underlyingUnpacker.getNextFormat();
+    switch (nextFormat.getValueType()) {
+      case BOOLEAN:
+        return unpackBoolean();
+      case INTEGER:
+        return unpackInt();
+      case FLOAT:
+        return unpackDouble();
+      case STRING:
+        return unpackString();
+      case BINARY:
+        return unpackPayload();
+      case ARRAY:
+        return unpackArray();
+      case MAP:
+        return unpackMap();
+      default:
+        return null;
+    }
   }
 
   @Override

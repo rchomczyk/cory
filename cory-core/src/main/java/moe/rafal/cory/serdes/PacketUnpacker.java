@@ -64,6 +64,8 @@ public interface PacketUnpacker extends Closeable {
 
   <T extends Enum<T>> T unpackEnum() throws IOException;
 
+  Object unpackObject() throws IOException;
+
   <T> T unpackAuto() throws IOException;
 
   boolean hasNext() throws IOException;

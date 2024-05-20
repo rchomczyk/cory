@@ -20,12 +20,13 @@ package moe.rafal.cory.serdes;
 import static org.msgpack.core.MessagePack.newDefaultBufferPacker;
 import static org.msgpack.core.MessagePack.newDefaultUnpacker;
 
-public class MessagePackPacketSerdesContext implements PacketSerdesContext {
-
-  public static final MessagePackPacketSerdesContext INSTANCE =
-      new MessagePackPacketSerdesContext();
+public final class MessagePackPacketSerdesContext implements PacketSerdesContext {
 
   private MessagePackPacketSerdesContext() {}
+
+  public static PacketSerdesContext getMessagePackPacketSerdesContext() {
+    return new MessagePackPacketSerdesContext();
+  }
 
   @Override
   public PacketPacker newPacketPacker() {

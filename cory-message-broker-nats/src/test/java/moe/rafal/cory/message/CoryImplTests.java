@@ -24,6 +24,7 @@ import static moe.rafal.cory.PacketTestsUtils.getLoginRequestPacket;
 import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNatsConnectionUri;
 import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -38,7 +39,6 @@ import moe.rafal.cory.Packet;
 import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.message.packet.PacketListenerDelegate;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.subject.LoginPacket;
 import moe.rafal.cory.subject.LoginRequestPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -61,7 +61,7 @@ class CoryImplTests {
             .withMessageBroker(
                 produceNatsMessageBroker(
                     Options.builder().server(getNatsConnectionUri(natsServer)).build()))
-            .withSerdesContext(MessagePackPacketSerdesContext.INSTANCE)
+            .withSerdesContext(getMessagePackPacketSerdesContext())
             .build();
   }
 

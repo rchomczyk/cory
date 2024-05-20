@@ -27,6 +27,7 @@ import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.PacketTestsUtils.MAXIMUM_RESPONSE_PERIOD;
 import static moe.rafal.cory.integration.redis.EmbeddedRedisServerExtension.getRedisConnectionUri;
 import static moe.rafal.cory.message.RedisMessageBrokerFactory.getRedisMessageBroker;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -37,14 +38,12 @@ import static org.mockito.Mockito.verify;
 
 import com.github.fppt.jedismock.RedisServer;
 import io.lettuce.core.RedisURI;
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import moe.rafal.cory.integration.redis.EmbeddedRedisServerExtension;
 import moe.rafal.cory.integration.redis.InjectRedisServer;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,12 +60,12 @@ class RedisMessageBrokerTests {
     messageBroker =
         (RedisMessageBroker)
             getRedisMessageBroker(
-                MessagePackPacketSerdesContext.INSTANCE,
+                getMessagePackPacketSerdesContext(),
                 RedisURI.create(getRedisConnectionUri(redisServer)));
     messageBrokerWhichIsFailing =
         (RedisMessageBroker)
             RedisMessageBrokerFactory.getRedisMessageBroker(
-                MessagePackPacketSerdesContext.INSTANCE,
+                getMessagePackPacketSerdesContext(),
                 RedisURI.create(getRedisConnectionUri(redisServer)),
                 ZERO);
   }

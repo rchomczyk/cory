@@ -30,11 +30,11 @@ import moe.rafal.cory.serdes.PacketUnpacker;
 class PacketListenerObserverImpl implements PacketListenerObserver {
 
   private static final String RECEIVED_PACKET =
-      "Received packet of type %s (%s) from %s channel with %s reply channel.";
+      "Received packet of type %s (%s) from %s channel with %s reply channel. Preview: %s";
   private static final String RECEIVED_AND_FORWARDED_PACKET =
-      "Received packet of type %s (%s) from %s channel with %s reply channel and forwarded to %s listener.";
+      "Received packet of type %s (%s) from %s channel with %s reply channel and forwarded to %s listener. Preview: %s";
   private static final String RECEIVED_AND_RESPONDED_PACKET =
-      "Received packet of type %s (%s) from %s channel with %s reply channel and responded with %s packet.";
+      "Received packet of type %s (%s) from %s channel with %s reply channel and responded with %s packet. Preview: %s";
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
@@ -131,7 +131,8 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         packet.getClass().getName(),
         packet.getUniqueId(),
         channelName,
-        replyChannelName);
+        replyChannelName,
+        packet);
   }
 
   private void logReceivedAndForwardedPacket(
@@ -146,7 +147,8 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         packet.getUniqueId(),
         channelName,
         replyChannelName,
-        packetListener.getClass().getName());
+        packetListener.getClass().getName(),
+        packet);
   }
 
   private void logReceivedAndRespondedPacket(
@@ -158,6 +160,7 @@ class PacketListenerObserverImpl implements PacketListenerObserver {
         packet.getUniqueId(),
         channelName,
         replyChannelName,
-        responsePacket.getClass().getName());
+        responsePacket.getClass().getName(),
+        packet);
   }
 }

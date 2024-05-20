@@ -34,11 +34,11 @@ import moe.rafal.cory.serdes.PacketUnpacker;
 class PacketRequesterImpl implements PacketRequester {
 
   private static final String PACKET_REQUESTING_STARTING =
-      "Requesting packet of type %s (%s) over the channel %s.";
+      "Requesting packet of type %s (%s) over the channel %s. Preview: %s";
   private static final String PACKET_REQUESTING_COMPLETED =
-      "Request of packet of type %s (%s) has been completed over the %s channel with payload of %d bytes.";
+      "Request of packet of type %s (%s) has been completed over the %s channel with payload of %d bytes. Preview: %s";
   private static final String PACKET_REQUESTING_FULFILLED =
-      "Request of packet of type %s (%s) has been fulfilled over the temporary channel with payload of %d bytes.";
+      "Request of packet of type %s (%s) has been fulfilled over the temporary channel with payload of %d bytes. Preview: %s";
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
@@ -103,7 +103,8 @@ class PacketRequesterImpl implements PacketRequester {
         PACKET_REQUESTING_STARTING,
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
-        channelName);
+        channelName,
+        packet);
   }
 
   private void logPacketRequestingCompletion(Packet packet, String channelName, byte[] payload) {
@@ -113,7 +114,8 @@ class PacketRequesterImpl implements PacketRequester {
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
         channelName,
-        payload.length);
+        payload.length,
+        packet);
   }
 
   private void logPacketRequestingFulfilled(Packet packet, byte[] payload) {
@@ -122,6 +124,7 @@ class PacketRequesterImpl implements PacketRequester {
         PACKET_REQUESTING_FULFILLED,
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
-        payload.length);
+        payload.length,
+        packet);
   }
 }

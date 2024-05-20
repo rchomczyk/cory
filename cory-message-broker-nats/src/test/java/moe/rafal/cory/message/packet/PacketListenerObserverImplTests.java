@@ -26,6 +26,7 @@ import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static moe.rafal.cory.message.packet.PacketListenerObserver.getPacketListenerObserver;
 import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -39,7 +40,6 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.subject.LoginPacket;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
@@ -64,14 +64,14 @@ class PacketListenerObserverImplTests {
             Options.builder().server(getNatsConnectionUri(natsServer)).build());
     packetPublisher =
         getPacketPublisher(
-            loggerFacade, messageBroker, packetGateway, MessagePackPacketSerdesContext.INSTANCE);
+            loggerFacade, messageBroker, packetGateway, getMessagePackPacketSerdesContext());
     packetListenerObserver =
         getPacketListenerObserver(
             loggerFacade,
             messageBroker,
             packetGateway,
             packetPublisher,
-            MessagePackPacketSerdesContext.INSTANCE);
+            getMessagePackPacketSerdesContext());
   }
 
   @Test
@@ -118,7 +118,7 @@ class PacketListenerObserverImplTests {
 
   @Test
   void processIncomingPacketTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       LoginPacket packet = getLoginPacket();
       packetGateway.writePacket(packet, packer);
       LoginPacket processedPacket =
@@ -129,7 +129,7 @@ class PacketListenerObserverImplTests {
 
   @Test
   void processIncomingPacketShouldThrowWhenMalformedTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();

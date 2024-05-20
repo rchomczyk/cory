@@ -23,6 +23,7 @@ import static java.time.Duration.ofHours;
 import static java.time.Duration.ofSeconds;
 import static moe.rafal.cory.MessagePackAssertions.getBinaryArrayOf;
 import static moe.rafal.cory.MessagePackAssertions.unpackValueAndAssertThatEqualTo;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static moe.rafal.cory.subject.GameState.AWAITING;
 import static moe.rafal.cory.subject.GameState.COUNTING;
 import static moe.rafal.cory.subject.GameState.RUNNING;
@@ -74,7 +75,7 @@ class MessagePackPacketUnpackerTests {
   @AfterEach
   void closePacketUnpacker() {
     assertThatCode(
-            () -> MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(new byte[0]).close())
+            () -> getMessagePackPacketSerdesContext().newPacketUnpacker(new byte[0]).close())
         .doesNotThrowAnyException();
   }
 
@@ -89,7 +90,7 @@ class MessagePackPacketUnpackerTests {
             },
             DEFAULT_VALUE);
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(content)) {
+        getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
       assertThat(unpacker.unpackString()).isEqualTo("test_string_1");
       unpacker.skipValue();
       assertThat(unpacker.unpackString()).isEqualTo("test_string_3");
@@ -199,10 +200,10 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackInstantWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packDuration(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackInstant()).isNull();
       }
     }
@@ -217,10 +218,10 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackDurationWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packDuration(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackDuration()).isNull();
       }
     }
@@ -234,10 +235,10 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void unpackEnumWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packEnum(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat((GameState) unpacker.unpackEnum()).isNull();
       }
     }
@@ -246,7 +247,7 @@ class MessagePackPacketUnpackerTests {
   @Test
   void hasNextOnEmptyUnpackerTest() throws IOException {
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(new byte[0])) {
+        getMessagePackPacketSerdesContext().newPacketUnpacker(new byte[0])) {
       assertThat(unpacker.hasNext()).isFalse();
     }
   }
@@ -254,7 +255,7 @@ class MessagePackPacketUnpackerTests {
   @Test
   void hasNextOnExhaustedUnpackerTest() throws IOException {
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
+        getMessagePackPacketSerdesContext().newPacketUnpacker(
             getBinaryArrayOf(PacketPacker::packInt, 1))) {
       assertThat(unpacker.hasNext()).isTrue();
     }
@@ -262,10 +263,10 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNilValueOnNilElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packNil();
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue()).isTrue();
       }
     }
@@ -273,10 +274,10 @@ class MessagePackPacketUnpackerTests {
 
   @Test
   void hasNextNilValueOnAnyElement() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packDuration(ZERO);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue()).isFalse();
       }
     }

@@ -23,6 +23,7 @@ import static java.time.Duration.ofDays;
 import static java.time.Duration.ofHours;
 import static java.time.Duration.ofSeconds;
 import static moe.rafal.cory.MessagePackAssertions.packValueAndAssertThatContains;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static moe.rafal.cory.subject.GameState.AWAITING;
 import static moe.rafal.cory.subject.GameState.COUNTING;
 import static moe.rafal.cory.subject.GameState.RUNNING;
@@ -46,7 +47,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class MessagePackPacketPackerTests {
 
   private final PacketPacker packetPacker =
-      MessagePackPacketSerdesContext.INSTANCE.newPacketPacker();
+      getMessagePackPacketSerdesContext().newPacketPacker();
 
   private static Set<byte[]> getBinarySubjects() {
     return Set.of(
@@ -89,7 +90,7 @@ class MessagePackPacketPackerTests {
 
   @Test
   void closePacketUnpacker() {
-    assertThatCode(() -> MessagePackPacketSerdesContext.INSTANCE.newPacketPacker().close())
+    assertThatCode(() -> getMessagePackPacketSerdesContext().newPacketPacker().close())
         .doesNotThrowAnyException();
   }
 
@@ -164,10 +165,10 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packUUIDWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packUUID(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackUUID()).isNull();
       }
     }
@@ -210,10 +211,10 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packInstantWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packInstant(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackInstant()).isNull();
       }
     }
@@ -228,10 +229,10 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packDurationWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packDuration(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackDuration()).isNull();
       }
     }
@@ -246,10 +247,10 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packEnumWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packDuration(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat((GameState) unpacker.unpackEnum()).isNull();
       }
     }
@@ -257,14 +258,14 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packAutoTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packAuto(10);
       packer.packAuto("test_string");
       packer.packAuto(AWAITING);
       packer.packAuto(Map.of("key", "value", "key2", "value2"));
       packer.packAuto(new String[] {"value", "value1", "value2"});
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.unpackString()).isEqualTo(Integer.class.getName());
         assertThat(unpacker.unpackInt()).isEqualTo(10);
         assertThat(unpacker.unpackString()).isEqualTo(String.class.getName());
@@ -281,10 +282,10 @@ class MessagePackPacketPackerTests {
 
   @Test
   void packAutoWithNullValueTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packAuto(null);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(unpacker.hasNextNilValue()).isTrue();
       }
     }

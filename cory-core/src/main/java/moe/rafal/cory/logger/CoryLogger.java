@@ -19,19 +19,26 @@ package moe.rafal.cory.logger;
 
 import static java.lang.String.format;
 import static java.util.logging.Level.ALL;
+import static java.util.logging.Level.FINER;
+import static moe.rafal.cory.logger.payload.PayloadUtils.getPacketPayload;
+import static moe.rafal.cory.logger.payload.PayloadUtils.getPacketPreview;
 
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import moe.rafal.cory.Packet;
+import moe.rafal.cory.serdes.PacketSerdesContext;
 
 class CoryLogger implements LoggerFacade {
 
-  private static final int FINER_LEVEL_VALUE = 400;
+  private static final int FINER_LEVEL_VALUE = FINER.intValue();
+  private final PacketSerdesContext serdesContext;
   private final boolean debug;
   private final Logger logger;
 
-  CoryLogger(final boolean debug) {
+  CoryLogger(final PacketSerdesContext serdesContext, final boolean debug) {
+    this.serdesContext = serdesContext;
     this.debug = debug;
     this.logger = getConfiguredLogger();
   }
@@ -42,16 +49,26 @@ class CoryLogger implements LoggerFacade {
       return;
     }
 
-    logger.log(level, format(message, parameters));
+    final Object[] parametersWithPayloadPreview = new Object[parameters.length];
+    for (int index = 0; index < parametersWithPayloadPreview.length; index++) {
+      Object parameter = parameters[index];
+      if (parameter instanceof Packet) {
+        parameter =
+            getPacketPreview(serdesContext, getPacketPayload(serdesContext, (Packet) parameter));
+      }
+      parametersWithPayloadPreview[index] = parameter;
+    }
+
+    logger.log(level, format(message, parametersWithPayloadPreview));
   }
 
   private Logger getConfiguredLogger() {
-    Logger underlyingLogger = Logger.getLogger(getClass().getName());
-    for (Handler handler : underlyingLogger.getHandlers()) {
+    final Logger underlyingLogger = Logger.getLogger(getClass().getName());
+    for (final Handler handler : underlyingLogger.getHandlers()) {
       underlyingLogger.removeHandler(handler);
     }
 
-    Handler handler = new ConsoleHandler();
+    final Handler handler = new ConsoleHandler();
     handler.setLevel(ALL);
 
     underlyingLogger.addHandler(handler);

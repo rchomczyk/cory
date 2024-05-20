@@ -28,12 +28,12 @@ import static moe.rafal.cory.PacketTestsUtils.NIL_UNIQUE_ID;
 import static moe.rafal.cory.PacketTestsUtils.getEmptyLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getMalformedPacket;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mockStatic;
 
 import java.io.IOException;
 import java.util.UUID;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -77,10 +77,10 @@ class PacketTests {
   @Test
   void writeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packet.write(packer);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_USERNAME);
         assertThatUnpackerContains(unpacker, PacketUnpacker::unpackString, INITIAL_PASSWORD);
       }
@@ -98,7 +98,7 @@ class PacketTests {
             },
             DEFAULT_VALUE);
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(content)) {
+        getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
       packet.read(unpacker);
       assertThat(packet.getUsername()).isEqualTo(INCOMING_USERNAME);
       assertThat(packet.getPassword()).isEqualTo(INCOMING_PASSWORD);
