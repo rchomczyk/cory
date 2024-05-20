@@ -23,6 +23,7 @@ import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNat
 import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static moe.rafal.cory.message.packet.PacketRequester.getPacketRequester;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -37,7 +38,6 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import np.com.madanpokharel.embed.nats.EmbeddedNatsServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +62,7 @@ class PacketRequesterImplTests {
             loggerFacade,
             messageBroker,
             PacketGateway.INSTANCE,
-            MessagePackPacketSerdesContext.INSTANCE);
+            getMessagePackPacketSerdesContext());
   }
 
   @Test
@@ -84,8 +84,8 @@ class PacketRequesterImplTests {
             loggerFacade,
             messageBroker,
             packetGatewayMock,
-            MessagePackPacketSerdesContext.INSTANCE);
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+            getMessagePackPacketSerdesContext());
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");
       byte[] content = packer.toBinaryArray();

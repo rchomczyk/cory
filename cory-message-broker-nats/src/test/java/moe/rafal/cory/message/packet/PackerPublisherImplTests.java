@@ -26,6 +26,7 @@ import static moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension.getNat
 import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.NatsMessageBrokerFactory.produceNatsMessageBroker;
 import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.awaitility.Awaitility.await;
@@ -43,7 +44,6 @@ import moe.rafal.cory.integration.nats.EmbeddedNatsServerExtension;
 import moe.rafal.cory.integration.nats.InjectNatsServer;
 import moe.rafal.cory.logger.LoggerFacade;
 import moe.rafal.cory.message.MessageBroker;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketSerdesContext;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -71,7 +71,7 @@ class PackerPublisherImplTests {
             loggerFacade,
             messageBroker,
             PacketGateway.INSTANCE,
-            MessagePackPacketSerdesContext.INSTANCE);
+            getMessagePackPacketSerdesContext());
   }
 
   @Test
@@ -88,7 +88,7 @@ class PackerPublisherImplTests {
             () -> {
               assertThat(receivedPayload).isNotNull();
               try (PacketUnpacker unpacker =
-                  MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
+                  getMessagePackPacketSerdesContext().newPacketUnpacker(
                       receivedPayload.get())) {
                 assertThatUnpackerContains(
                     unpacker, PacketUnpacker::unpackString, packet.getClass().getName());

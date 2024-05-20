@@ -30,9 +30,9 @@ import moe.rafal.cory.serdes.PacketSerdesContext;
 class PacketPublisherImpl implements PacketPublisher {
 
   private static final String PACKET_PUBLISHING_STARTING =
-      "Publishing packet of type %s (%s) over the channel %s.";
+      "Publishing packet of type %s (%s) over the channel %s. Preview: %s";
   private static final String PACKET_PUBLISHING_COMPLETED =
-      "Packet of type %s (%s) has been published over the %s channel with payload of %d bytes.";
+      "Packet of type %s (%s) has been published over the %s channel with payload of %d bytes. Preview: %s";
   private final LoggerFacade loggerFacade;
   private final MessageBroker messageBroker;
   private final PacketGateway packetGateway;
@@ -70,7 +70,8 @@ class PacketPublisherImpl implements PacketPublisher {
         PACKET_PUBLISHING_STARTING,
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
-        channelName);
+        channelName,
+        packet);
   }
 
   private void logPacketPublicationCompletion(Packet packet, String channelName, byte[] payload) {
@@ -80,6 +81,7 @@ class PacketPublisherImpl implements PacketPublisher {
         packet.getClass().getSimpleName(),
         packet.getUniqueId(),
         channelName,
-        payload.length);
+        payload.length,
+        packet);
   }
 }

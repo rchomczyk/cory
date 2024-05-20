@@ -17,7 +17,7 @@
 
 package moe.rafal.cory;
 
-import static moe.rafal.cory.logger.LoggerFacade.getCoryLogger;
+import static moe.rafal.cory.logger.LoggerFacade.getNoopLogger;
 import static moe.rafal.cory.message.packet.PacketListenerObserver.getPacketListenerObserver;
 import static moe.rafal.cory.message.packet.PacketPublisher.getPacketPublisher;
 import static moe.rafal.cory.message.packet.PacketRequester.getPacketRequester;
@@ -31,7 +31,7 @@ import moe.rafal.cory.serdes.PacketSerdesContext;
 
 public final class CoryBuilder {
 
-  private LoggerFacade loggerFacade = getCoryLogger(false);
+  private LoggerFacade loggerFacade = getNoopLogger();
   private MessageBroker messageBroker;
   private PacketSerdesContext serdesContext;
 
@@ -67,12 +67,12 @@ public final class CoryBuilder {
           "Cory could not be built, because of missing packet serdes context.");
     }
 
-    PacketGateway packetGateway = PacketGateway.INSTANCE;
-    PacketPublisher packetPublisher =
+    final PacketGateway packetGateway = PacketGateway.INSTANCE;
+    final PacketPublisher packetPublisher =
         getPacketPublisher(loggerFacade, messageBroker, packetGateway, serdesContext);
-    PacketRequester packetRequester =
+    final PacketRequester packetRequester =
         getPacketRequester(loggerFacade, messageBroker, packetGateway, serdesContext);
-    PacketListenerObserver packetListenerObserver =
+    final PacketListenerObserver packetListenerObserver =
         getPacketListenerObserver(
             loggerFacade, messageBroker, packetGateway, packetPublisher, serdesContext);
     return new CoryImpl(

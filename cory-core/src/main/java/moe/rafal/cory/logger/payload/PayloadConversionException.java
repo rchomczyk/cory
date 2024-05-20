@@ -15,20 +15,11 @@
  *
  */
 
-package moe.rafal.cory.logger;
+package moe.rafal.cory.logger.payload;
 
-import java.util.logging.Level;
-import moe.rafal.cory.serdes.PacketSerdesContext;
+public class PayloadConversionException extends IllegalStateException {
 
-public interface LoggerFacade {
-
-  static LoggerFacade getCoryLogger(final PacketSerdesContext serdesContext, final boolean debug) {
-    return new CoryLogger(serdesContext, debug);
+  public PayloadConversionException(final String message, final Throwable cause) {
+    super(message, cause);
   }
-
-  static LoggerFacade getNoopLogger() {
-    return new NoopLogger();
-  }
-
-  void log(final Level level, final String message, final Object... parameters);
 }

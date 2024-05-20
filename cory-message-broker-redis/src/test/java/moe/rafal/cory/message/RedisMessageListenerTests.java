@@ -21,6 +21,7 @@ import static java.lang.String.format;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_CHANNEL_NAME;
 import static moe.rafal.cory.PacketTestsUtils.BROADCAST_TEST_PAYLOAD;
 import static moe.rafal.cory.message.RedisMessageBrokerTestsUtils.getPayloadWithRequestUniqueId;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -29,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import org.junit.jupiter.api.Test;
 
 class RedisMessageListenerTests {
@@ -60,7 +60,7 @@ class RedisMessageListenerTests {
         .receive(any(), any(), any());
     RedisMessageListener redisMessageListener =
         new RedisMessageListener(
-            MessagePackPacketSerdesContext.INSTANCE, BROADCAST_CHANNEL_NAME, messageListenerMock);
+            getMessagePackPacketSerdesContext(), BROADCAST_CHANNEL_NAME, messageListenerMock);
     assertThatCode(
             () ->
                 redisMessageListener.processIncomingMessage(

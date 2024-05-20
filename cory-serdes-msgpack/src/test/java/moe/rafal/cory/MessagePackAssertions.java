@@ -17,12 +17,12 @@
 
 package moe.rafal.cory;
 
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.pivovarit.function.ThrowingBiConsumer;
 import com.pivovarit.function.ThrowingFunction;
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 
@@ -36,7 +36,7 @@ public final class MessagePackAssertions {
       T expectedValue)
       throws IOException {
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+        getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
       assertThatUnpackerContains(unpacker, valueResolver, expectedValue);
     }
   }
@@ -65,7 +65,7 @@ public final class MessagePackAssertions {
       T expectedValue)
       throws IOException {
     try (PacketUnpacker unpacker =
-        MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(
+        getMessagePackPacketSerdesContext().newPacketUnpacker(
             getBinaryArrayOf(packerInitializer, expectedValue))) {
       assertThat(valueResolver.apply(unpacker)).isEqualTo(expectedValue);
     }
@@ -74,7 +74,7 @@ public final class MessagePackAssertions {
   public static <T> byte[] getBinaryArrayOf(
       ThrowingBiConsumer<PacketPacker, T, IOException> packetInitializer, T expectedValue)
       throws IOException {
-    PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker();
+    PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker();
     packetInitializer.accept(packer, expectedValue);
     return packer.toBinaryArray();
   }

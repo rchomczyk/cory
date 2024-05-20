@@ -19,11 +19,11 @@ package moe.rafal.cory;
 
 import static moe.rafal.cory.PacketTestsUtils.getLoginPacket;
 import static moe.rafal.cory.PacketTestsUtils.getMalformedPacket;
+import static moe.rafal.cory.serdes.MessagePackPacketSerdesContext.getMessagePackPacketSerdesContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.io.IOException;
-import moe.rafal.cory.serdes.MessagePackPacketSerdesContext;
 import moe.rafal.cory.serdes.PacketPacker;
 import moe.rafal.cory.serdes.PacketUnpacker;
 import moe.rafal.cory.subject.LoginPacket;
@@ -37,10 +37,10 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat((LoginPacket) packetGateway.readPacket(unpacker)).isEqualTo(packet);
       }
     }
@@ -49,10 +49,10 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketShouldThrowWithMissingConstructorTest() throws IOException {
     MalformedPacket packet = getMalformedPacket();
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packetGateway.writePacket(packet, packer);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThatCode(() -> packetGateway.readPacket(unpacker))
             .isInstanceOf(MalformedPacketException.class)
             .hasMessage(
@@ -64,10 +64,10 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketTypeTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packetGateway.writePacketType(packet, packer);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(packetGateway.readPacketType(unpacker)).isEqualTo(packet.getClass());
       }
     }
@@ -75,10 +75,10 @@ class PacketGatewayImplTests {
 
   @Test
   void writeAndReadPacketTypeShouldThrowWithMissingTypeTest() throws IOException {
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packString("moe.rafal.cory.packet.subject.MissingPacket");
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThatCode(() -> packetGateway.readPacketType(unpacker))
             .isInstanceOf(MalformedPacketException.class)
             .hasMessage(
@@ -90,10 +90,10 @@ class PacketGatewayImplTests {
   @Test
   void writeAndReadPacketUniqueIdTest() throws IOException {
     LoginPacket packet = getLoginPacket();
-    try (PacketPacker packer = MessagePackPacketSerdesContext.INSTANCE.newPacketPacker()) {
+    try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packetGateway.writePacketUniqueId(packet, packer);
       try (PacketUnpacker unpacker =
-          MessagePackPacketSerdesContext.INSTANCE.newPacketUnpacker(packer.toBinaryArray())) {
+          getMessagePackPacketSerdesContext().newPacketUnpacker(packer.toBinaryArray())) {
         assertThat(packetGateway.readPacketUniqueId(unpacker)).isEqualTo(packet.getUniqueId());
       }
     }
