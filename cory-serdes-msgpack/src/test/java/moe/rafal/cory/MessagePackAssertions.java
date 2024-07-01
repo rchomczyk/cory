@@ -65,8 +65,8 @@ public final class MessagePackAssertions {
       T expectedValue)
       throws IOException {
     try (PacketUnpacker unpacker =
-        getMessagePackPacketSerdesContext().newPacketUnpacker(
-            getBinaryArrayOf(packerInitializer, expectedValue))) {
+        getMessagePackPacketSerdesContext()
+            .newPacketUnpacker(getBinaryArrayOf(packerInitializer, expectedValue))) {
       assertThat(valueResolver.apply(unpacker)).isEqualTo(expectedValue);
     }
   }

@@ -88,8 +88,7 @@ class CoryImpl implements Cory {
     loggerFacade.log(FINER, CHANNEL_OBSERVED, channelName, packetListener.getClass().getName());
   }
 
-  private void logChannelMutualObservation(
-      String channelName, PacketListener<?> packetListener) {
+  private void logChannelMutualObservation(String channelName, PacketListener<?> packetListener) {
     loggerFacade.log(
         FINER, CHANNEL_MUTUALLY_OBSERVED, channelName, packetListener.getClass().getName());
   }

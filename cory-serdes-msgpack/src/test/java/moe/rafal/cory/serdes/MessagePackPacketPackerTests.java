@@ -46,8 +46,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class MessagePackPacketPackerTests {
 
-  private final PacketPacker packetPacker =
-      getMessagePackPacketSerdesContext().newPacketPacker();
+  private final PacketPacker packetPacker = getMessagePackPacketSerdesContext().newPacketPacker();
 
   private static Set<byte[]> getBinarySubjects() {
     return Set.of(

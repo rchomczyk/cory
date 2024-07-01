@@ -34,8 +34,7 @@ class RedisMessageBrokerFactoryTests {
     assertThatCode(
             () ->
                 getRedisMessageBroker(
-                    getMessagePackPacketSerdesContext(),
-                    RedisURI.create(INVALID_CONNECTION_URI)))
+                    getMessagePackPacketSerdesContext(), RedisURI.create(INVALID_CONNECTION_URI)))
         .isInstanceOf(RedisConnectionException.class)
         .hasMessageStartingWith("Unable to connect to ");
   }

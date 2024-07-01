@@ -97,8 +97,7 @@ class PacketTests {
               packer.packString(INCOMING_PASSWORD);
             },
             DEFAULT_VALUE);
-    try (PacketUnpacker unpacker =
-        getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
+    try (PacketUnpacker unpacker = getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
       packet.read(unpacker);
       assertThat(packet.getUsername()).isEqualTo(INCOMING_USERNAME);
       assertThat(packet.getPassword()).isEqualTo(INCOMING_PASSWORD);

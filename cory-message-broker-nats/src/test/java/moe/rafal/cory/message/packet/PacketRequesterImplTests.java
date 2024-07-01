@@ -81,10 +81,7 @@ class PacketRequesterImplTests {
     doThrow(new IOException()).when(packetGatewayMock).readPacket(any());
     packetRequester =
         getPacketRequester(
-            loggerFacade,
-            messageBroker,
-            packetGatewayMock,
-            getMessagePackPacketSerdesContext());
+            loggerFacade, messageBroker, packetGatewayMock, getMessagePackPacketSerdesContext());
     try (PacketPacker packer = getMessagePackPacketSerdesContext().newPacketPacker()) {
       packer.packString("Hello");
       packer.packString("World");

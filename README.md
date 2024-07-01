@@ -11,5 +11,4 @@ You can find a bunch of examples in the [examples](cory-examples) module.
 
 The packet format is described in [format.txt](format.txt) file.
 
-
 [![codecov](https://codecov.io/gh/shitzuu/cory/branch/master/graph/badge.svg?token=879IWT46U3)](https://codecov.io/gh/shitzuu/cory)

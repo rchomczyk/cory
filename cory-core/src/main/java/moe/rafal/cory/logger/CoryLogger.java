@@ -59,7 +59,8 @@ class CoryLogger implements LoggerFacade {
       parametersWithPayloadPreview[index] = parameter;
     }
 
-    logger.log(level, format(message, parametersWithPayloadPreview));
+    final String formattedMessage = format(message, parametersWithPayloadPreview);
+    logger.log(level, formattedMessage);
   }
 
   private Logger getConfiguredLogger() {

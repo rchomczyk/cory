@@ -74,8 +74,7 @@ class MessagePackPacketUnpackerTests {
 
   @AfterEach
   void closePacketUnpacker() {
-    assertThatCode(
-            () -> getMessagePackPacketSerdesContext().newPacketUnpacker(new byte[0]).close())
+    assertThatCode(() -> getMessagePackPacketSerdesContext().newPacketUnpacker(new byte[0]).close())
         .doesNotThrowAnyException();
   }
 
@@ -89,8 +88,7 @@ class MessagePackPacketUnpackerTests {
               packer.packString("test_string_3");
             },
             DEFAULT_VALUE);
-    try (PacketUnpacker unpacker =
-        getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
+    try (PacketUnpacker unpacker = getMessagePackPacketSerdesContext().newPacketUnpacker(content)) {
       assertThat(unpacker.unpackString()).isEqualTo("test_string_1");
       unpacker.skipValue();
       assertThat(unpacker.unpackString()).isEqualTo("test_string_3");
@@ -255,8 +253,8 @@ class MessagePackPacketUnpackerTests {
   @Test
   void hasNextOnExhaustedUnpackerTest() throws IOException {
     try (PacketUnpacker unpacker =
-        getMessagePackPacketSerdesContext().newPacketUnpacker(
-            getBinaryArrayOf(PacketPacker::packInt, 1))) {
+        getMessagePackPacketSerdesContext()
+            .newPacketUnpacker(getBinaryArrayOf(PacketPacker::packInt, 1))) {
       assertThat(unpacker.hasNext()).isTrue();
     }
   }

@@ -88,8 +88,7 @@ class PackerPublisherImplTests {
             () -> {
               assertThat(receivedPayload).isNotNull();
               try (PacketUnpacker unpacker =
-                  getMessagePackPacketSerdesContext().newPacketUnpacker(
-                      receivedPayload.get())) {
+                  getMessagePackPacketSerdesContext().newPacketUnpacker(receivedPayload.get())) {
                 assertThatUnpackerContains(
                     unpacker, PacketUnpacker::unpackString, packet.getClass().getName());
                 assertThatUnpackerContains(
