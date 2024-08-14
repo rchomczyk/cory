@@ -8,7 +8,7 @@
       <artifactId>jnats</artifactId>
       <groupId>io.nats</groupId>
       <scope>compile</scope>
-      <version>2.19.1</version>
+      <version>2.20.0</version>
     </dependency>
     <dependency>
       <artifactId>cory-core</artifactId>
