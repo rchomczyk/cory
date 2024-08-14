@@ -106,7 +106,7 @@
       <artifactId>awaitility</artifactId>
       <groupId>org.awaitility</groupId>
       <scope>test</scope>
-      <version>4.2.1</version>
+      <version>4.2.2</version>
     </dependency>
     <dependency>
       <artifactId>junit-jupiter-api</artifactId>
@@ -131,7 +131,7 @@
         <groupId>org.junit</groupId>
         <scope>import</scope>
         <type>pom</type>
-        <version>5.10.3</version>
+        <version>5.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
