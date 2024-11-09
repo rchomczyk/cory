@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: s4u/maven-settings-action@v3.0.0
+      - uses: s4u/maven-settings-action@v3.1.0
         with:
           servers: |
             [{
@@ -24,7 +24,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Cache the Maven packages to speed up build
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4.1.2
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
