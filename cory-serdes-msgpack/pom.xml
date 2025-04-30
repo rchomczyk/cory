@@ -14,7 +14,7 @@
       <artifactId>msgpack-core</artifactId>
       <groupId>org.msgpack</groupId>
       <scope>compile</scope>
-      <version>0.9.8</version>
+      <version>0.9.9</version>
     </dependency>
     <dependency>
       <artifactId>cory-core</artifactId>
